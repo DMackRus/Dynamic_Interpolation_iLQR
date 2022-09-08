@@ -1,0 +1,3 @@
+/home/david/projects/iLQR/Dynamics_Interpolation_iLQR/cmake-build-debug/CMakeFiles/Mujoco_Acrobot_Control.dir
+/home/david/projects/iLQR/Dynamics_Interpolation_iLQR/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/david/projects/iLQR/Dynamics_Interpolation_iLQR/cmake-build-debug/CMakeFiles/rebuild_cache.dir

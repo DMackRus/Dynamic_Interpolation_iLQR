@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="Mujoco_Acrobot_Control"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\Libraries\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Mujoco_Acrobot_Control">
+				<Option output="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/Mujoco_Acrobot_Control" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/mujoco/include"/>
+					<Add directory="//include/eigen3"/>
+					<Add directory="/home/david/Libraries/eigen-3.4.0"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 Mujoco_Acrobot_Control"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Mujoco_Acrobot_Control/fast">
+				<Option output="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/Mujoco_Acrobot_Control" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/mujoco/include"/>
+					<Add directory="//include/eigen3"/>
+					<Add directory="/home/david/Libraries/eigen-3.4.0"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 Mujoco_Acrobot_Control/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/Utility/MujocoController/MujocoController.cpp">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/Utility/MujocoController/MujocoController.h">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/Utility/MujocoController/MujocoUI.cpp">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/Utility/MujocoController/MujocoUI.h">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/iLQR/iLQR_dataCentric.cpp">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/iLQR/iLQR_dataCentric.h">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/main.cpp">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/model/frankaArmAndBox.cpp">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/model/frankaArmAndBox.h">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/../../Libraries/Eigen3Config.cmake">
+			<Option virtualFolder="CMake Files\..\..\Libraries\"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/../../Libraries/Eigen3ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\Libraries\"/>
+		</Unit>
+		<Unit filename="/home/david/projects/ILQR_Mujoco_Arm_Push_Clyinder_Old_Save/../../Libraries/Eigen3Targets.cmake">
+			<Option virtualFolder="CMake Files\..\..\Libraries\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

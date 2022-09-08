@@ -1,0 +1,53 @@
+<mujoco model="reaching task - franka_panda">
+    <!-- =================================================
+            Copyright 2018 Vikash Kumar
+            Model   :: Franka (MuJoCoV2.0)
+            Author  :: Vikash Kumar (vikashplus@gmail.com)
+            source  :: https://github.com/vikashplus/franka_sim
+        ====================================================== -->
+
+    <include file="assets/basic_scene.xml"/>
+    <include file="assets/assets.xml"/>
+    <include file="assets/gripper_assets.xml"/>
+    <compiler meshdir=""/>
+
+    <worldbody>
+        <!-- Include the franka_panda robot arm model -->
+        <include file="assets/chain0.xml"/>
+        <body pos="0.8 0. 0.041" name="goal">
+            <joint type="free" />
+            <geom type = "cylinder" pos = "0 0 0" size = "0.04 0.08" mass="0.2" rgba = "0 1 0 1" solimp="0.7 0.99 0.01 0.5 2" solref = "0.04 0.8" condim="4" margin = "0.001"/>
+        </body>
+
+        <body pos="0.6 0.1 0.041" name="obstacle_1">
+            <joint type="free" />
+            <geom type = "cylinder" pos = "0 0 0" size = "0.04 0.08" mass="0.2" rgba = "1 0 0 1" solimp="0.7 0.99 0.01 0.5 2" solref = "0.04 0.8" condim="4" margin = "0.001"/>
+        </body>
+
+        <body pos="0.6 -0.1 0.041" name="obstacle_2">
+            <joint type="free" />
+            <geom type = "cylinder" pos = "0 0 0" size = "0.04 0.08" mass="2" rgba = "1 0 0 1" solimp="0.7 0.99 0.01 0.5 2" solref = "0.04 0.8" condim="4" margin = "0.001"/>
+        </body>
+
+        <body pos="0.7 0.2 0.041" name="obstacle_3">
+            <joint type="free" />
+            <geom type = "cylinder" pos = "0 0 0" size = "0.04 0.08" mass="0.2" rgba = "1 0 0 1" solimp="0.7 0.99 0.01 0.5 2" solref = "0.04 0.8" condim="4" margin = "0.001"/>
+        </body>
+
+        <body pos="0.7 -0.2 0.041" name="obstacle_4">
+            <joint type="free" />
+            <geom type = "cylinder" pos = "0 0 0" size = "0.04 0.08" mass="0.2" rgba = "1 0 0 1" solimp="0.7 0.99 0.01 0.5 2" solref = "0.04 0.8" condim="4" margin = "0.001"/>
+        </body>
+
+        <body pos="0.8 0 0" name="display_goal">
+            <joint type="free" />
+            <geom type = "box" pos = "0 0 0" size = ".01 .01 .01" mass="1" margin = "0.001"/>
+            <site type="box" pos="0 0 0.4" size=".02 .02 .02" rgba="0 1 0 1"/>
+        </body>
+
+    </worldbody>
+
+    <size njmax="700" nconmax="500"/>
+
+    <include file='assets/actuator0.xml'/>
+</mujoco>

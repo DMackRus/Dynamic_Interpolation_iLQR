@@ -1,0 +1,44 @@
+<body pos="0 0.8 0" name="table_base">
+		<joint name="table_base:joint" type="free" damping="0.01"></joint>
+		<geom mesh="chair_seat_mesh" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="50" friction="0.95 0.3 0.1" material="MatLightWood"/>
+		<site name="chair_seat_x_axes" pos="0.1 0 0" size="0.1 0.01 0.01" rgba="1 0 0 1" type="box"></site>
+		<site name="chair_seat_y_axes" pos="0 0.1 0" size="0.01 0.1 0.01" rgba="0 1 0 1" type="box"></site>
+		<site name="chair_seat_z_axes" pos="0 0 0.1" size="0.01 0.01 0.1" rgba="0 0 1 1" type="box"></site>
+</body>
+<!--load leg0-->
+<!--
+<body pos="0 1.45 0" name="chair_leg0">
+		<joint name="chair_leg0:joint" type="free" damping="0.01"></joint>
+		<geom mesh="chair_leg_mesh" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="50" friction="0.95 0.3 0.1" material="MatLightWood"/>
+		<site name="chair_leg0_x_axes" pos="0.1 0 0" size="0.1 0.01 0.01" rgba="1 0 0 1" type="box"></site>
+		<site name="chair_leg0_y_axes" pos="0 0.1 0" size="0.01 0.1 0.01" rgba="0 1 0 1" type="box"></site>
+		<site name="chair_leg0_z_axes" pos="0 0 0.1" size="0.01 0.01 0.1" rgba="0 0 1 1" type="box"></site>
+</body>
+
+
+<body pos="0.2 1.45 0" name="chair_leg1">
+		<joint name="chair_leg1:joint" type="free" damping="0.01"></joint>
+		<geom mesh="chair_leg_mesh" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="50" friction="0.95 0.3 0.1" material="MatLightWood"/>
+		<site name="chair_leg1_x_axes" pos="0.1 0 0" size="0.1 0.01 0.01" rgba="1 0 0 1" type="box"></site>
+		<site name="chair_leg1_y_axes" pos="0 0.1 0" size="0.01 0.1 0.01" rgba="0 1 0 1" type="box"></site>
+		<site name="chair_leg1_z_axes" pos="0 0 0.1" size="0.01 0.01 0.1" rgba="0 0 1 1" type="box"></site>
+</body>
+
+
+<body pos="0.4 1.45 0" name="chair_leg2">
+		<joint name="chair_leg2:joint" type="free" damping="0.01"></joint>
+		<geom mesh="chair_leg_mesh" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="50" friction="0.95 0.3 0.1" material="MatLightWood"/>
+		<site name="chair_leg2_x_axes" pos="0.1 0 0" size="0.1 0.01 0.01" rgba="1 0 0 1" type="box"></site>
+		<site name="chair_leg2_y_axes" pos="0 0.1 0" size="0.01 0.1 0.01" rgba="0 1 0 1" type="box"></site>
+		<site name="chair_leg2_z_axes" pos="0 0 0.1" size="0.01 0.01 0.1" rgba="0 0 1 1" type="box"></site>
+</body>
+
+
+<body pos="0.6 1.45 0" name="chair_leg3">
+		<joint name="chair_leg3:joint" type="free" damping="0.01"></joint>
+		<geom mesh="chair_leg_mesh" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="50" friction="0.95 0.3 0.1" material="MatLightWood"/>
+		<site name="chair_leg3_x_axes" pos="0.1 0 0" size="0.1 0.01 0.01" rgba="1 0 0 1" type="box"></site>
+		<site name="chair_leg3_y_axes" pos="0 0.1 0" size="0.01 0.1 0.01" rgba="0 1 0 1" type="box"></site>
+		<site name="chair_leg3_z_axes" pos="0 0 0.1" size="0.01 0.01 0.1" rgba="0 0 1 1" type="box"></site>
+</body>
+-->

@@ -1,0 +1,22 @@
+<mujoco model="reaching task - franka_panda">
+    <!-- =================================================
+            Copyright 2018 Vikash Kumar
+            Model   :: Franka (MuJoCoV2.0)
+            Author  :: Vikash Kumar (vikashplus@gmail.com)
+            source  :: https://github.com/vikashplus/franka_sim
+        ====================================================== -->
+
+    <include file="assets/basic_scene.xml"/>
+    <include file="assets/assets.xml"/>
+    <include file="assets/gripper_assets.xml"/>
+    <compiler meshdir=""/>
+
+    <worldbody>
+        <!-- Include the franka_panda robot arm model -->
+        <include file="assets/chain0.xml"/>
+    </worldbody>
+
+    <size njmax="500" nconmax="500"/>
+
+    <include file='assets/actuator0.xml'/>
+</mujoco>

@@ -1,0 +1,44 @@
+<mujoco model="franka_panda v200">
+    <!-- =================================================
+        Copyright 2018 Vikash Kumar
+        Model   :: Franka (MuJoCoV2.0)
+        Author  :: Vikash Kumar (vikashplus@gmail.com)
+        source  :: https://github.com/vikashplus/franka_sim
+        License :: Under Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+    ====================================================== -->
+
+    <include file="assets/basic_scene.xml"/>
+    <include file="assets/assets.xml"/>
+    <include file="assets/gripper_assets.xml"/>
+    <compiler meshdir=""/>
+
+    <worldbody>
+        <include file="assets/chain0.xml"/>
+        <!-- 0.071 -->
+        <!-- friction="1 0.5 0.0001" -->
+        <body pos="0.7 0.02 0.041" name="box_goal">
+            <joint type="free" />
+            <!--  -->
+            <geom type = "cylinder" pos = "0 0 0" size = "0.09 0.08" mass="0.2" rgba = "0 1 0 1" solimp="0.7 0.99 0.01 0.5 2" solref = "0.04 0.8" condim="4" margin = "0.001"/>
+            <!-- <geom type="capsule" pos = "0 0 0" size="0.05 0.03" mass="0.2" rgba = "0 0 1 0.8" solimp="0 0.4 0.001 0.9 6" solref = "0.02 1" margin = "0.001"/> -->:
+            <!-- <geom type = "cylinder" pos = "0 0 0" size = "0.05 0.07" mass="0.1" rgba = "0 1 0 0.8" solimp="0 0.4 0.001 0.9 6" solref = "0.02 1" margin = "0.001"/> -->
+            <!-- "box" pos = "0 0 0" size = "0.05 0.05 0.07"  -->
+        </body>
+
+        <!-- <body pos="0.6515 0.02 0.2" -->
+        <!-- friction="1 0.5 0.0001" -->
+
+        <!--
+        <body pos="0.7 0.02 0.14" name="box_obstacle_1">
+            <joint type="free" />
+            <geom type = "box" pos = "0 0 0" size = "0.03 0.03 0.06" mass="0.2" rgba = "0 0 1 1"  solimp="0.4 0.99 0.01 0.5 2" solref = "0.04 0.9" condim="4" margin = "0.001"/>
+        </body>
+        -->
+
+    </worldbody>
+
+    <size njmax="500" nconmax="500"/>
+
+    <include file='assets/actuator1.xml'/>
+
+</mujoco>
