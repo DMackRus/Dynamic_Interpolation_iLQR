@@ -1,16 +1,16 @@
 # Dynamic_Interpolation_iLQR
-This work is to appear in teh proceedings of (conference name).
+This work is to appear in the proceedings of (conference name).
 
 ## Installation Requirments
-- MuJoCo V(unknown)(Included in this repository)
-- Eigen v3.40
+- MuJoCo V2.10(Included in this repository)
+- Eigen V3.40
 
 ## Foreword
-This repository is inteded to work for the most part after downloaidng this repository as well as the Eigen library (https://eigen.tuxfamily.org/index.php?title=Main_Page). Once downloaded main.cpp can be run to optimise and display different optimised trajectories. Currently there are three implemented tasks in this repository (Pendulum control task, reaching a desired configuration of a 7-DoF arm as well as pushing a cylinder along the ground to a desired location with the 7-DoF arm.)
+This repository is intended to work for the most part after downloading this repository as well as the Eigen library (https://eigen.tuxfamily.org/index.php?title=Main_Page). Once downloaded main.cpp can be run to optimise and display different optimised trajectories. Currently there are three implemented tasks in this repository (Pendulum control task, reaching a desired configuration of a 7-DoF arm as well as pushing a cylinder along the ground to a desired location with the 7-DoF arm.)
 
 ## General repository layout
 ### MuJoCo Library
-The MuJoCo library is currently version (VERSION HERE) and is included in this repository under "mujoco/include". 
+The MuJoCo library is currently version 2.10 and is included in this repository under "mujoco/include". 
 
 ### iLQR Implementation
 My iLQR implementation written in c++ is found under "iLQR"
@@ -33,3 +33,5 @@ To change the task currently being optimised you need to go into the "modelTrans
 
 After this, the correct task will be loaded, to change the scene you will need to specify a row number which will correspond toa  csv file with different randomly created scenes that w
 
+## Authors
+[David Russell](el16dmcr@leeds.ac.uk)

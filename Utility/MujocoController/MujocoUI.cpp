@@ -196,12 +196,12 @@ void setupMujocoWorld(int taskNumber, double timestep){
     mjv_defaultOption(&opt);
     mjr_defaultContext(&con);
 
-    cam.distance = 5.233;
-    cam.azimuth = 76.5;
-    cam.elevation = -25.3;
-    cam.lookat[0] = -0.0305;
-    cam.lookat[1] = 0.266;
-    cam.lookat[2] = 2.36;
+    cam.distance = 1.485;
+    cam.azimuth = 178.7;
+    cam.elevation = -31.3;
+    cam.lookat[0] = 0.325;
+    cam.lookat[1] = -0.0179;
+    cam.lookat[2] = 0.258;
 
     //model->opt.gravity[2] = 0;
     //model->opt.integrator = mjINT_EULER;
@@ -264,7 +264,7 @@ void render(){
                 controlNum = 0;
                 cpMjData(model, mdata, optimiser->d_init);
                 simstart = mdata->time;
-                //showFinalControls = 1 - showFinalControls;
+                showFinalControls = 1 - showFinalControls;
 
 //                int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 //                cout << "visual goal id: " << visualGoalId << endl;

@@ -21,8 +21,8 @@
 
 
 // ------- Unimplemented methods of inteprolating derivatives ------
-//#define QUADRATIC_INTERP_DERIVS 0
-//#define NN_INTERP_DERIVS        0
+#define QUADRATIC_INTERP_DERIVS 0
+#define NN_INTERP_DERIVS        0
 
 // -------- Parameters for the dynamic linear inteprolation methods ----------
 #define VEL_GRAD_SENSITIVITY_CUBE       0.0001

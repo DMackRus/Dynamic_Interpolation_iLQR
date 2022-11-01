@@ -9,7 +9,7 @@
 #define RUN_ILQR                1       // RUN_ILQR - runs a simple iLQR optimisation for given task
 #define GENERATE_A_B            0       // GENERATE_A_B - runs initial trajectory and generates and saves A, B matrices over that trajectory for every timestep
 #define ILQR_DATA_COLLECTION    0       // ILQR_DATA_COLLECTION - runs iLQR for many trajectories and saves useful data to csv file
-#define MAKE_TESTING_DATA       0
+#define MAKE_TESTING_DATA       0       // MAKE_TESTING_DATA - Creates a set number of valid starting and desired states for a certain task and saves them to a .csv file for later use.
 
 #define NUM_TRAJECTORIES_DATA_COLLECTION 50
 #define NUM_TESTS_EXTRAPOLATION  6
@@ -115,13 +115,16 @@ int main() {
         // 3 is a good example of a bad initialisation
         // ----- For reaching ------
         readStartAndGoalFromFile(2);
+        cout << "X desired: " << X_desired << endl;
+        //X_desired(7) = 0.6;
+        //X_desired(8) = -0.1;
         modelTranslator->setDesiredState(X_desired);
         optimiser->resetInitialStates(d_init_test, X0);
 
         for(int i = 0; i < 1; i++){
             testInitControls.clear();
             auto iLQRStart = high_resolution_clock::now();
-            optimiser->updateNumStepsPerDeriv(1);
+            optimiser->updateNumStepsPerDeriv(5);
 
             cpMjData(model, mdata, optimiser->d_init);
             initControls();
@@ -565,7 +568,7 @@ void initControls() {
         angle -= 0.4;
     }
 
-    float h = 0.1;
+    float h = 0.15;
 
     float deltaX = h * cos(angle);
     float deltaY = h * sin(angle);
@@ -609,11 +612,18 @@ void initControls() {
     x_diff = endPointX - intermediatePointX;
     y_diff = endPointY - intermediatePointY;
 
+    // Deliberately make initial;isation slightly worse so trajectory optimiser can do something
     for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
         initPath[i + 1](0) = initPath[i](0) + (x_diff / (5000 - splitIndex));
         initPath[i + 1](1) = initPath[i](1) + (y_diff / (5000 - splitIndex));
         initPath[i + 1](2) = initPath[i](2);
     }
+
+//    for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
+//        initPath[i + 1](0) = initPath[i](0) + (x_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
+//        initPath[i + 1](1) = initPath[i](1) + (y_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
+//        initPath[i + 1](2) = initPath[i](2);
+//    }
 
     for (int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++) {
 

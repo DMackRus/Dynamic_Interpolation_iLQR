@@ -83,6 +83,7 @@ frankaModel::frankaModel(){
 
     for(int i = 0; i < NUM_CTRL; i++){
         R.diagonal()[i] = armControlCosts;
+        //J.diagonal()[i] = 0.0007;
         J.diagonal()[i] = 0.0007;
         stateIndexToStateName[i] = i;
         stateIndexToFreeJntIndex[i] = 0;
