@@ -115,7 +115,7 @@ int main() {
         // 2 is a good example of decent initilisation + final trajec
         // 3 is a good example of a bad initialisation
         // ----- For reaching ------
-        readStartAndGoalFromFile(7);
+        readStartAndGoalFromFile(2);
         cout << "X desired: " << X_desired << endl;
         //X_desired(7) = 0.6;
         //X_desired(8) = -0.1;
@@ -125,7 +125,8 @@ int main() {
         for(int i = 0; i < 1; i++){
             testInitControls.clear();
             auto iLQRStart = high_resolution_clock::now();
-            optimiser->updateNumStepsPerDeriv(2);
+
+            optimiser->updateNumStepsPerDeriv(5);
 
             cpMjData(model, mdata, optimiser->d_init);
             initControls();

@@ -1,4 +1,5 @@
 # ninja log v5
+<<<<<<< HEAD
 2	1454	1669909477968123958	CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoController.cpp.o	97c0823cd8aaaaeb
 11386	12518	1670343115648070755	/home/david/projects/iLQR/iLQR_MuJoCo_online/Mujoco_Acrobot_Control	53e3a44b711036b5
 0	25	1670343993529737598	build.ninja	5b22252f24a5f817
@@ -18,3 +19,18 @@
 20295	21446	1670928956593114278	/home/david/projects/iLQR/iLQR_MuJoCo_online/Mujoco_Acrobot_Control	53e3a44b711036b5
 1	19631	1670929133573618319	CMakeFiles/Mujoco_Acrobot_Control.dir/iLQR/iLQR_dataCentric.cpp.o	d1475100ce406b07
 19631	20761	1670929134717621315	/home/david/projects/iLQR/iLQR_MuJoCo_online/Mujoco_Acrobot_Control	53e3a44b711036b5
+=======
+2	2210	1665571858524931903	CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoController.cpp.o	3412a5b2049594fc
+1	80	1667319935309633659	build.ninja	4e2421e393696724
+2	19519	1665571875812955291	CMakeFiles/Mujoco_Acrobot_Control.dir/iLQR/iLQR_dataCentric.cpp.o	254f7e8e5ae17921
+19519	20734	1665571877044956958	../Mujoco_Acrobot_Control	693631a310236d03
+2	11716	1665571868020944751	CMakeFiles/Mujoco_Acrobot_Control.dir/main.cpp.o	5112d7a4f54b541b
+2	4194	1665571860504934582	CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/modelTranslator.cpp.o	b1e76c5e28d2fb80
+2	1875	1665571858188931448	CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoUI.cpp.o	b30192f774d42d04
+14	2029	1667319974945738793	CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoUI.cpp.o	ab5e0c7b405efcee
+14	2032	1667319974949738804	CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoController.cpp.o	ec362a30bd7ca199
+14	3573	1667319976489742848	CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/modelTranslator.cpp.o	c99473f828ba6da7
+1	11872	1667319984781764575	CMakeFiles/Mujoco_Acrobot_Control.dir/main.cpp.o	82e36a81fed9953c
+14	19648	1667319992549784853	CMakeFiles/Mujoco_Acrobot_Control.dir/iLQR/iLQR_dataCentric.cpp.o	43daaa678bf20c74
+19648	21392	1667319994305789427	../Mujoco_Acrobot_Control	693631a310236d03
+>>>>>>> 8f7876acb89e2feb7ba9d4d9ad8f5d1c45b5fb30

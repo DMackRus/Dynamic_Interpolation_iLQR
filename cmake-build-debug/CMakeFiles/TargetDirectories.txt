@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 /home/david/projects/iLQR/iLQR_MuJoCo_online/cmake-build-debug/CMakeFiles/Mujoco_Acrobot_Control.dir
 /home/david/projects/iLQR/iLQR_MuJoCo_online/cmake-build-debug/CMakeFiles/edit_cache.dir
 /home/david/projects/iLQR/iLQR_MuJoCo_online/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+=======
+/home/david/projects/iLQR/Dynamic_Interpolation_iLQR/cmake-build-debug/CMakeFiles/Mujoco_Acrobot_Control.dir
+/home/david/projects/iLQR/Dynamic_Interpolation_iLQR/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/david/projects/iLQR/Dynamic_Interpolation_iLQR/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+>>>>>>> 8f7876acb89e2feb7ba9d4d9ad8f5d1c45b5fb30

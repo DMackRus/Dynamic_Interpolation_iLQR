@@ -1,3 +1,7 @@
 ToolSet: 1.0 (local)Options: 
 
+<<<<<<< HEAD
 Options:-DCMAKE_MAKE_PROGRAM=/snap/clion/218/bin/ninja/linux/ninja
+=======
+Options:-DCMAKE_MAKE_PROGRAM=/snap/clion/209/bin/ninja/linux/ninja
+>>>>>>> 8f7876acb89e2feb7ba9d4d9ad8f5d1c45b5fb30

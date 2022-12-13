@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Install script for directory: /home/david/projects/iLQR/iLQR_MuJoCo_online
+=======
+# Install script for directory: /home/david/projects/iLQR/Dynamic_Interpolation_iLQR
+>>>>>>> 8f7876acb89e2feb7ba9d4d9ad8f5d1c45b5fb30
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +54,9 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
+<<<<<<< HEAD
 file(WRITE "/home/david/projects/iLQR/iLQR_MuJoCo_online/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+=======
+file(WRITE "/home/david/projects/iLQR/Dynamic_Interpolation_iLQR/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+>>>>>>> 8f7876acb89e2feb7ba9d4d9ad8f5d1c45b5fb30
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
