@@ -217,20 +217,20 @@ float iLQR::rollOutTrajectory(){
 //            stepsCounter = num_mj_steps_per_control;
 //        }
 
-//        if( i % 20 == 0){
-//            mjrRect viewport = { 0, 0, 0, 0 };
-//            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
-//
-//            // update scene and render
-//            mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
-//            mjr_render(viewport, &scn, &con);
-//
-//            // swap OpenGL buffers (blocking call due to v-sync)
-//            glfwSwapBuffers(window);
-//
-//            // process pending GUI events, call GLFW callbacks
-//            glfwPollEvents();
-//        }
+        if( i % 20 == 0){
+            mjrRect viewport = { 0, 0, 0, 0 };
+            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+
+            // update scene and render
+            mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+            mjr_render(viewport, &scn, &con);
+
+            // swap OpenGL buffers (blocking call due to v-sync)
+            glfwSwapBuffers(window);
+
+            // process pending GUI events, call GLFW callbacks
+            glfwPollEvents();
+        }
 
     }
 
@@ -873,6 +873,22 @@ float iLQR::forwardsPass(float oldCost){
 
                 newCost += (currentCost * MUJOCO_DT);
 
+                if(VISUALISE_ROLLOUTS){
+                    if(t % 10 == 0){
+                        mjrRect viewport = { 0, 0, 0, 0 };
+                        glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+
+                        // update scene and render
+                        mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+                        mjr_render(viewport, &scn, &con);
+
+                        // swap OpenGL buffers (blocking call due to v-sync)
+                        glfwSwapBuffers(window);
+
+                        // process pending GUI events, call GLFW callbacks
+                        glfwPollEvents();
+                    }
+                }
                 modelTranslator->stepModel(mdata, 1);
             }
         }
@@ -893,9 +909,10 @@ float iLQR::forwardsPass(float oldCost){
 
         cpMjData(model, mdata, d_init);
 
-        for(int k = 0; k < NUM_CTRL; k++){
-            mdata->ctrl[k] = U_new[0](k);
-        }
+//        for(int k = 0; k < NUM_CTRL; k++){
+//            mdata->ctrl[k] = U_new[0](k);
+//        }
+        modelTranslator->setControls(mdata, U_new.at(0), grippersOpen_iLQR[0]);
 
         cpMjData(model, dArray[0], mdata);
 

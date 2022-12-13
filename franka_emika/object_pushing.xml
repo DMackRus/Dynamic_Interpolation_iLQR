@@ -16,13 +16,13 @@
         <include file="assets/chain0.xml"/>
         <body pos="0.7 0.02 0.041" name="goal">
             <joint type="free" />
-            <geom type = "cylinder" pos = "0 0 0" size = "0.06 0.05" mass="0.2" rgba = "0 1 0 1" solimp="0.4 0.99 0.01 0.5 2" solref = "0.2 0.8" condim="4" margin = "0.001"/>
+            <geom type = "cylinder" pos = "0 0 0" size = "0.06 0.05" mass="0.2" rgba = "0 1 0 1" solimp="0.4 0.99 0.01 0.5 2" solref = "0.1 0.8" condim="4" margin = "0.001"/>
         </body>
 
         <body pos="1 0 0" name="display_goal">
             <joint type="free" />
             <geom type = "box" pos = "1 0 0.01" size = ".01 .01 .01" mass="1" margin = "0.001"/>
-            <site type="box" pos="0 0 0" size=".02 .02 .02" rgba="0 1 0 1"/>
+            <site type="cylinder" pos="0 0 -0.019" size="0.06 0.02" rgba="0 1 0 1"/>
         </body>
 
         <body pos="1 0 0" name="display_intermediate">

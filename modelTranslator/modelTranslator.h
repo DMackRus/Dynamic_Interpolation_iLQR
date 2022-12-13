@@ -12,7 +12,7 @@
 //#define DOUBLE_PENDULUM 1
 //#define REACHING 1
 #define OBJECT_PUSHING 1
-//#define REACHING_CLUTTER 1
+//#define PUSHING_CLUTTER
 
 #ifdef DOUBLE_PENDULUM
 #define DOF 2
@@ -32,6 +32,12 @@
 #define OBJECT_PUSHING_TASK 1
 #endif
 
+#ifdef PUSHING_CLUTTER
+#define DOF 13
+#define NUM_CTRL 7
+#define PUSHING_CLUTTER_TASK 1
+#endif
+
 #ifdef REACHING_CLUTTER
 #define DOF 17
 #define NUM_CTRL 7
@@ -44,18 +50,10 @@
 typedef Matrix<double, NUM_CTRL, 1> m_ctrl;
 typedef Matrix<double, DOF, 1> m_dof;
 
-#ifdef GARBAGE
-typedef Matrix<double, (2*DOF) + 3, 1> m_state;
-typedef Matrix<double, (2*DOF) + 3, (2*DOF) + 3> m_state_state;
-typedef Matrix<double, (2*DOF) + 3, NUM_CTRL> m_state_ctrl;
-typedef Matrix<double, NUM_CTRL, (2*DOF) + 3> m_ctrl_state;
-
-#else
 typedef Matrix<double, (2*DOF), 1> m_state;
 typedef Matrix<double, (2*DOF), (2*DOF)> m_state_state;
 typedef Matrix<double, (2*DOF), NUM_CTRL> m_state_ctrl;
 typedef Matrix<double, NUM_CTRL, (2*DOF)> m_ctrl_state;
-#endif
 
 typedef Matrix<double, NUM_CTRL, NUM_CTRL> m_ctrl_ctrl;
 typedef Matrix<double, DOF, DOF> m_dof_dof;
@@ -73,8 +71,8 @@ public:
     int stateIndexToFreeJntIndex[DOF];
 
 #ifdef OBJECT_PUSHING_TASK
-    double cubeXPosCost = 2;
-    double cubeYPosCost = 2;
+    double cubeXPosCost = 1;
+    double cubeYPosCost = 1;
     double cubeVelCosts = 0.5;
 #endif
 

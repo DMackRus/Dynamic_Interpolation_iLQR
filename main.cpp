@@ -9,7 +9,7 @@
 #define RUN_ILQR                1       // RUN_ILQR - runs a simple iLQR optimisation for given task
 #define GENERATE_A_B            0       // GENERATE_A_B - runs initial trajectory and generates and saves A, B matrices over that trajectory for every timestep
 #define ILQR_DATA_COLLECTION    0       // ILQR_DATA_COLLECTION - runs iLQR for many trajectories and saves useful data to csv file
-#define MAKE_TESTING_DATA       0
+#define MAKE_TESTING_DATA       0       // MAKE_TESTING_DATA - Creates a set number of valid starting and desired states for a certain task and saves them to a .csv file for later use.
 
 #define NUM_TRAJECTORIES_DATA_COLLECTION 50
 #define NUM_TESTS_EXTRAPOLATION  6
@@ -97,6 +97,7 @@ void readStartAndGoalFromFile(int requiredRow);
 int main() {
     modelTranslator = new frankaModel();
     initMujoco(modelTranslator->taskNumber, 0.004);
+
     modelTranslator->init(model);
     d_init_test = mj_makeData(model);
     masterReset = mj_makeData(model);
@@ -111,17 +112,20 @@ int main() {
         optimiser->makeDataForOptimisation();
 
         // For pushing - screenshots are from trajectory 2.
-        // 2 is a good example of decent initiisation + final trajec
+        // 2 is a good example of decent initilisation + final trajec
         // 3 is a good example of a bad initialisation
         // ----- For reaching ------
-        readStartAndGoalFromFile(2);
+        readStartAndGoalFromFile(7);
+        cout << "X desired: " << X_desired << endl;
+        //X_desired(7) = 0.6;
+        //X_desired(8) = -0.1;
         modelTranslator->setDesiredState(X_desired);
         optimiser->resetInitialStates(d_init_test, X0);
 
         for(int i = 0; i < 1; i++){
             testInitControls.clear();
             auto iLQRStart = high_resolution_clock::now();
-            optimiser->updateNumStepsPerDeriv(1);
+            optimiser->updateNumStepsPerDeriv(2);
 
             cpMjData(model, mdata, optimiser->d_init);
             initControls();
@@ -380,6 +384,8 @@ void updateStartGoalAndData(){
 
 void readStartAndGoalFromFile(int requiredRow){
 
+    cout << "here" << endl;
+
     std::string nameOfFile = names[modelTranslator->taskNumber];
 
     fstream fin;
@@ -411,25 +417,26 @@ void readStartAndGoalFromFile(int requiredRow){
         counter++;
     }
 
-
+    X0(5) += PI/2;
+    X0(6) += PI/4;
 
     cpMjData(model, mdata, masterReset);
     modelTranslator->setState(mdata, X0);
 
-    if(modelTranslator->taskNumber == 2){
-        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_goal");
+//    if(modelTranslator->taskNumber == 2){
+//        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_goal");
+//
+//        m_pose goalPose;
+//        goalPose.setZero();
+//        goalPose(0) = X_desired(7);
+//        goalPose(1) = X_desired(8);
+//
+//        globalMujocoController->setBodyPose(model, mdata, visualGoalId, goalPose);
+//    }
 
-        m_pose goalPose;
-        goalPose.setZero();
-        goalPose(0) = X_desired(7);
-        goalPose(1) = X_desired(8);
-
-        globalMujocoController->setBodyPose(model, mdata, visualGoalId, goalPose);
-    }
 
 
-
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 1; i++){
         mj_step(model, mdata);
     }
     cpMjData(model, d_init_test, mdata);
@@ -528,8 +535,8 @@ void initControls() {
 
     //const std::string endEffecName = "franka_gripper";
     //panda0_leftfinger
-    const std::string EE_Name = "franka_gripper";
-    const std::string goalName = "goal";
+    const std::string EE_Name = "right_finger";
+    const std::string goalName = "tin";
 
     int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
     int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
@@ -565,7 +572,7 @@ void initControls() {
         angle -= 0.4;
     }
 
-    float h = 0.1;
+    float h = 0.15;
 
     float deltaX = h * cos(angle);
     float deltaY = h * sin(angle);
@@ -609,11 +616,18 @@ void initControls() {
     x_diff = endPointX - intermediatePointX;
     y_diff = endPointY - intermediatePointY;
 
+    // Deliberately make initial;isation slightly worse so trajectory optimiser can do something
     for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
         initPath[i + 1](0) = initPath[i](0) + (x_diff / (5000 - splitIndex));
         initPath[i + 1](1) = initPath[i](1) + (y_diff / (5000 - splitIndex));
         initPath[i + 1](2) = initPath[i](2);
     }
+
+//    for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
+//        initPath[i + 1](0) = initPath[i](0) + (x_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
+//        initPath[i + 1](1) = initPath[i](1) + (y_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
+//        initPath[i + 1](2) = initPath[i](2);
+//    }
 
     for (int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++) {
 
@@ -626,7 +640,7 @@ void initControls() {
         m_point axisDiff = globalMujocoController->quat2Axis(quatDiff);
 
         m_pose differenceFromPath;
-        float gains[6] = {10000, 10000, 10000, 500, 500, 500};
+        float gains[6] = {1, 1, 1, 0, 0, 0};
         for (int j = 0; j < 3; j++) {
             differenceFromPath(j) = initPath[i](j) - currentEEPose(j);
             differenceFromPath(j + 3) = axisDiff(j);
@@ -660,9 +674,12 @@ void initControls() {
 
         for (int k = 0; k < NUM_CTRL; k++) {
 
-            testInitControls[i](k) = desiredControls(k) + mdata->qfrc_bias[k];
-            mdata->ctrl[k] = testInitControls[i](k);
+            testInitControls[i](k) = desiredControls(k);
+//            testInitControls[i](k) = 0.0;
+            //mdata->ctrl[k] = testInitControls[i](k);
         }
+
+        modelTranslator->setControls(mdata, testInitControls[i], grippersOpen[i]);
 
         for (int j = 0; j < 1; j++) {
             mj_step(model, mdata);

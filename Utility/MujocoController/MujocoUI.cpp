@@ -122,12 +122,12 @@ void mouse_move(GLFWwindow* window, double xpos, double ypos){
     // move camera
     mjv_moveCamera(model, action, dx / height, dy / height, &scn, &cam);
 
-    cout << "camera dist: " << cam.distance << endl;
-    cout << "camera azimuth: " << cam.azimuth << endl;
-    cout << "camera elevation: " << cam.elevation << endl;
-    cout << "camera look at: " << cam.lookat[0] << endl;
-    cout << "camera look at: " << cam.lookat[1] << endl;
-    cout << "camera look at: " << cam.lookat[2] << endl;
+//    cout << "camera dist: " << cam.distance << endl;
+//    cout << "camera azimuth: " << cam.azimuth << endl;
+//    cout << "camera elevation: " << cam.elevation << endl;
+//    cout << "camera look at: " << cam.lookat[0] << endl;
+//    cout << "camera look at: " << cam.lookat[1] << endl;
+//    cout << "camera look at: " << cam.lookat[2] << endl;
 }
 
 
@@ -163,7 +163,8 @@ void setupMujocoWorld(int taskNumber, double timestep){
     }
     // Franka arm plus a cylinder to push along ground
     else if(taskNumber == 2){
-        model = mj_loadXML("franka_emika/object_pushing.xml", NULL, error, 1000);
+        //model = mj_loadXML("franka_emika/object_pushing.xml", NULL, error, 1000);
+        model = mj_loadXML("franka_emika/franka_emika_panda/pushing_scene.xml", NULL, error, 1000);
     }
     // Franka arm reaches through mild clutter to goal object
     else if(taskNumber == 3){
@@ -176,6 +177,7 @@ void setupMujocoWorld(int taskNumber, double timestep){
     model->opt.timestep = timestep;
 
     if( !model ) {
+
         printf("%s\n", error);
     }
 
@@ -196,12 +198,12 @@ void setupMujocoWorld(int taskNumber, double timestep){
     mjv_defaultOption(&opt);
     mjr_defaultContext(&con);
 
-    cam.distance = 5.233;
-    cam.azimuth = 76.5;
-    cam.elevation = -25.3;
-    cam.lookat[0] = -0.0305;
-    cam.lookat[1] = 0.266;
-    cam.lookat[2] = 2.36;
+    cam.distance = 1.046;
+    cam.azimuth = -137.7;
+    cam.elevation = -11.5;
+    cam.lookat[0] = 0.614;
+    cam.lookat[1] = 0.165;
+    cam.lookat[2] = 0.33;
 
     //model->opt.gravity[2] = 0;
     //model->opt.integrator = mjINT_EULER;
@@ -216,6 +218,7 @@ void setupMujocoWorld(int taskNumber, double timestep){
     glfwSetMouseButtonCallback(window, mouse_button);
     glfwSetScrollCallback(window, scroll);
     glfwSetWindowCloseCallback(window, windowCloseCallback);
+
 }
 
 void render(){
@@ -241,19 +244,7 @@ void render(){
         //  Otherwise add a cpu timer and exit this loop when it is time to render.
         mjtNum simstart = mdata->time;
         while (mdata->time - simstart < 1.0 / 60.0){
-            nextControl = optimiser->returnDesiredControl(controlNum, showFinalControls);
-            for(int k = 0; k < NUM_CTRL; k++){
-                mdata->ctrl[k] = nextControl(k);
-            }
-
-            if(grippersOpen[controlNum]){
-                mdata->ctrl[7] = GRIPPERS_OPEN;
-                mdata->ctrl[8] = GRIPPERS_OPEN;
-            }
-            else{
-                mdata->ctrl[7] = GRIPPERS_CLOSED;
-                mdata->ctrl[8] = GRIPPERS_CLOSED;
-            }
+            optimiser->modelTranslator->setControls(mdata, testInitControls[controlNum], grippersOpen[controlNum]);
 
             mj_step(model, mdata);
 
@@ -285,6 +276,16 @@ void render(){
         // update scene and render
         mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
         mjr_render(viewport, &scn, &con);
+
+        mjrRect rect{0, 0, 100, 100};
+        mjr_rectangle(rect, 0, 0, 0, 0);
+
+        if(showFinalControls){
+            mjr_overlay(0, mjGRID_TOPLEFT, rect, "Final Trajectory", 0, &con);
+        }
+        else{
+            mjr_overlay(0, mjGRID_TOPLEFT, rect, "Initial Trajectory", 0, &con);
+        }
 
         // swap OpenGL buffers (blocking call due to v-sync)
         glfwSwapBuffers(window);
@@ -318,18 +319,20 @@ void render_simpleTest(){
         //  Otherwise add a cpu timer and exit this loop when it is time to render.
         mjtNum simstart = mdata->time;
         while (mdata->time - simstart < 1.0 / 60.0) {
-            for (int k = 0; k < NUM_CTRL; k++) {
-                mdata->ctrl[k] = testInitControls[controlNum](k);
-            }
 
-            if(grippersOpen[controlNum]){
-                mdata->ctrl[7] = GRIPPERS_OPEN;
-                mdata->ctrl[8] = GRIPPERS_OPEN;
-            }
-            else{
-                mdata->ctrl[7] = GRIPPERS_CLOSED;
-                mdata->ctrl[8] = GRIPPERS_CLOSED;
-            }
+            optimiser->modelTranslator->setControls(mdata, testInitControls[controlNum], grippersOpen[controlNum]);
+//            for (int k = 0; k < NUM_CTRL; k++) {
+//                mdata->ctrl[k] = testInitControls[controlNum](k);
+//            }
+
+//            if(grippersOpen[controlNum]){
+//                mdata->ctrl[7] = GRIPPERS_OPEN;
+//                mdata->ctrl[8] = GRIPPERS_OPEN;
+//            }
+//            else{
+//                mdata->ctrl[7] = GRIPPERS_CLOSED;
+//                mdata->ctrl[8] = GRIPPERS_CLOSED;
+//            }
             //cout << "testInitControls[controlNum] " << testInitControls[controlNum] << endl;
 
             mj_step(model, mdata);

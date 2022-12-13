@@ -1,0 +1,9 @@
+/snap/clion/218/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/218/bin/ninja/linux/ninja -G Ninja -S /home/david/projects/iLQR/iLQR_MuJoCo_online -B /home/david/projects/iLQR/iLQR_MuJoCo_online/cmake-build-debug
+-- OPENMP has been found
+-- Eigen library found
+-- GLFW lib found at: /home/david/projects/iLQR/iLQR_MuJoCo_online/mujoco/include/libglfw.so.3
+-- MuJoCo lib found at: /home/david/projects/iLQR/iLQR_MuJoCo_online/mujoco/include/libmujoco.so
+-- Mujoco include directory: /home/david/projects/iLQR/iLQR_MuJoCo_online/mujoco/include
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/david/projects/iLQR/iLQR_MuJoCo_online/cmake-build-debug

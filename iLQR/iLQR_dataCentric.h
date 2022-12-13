@@ -21,8 +21,8 @@
 
 
 // ------- Unimplemented methods of inteprolating derivatives ------
-//#define QUADRATIC_INTERP_DERIVS 0
-//#define NN_INTERP_DERIVS        0
+#define QUADRATIC_INTERP_DERIVS 0
+#define NN_INTERP_DERIVS        0
 
 // -------- Parameters for the dynamic linear inteprolation methods ----------
 #define VEL_GRAD_SENSITIVITY_CUBE       0.0001
@@ -33,6 +33,8 @@
 // previous parameters for dynamic linear inteprolation - 5, 50, 0.0001, 0.0005 (minN, maxN, cube sens, joint sens)
 
 #define DQACCDQ_MAX                     250
+
+#define VISUALISE_ROLLOUTS              1
 
 class iLQR
 {
