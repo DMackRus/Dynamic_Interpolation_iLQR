@@ -1,9 +1,17 @@
-/snap/clion/218/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/218/bin/ninja/linux/ninja -G Ninja -S /home/david/projects/iLQR/iLQR_MuJoCo_online -B /home/david/projects/iLQR/iLQR_MuJoCo_online/cmake-build-debug
+"C:\Program Files\JetBrains\CLion 2022.3\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" -S C:\Users\davem\CLionProjects\Dynamic_Interpolation_iLQR -B C:\Users\davem\CLionProjects\Dynamic_Interpolation_iLQR\cmake-build-debug
 -- OPENMP has been found
--- Eigen library found
--- GLFW lib found at: /home/david/projects/iLQR/iLQR_MuJoCo_online/mujoco/include/libglfw.so.3
--- MuJoCo lib found at: /home/david/projects/iLQR/iLQR_MuJoCo_online/mujoco/include/libmujoco.so
--- Mujoco include directory: /home/david/projects/iLQR/iLQR_MuJoCo_online/mujoco/include
--- Configuring done
--- Generating done
--- Build files have been written to: /home/david/projects/iLQR/iLQR_MuJoCo_online/cmake-build-debug
+CMake Error at CMakeLists.txt:18 (find_package):
+  Could not find a package configuration file provided by "Eigen3" (requested
+  version 3.3) with any of the following names:
+
+    Eigen3Config.cmake
+    eigen3-config.cmake
+
+  Add the installation prefix of "Eigen3" to CMAKE_PREFIX_PATH or set
+  "Eigen3_DIR" to a directory containing one of the above files.  If "Eigen3"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+
+
+-- Configuring incomplete, errors occurred!
+See also "C:/Users/davem/CLionProjects/Dynamic_Interpolation_iLQR/cmake-build-debug/CMakeFiles/CMakeOutput.log".

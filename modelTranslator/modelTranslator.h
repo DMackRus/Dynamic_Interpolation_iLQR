@@ -95,11 +95,7 @@ public:
     m_state X_desired;
     DiagonalMatrix<double, NUM_CTRL> R;
 
-#ifdef GARBAGE
-    DiagonalMatrix<double, (2 * DOF) + 3> Q;
-#else
     DiagonalMatrix<double, 2 * DOF> Q;
-#endif
 
     DiagonalMatrix<double, NUM_CTRL> J;
 

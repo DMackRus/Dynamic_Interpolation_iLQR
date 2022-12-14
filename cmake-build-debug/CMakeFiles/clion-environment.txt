@@ -1,7 +1,4 @@
-ToolSet: 1.0 (local)Options: 
+ToolSet: w64 9.0 (local)@C:\Program Files\JetBrains\CLion 2022.3\bin\mingw
+Options: 
 
-<<<<<<< HEAD
-Options:-DCMAKE_MAKE_PROGRAM=/snap/clion/218/bin/ninja/linux/ninja
-=======
-Options:-DCMAKE_MAKE_PROGRAM=/snap/clion/209/bin/ninja/linux/ninja
->>>>>>> 8f7876acb89e2feb7ba9d4d9ad8f5d1c45b5fb30
+Options:

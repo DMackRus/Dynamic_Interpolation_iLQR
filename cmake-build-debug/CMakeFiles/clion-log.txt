@@ -1,9 +1,0 @@
-/snap/clion/209/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/209/bin/ninja/linux/ninja -G Ninja -S /home/david/projects/iLQR/Dynamic_Interpolation_iLQR -B /home/david/projects/iLQR/Dynamic_Interpolation_iLQR/cmake-build-debug
--- OPENMP has been found
--- Eigen library found
--- GLFW lib found at: /home/david/projects/iLQR/Dynamic_Interpolation_iLQR/mujoco/include/libglfw.so.3
--- MuJoCo lib found at: /home/david/projects/iLQR/Dynamic_Interpolation_iLQR/mujoco/include/libmujoco210.so
--- Mujoco include directory: /home/david/projects/iLQR/Dynamic_Interpolation_iLQR/mujoco/include
--- Configuring done
--- Generating done
--- Build files have been written to: /home/david/projects/iLQR/Dynamic_Interpolation_iLQR/cmake-build-debug
