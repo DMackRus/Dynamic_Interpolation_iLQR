@@ -14,9 +14,9 @@ extern GLFWwindow *window;
 extern MujocoController *globalMujocoController;
 extern iLQR* optimiser;
 
-std::vector<m_ctrl> testInitControls;
+std::vector<m_ctrl> initControls;
 std::vector<bool> grippersOpen;
-mjData* d_init_test;
+mjData* d_init;
 m_point intermediatePoint;
 
 bool button_left = false;
@@ -163,8 +163,8 @@ void setupMujocoWorld(int taskNumber, double timestep){
     }
     // Franka arm plus a cylinder to push along ground
     else if(taskNumber == 2){
-        //model = mj_loadXML("franka_emika/object_pushing.xml", NULL, error, 1000);
-        model = mj_loadXML("franka_emika/franka_emika_panda/pushing_scene.xml", NULL, error, 1000);
+        model = mj_loadXML("franka_emika/object_pushing.xml", NULL, error, 1000);
+        //model = mj_loadXML("franka_emika/franka_emika_panda/pushing_scene.xml", NULL, error, 1000);
     }
     // Franka arm reaches through mild clutter to goal object
     else if(taskNumber == 3){
@@ -182,7 +182,8 @@ void setupMujocoWorld(int taskNumber, double timestep){
     }
 
     // make data corresponding to model
-    mdata = mj_makeData(model);
+    mdata = mj_makeData(model);         //mdata - main data, used for computaitons and displaying final trajectory
+    d_init = mj_makeData(model);        //d_init saves the initial state of the starting data for a task
 
     // init GLFW, create window, make OpenGL context current, request v-sync
     // init GLFW
@@ -226,7 +227,7 @@ void render(){
     int controlNum = 0;
     bool showFinalControls = true;
     m_ctrl nextControl;
-    cpMjData(model, mdata, optimiser->d_init);
+    cpMjData(model, mdata, d_init);
 //    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 //    cout << "visual goal id: " << visualGoalId << endl;
 //
@@ -244,16 +245,15 @@ void render(){
         //  Otherwise add a cpu timer and exit this loop when it is time to render.
         mjtNum simstart = mdata->time;
         while (mdata->time - simstart < 1.0 / 60.0){
-            optimiser->modelTranslator->setControls(mdata, testInitControls[controlNum], grippersOpen[controlNum]);
+            optimiser->modelTranslator->setControls(mdata, optimiser->returnDesiredControl(controlNum, showFinalControls), false);
 
             mj_step(model, mdata);
-
 
             controlNum++;
 
             if(controlNum >= MUJ_STEPS_HORIZON_LENGTH){
                 controlNum = 0;
-                cpMjData(model, mdata, optimiser->d_init);
+                cpMjData(model, mdata, d_init);
                 simstart = mdata->time;
                 showFinalControls = 1 - showFinalControls;
 
@@ -300,7 +300,7 @@ void render_simpleTest(){
     // run main loop, target real-time simulation and 60 fps rendering
     m_state currentState;
     int controlNum = 0;
-    cpMjData(model, mdata, d_init_test);
+    cpMjData(model, mdata, d_init);
 //    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 //    cout << "visual goal id: " << visualGoalId << endl;
 //
@@ -320,28 +320,15 @@ void render_simpleTest(){
         mjtNum simstart = mdata->time;
         while (mdata->time - simstart < 1.0 / 60.0) {
 
-            optimiser->modelTranslator->setControls(mdata, testInitControls[controlNum], grippersOpen[controlNum]);
-//            for (int k = 0; k < NUM_CTRL; k++) {
-//                mdata->ctrl[k] = testInitControls[controlNum](k);
-//            }
+            optimiser->modelTranslator->setControls(mdata, initControls[controlNum], false);
 
-//            if(grippersOpen[controlNum]){
-//                mdata->ctrl[7] = GRIPPERS_OPEN;
-//                mdata->ctrl[8] = GRIPPERS_OPEN;
-//            }
-//            else{
-//                mdata->ctrl[7] = GRIPPERS_CLOSED;
-//                mdata->ctrl[8] = GRIPPERS_CLOSED;
-//            }
-            //cout << "testInitControls[controlNum] " << testInitControls[controlNum] << endl;
-
-            mj_step(model, mdata);
+            optimiser->modelTranslator->stepModel(mdata, 1);
 
             controlNum++;
 
             if (controlNum >= MUJ_STEPS_HORIZON_LENGTH) {
                 controlNum = 0;
-                cpMjData(model, mdata, optimiser->d_init);
+                cpMjData(model, mdata, d_init);
                 simstart = mdata->time;
 //                int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 //                cout << "visual goal id: " << visualGoalId << endl;
@@ -364,14 +351,56 @@ void render_simpleTest(){
         mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
         mjr_render(viewport, &scn, &con);
 
+        mjrRect rect{0, 0, 100, 100};
+        mjr_rectangle(rect, 0, 0, 0, 0);
+
+        mjr_overlay(0, mjGRID_TOPLEFT, rect, "Simple Test", 0, &con);
+
         // swap OpenGL buffers (blocking call due to v-sync)
         glfwSwapBuffers(window);
 
         // process pending GUI events, call GLFW callbacks
         glfwPollEvents();
     }
-
 }
+
+//void render_simpleTest(){
+//
+//    m_state currentState;
+//    int controlNum = 0;
+//    cpMjData(model, mdata, d_init);
+//
+//    while (!glfwWindowShouldClose(window)){
+//        //optimiser->modelTranslator->setControls(mdata, initControls[controlNum], false);
+//        cout << "model timestep " << model->opt.timestep << ": " << initControls[controlNum] <<std::endl;
+//
+//        //optimiser->modelTranslator->stepModel(mdata, 1);
+//        mj_step(model, mdata);
+//
+//        controlNum++;
+//
+//        if (controlNum >= MUJ_STEPS_HORIZON_LENGTH) {
+//            controlNum = 0;
+//            cpMjData(model, mdata, d_init);
+//
+//        }
+//
+//        // get framebuffer viewport
+//        mjrRect viewport = { 0, 0, 0, 0 };
+//        glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+//
+//        // update scene and render
+//        mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+//        mjr_render(viewport, &scn, &con);
+//
+//        // swap OpenGL buffers (blocking call due to v-sync)
+//        glfwSwapBuffers(window);
+//
+//        // process pending GUI events, call GLFW callbacks
+//        glfwPollEvents();
+//
+//    }
+//}
 
 void updateScreen(){
     mjrRect viewport = { 0, 0, 0, 0 };

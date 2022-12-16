@@ -59,9 +59,11 @@ typedef Matrix<double, NUM_CTRL, NUM_CTRL> m_ctrl_ctrl;
 typedef Matrix<double, DOF, DOF> m_dof_dof;
 typedef Matrix<double, DOF, NUM_CTRL> m_dof_ctrl;
 
-class frankaModel{
+extern MujocoController *globalMujocoController;
+
+class taskTranslator{
 public:
-    frankaModel();
+    taskTranslator();
 
     double armControlCosts;
     double armStateCosts;
@@ -79,6 +81,7 @@ public:
     // State vector is: 7 joint angles, two cube pos (X and Y), cube rot, 7 joint velocities, two cube velocities (X and Y)
 
     double terminalConstant = 10;
+    std::string names[3] = { "Testing_Data/StartAndGoalStates/Pendulum.csv", "Testing_Data/StartAndGoalStates/Reaching.csv", "Testing_Data/StartAndGoalStates/Pushing.csv"};
 
     double A = 0.1;
     double sigma = 0.03;
@@ -100,7 +103,6 @@ public:
     DiagonalMatrix<double, NUM_CTRL> J;
 
     void init(mjModel *m);
-    void setDesiredState(m_state _desiredState);
 
     //double getCost(mjData *d, m_ctrl lastControl, int controlNum, int totalControls, bool firstControl);
     // Given a set of mujoco data, what is the cost of its state and controls
@@ -141,6 +143,10 @@ public:
 
     double EEDistToGoal(mjData *d, int goalObjectId);
     m_point returnEE_point(mjData *d);
+
+    m_state setupTask(mjData *d, bool randomTask, int taskRow);
+
+    std::vector<m_ctrl> initControls(mjData *d, mjData *d_init, m_state X0);
 
 };
 

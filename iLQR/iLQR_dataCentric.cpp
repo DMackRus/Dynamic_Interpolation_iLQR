@@ -11,7 +11,7 @@ extern mjvOption opt;			        // visualization options
 extern mjrContext con;				    // custom GPU context
 extern GLFWwindow *window;
 
-iLQR::iLQR(mjModel* m, mjData* d, frankaModel* _modelTranslator, MujocoController* _mujocoController){
+iLQR::iLQR(mjModel* m, mjData* d, taskTranslator* _modelTranslator, MujocoController* _mujocoController){
     numIterations = 0;
     lamda = 0.00001;
 
@@ -217,20 +217,20 @@ float iLQR::rollOutTrajectory(){
 //            stepsCounter = num_mj_steps_per_control;
 //        }
 
-        if( i % 20 == 0){
-            mjrRect viewport = { 0, 0, 0, 0 };
-            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
-
-            // update scene and render
-            mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
-            mjr_render(viewport, &scn, &con);
-
-            // swap OpenGL buffers (blocking call due to v-sync)
-            glfwSwapBuffers(window);
-
-            // process pending GUI events, call GLFW callbacks
-            glfwPollEvents();
-        }
+//        if( i % 20 == 0){
+//            mjrRect viewport = { 0, 0, 0, 0 };
+//            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+//
+//            // update scene and render
+//            mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+//            mjr_render(viewport, &scn, &con);
+//
+//            // swap OpenGL buffers (blocking call due to v-sync)
+//            glfwSwapBuffers(window);
+//
+//            // process pending GUI events, call GLFW callbacks
+//            glfwPollEvents();
+//        }
 
     }
 
@@ -1309,7 +1309,8 @@ void iLQR::setInitControls(std::vector<m_ctrl> _initControls, std::vector<bool> 
         U_old[i] = _initControls[i].replicate(1,1);
         U_new[i] = _initControls[i].replicate(1,1);
 
-        grippersOpen_iLQR[i] = _grippersOpen[i];
+//        grippersOpen_iLQR[i] = _grippersOpen[i];
+        grippersOpen_iLQR[i] = false;
     }
 }
 

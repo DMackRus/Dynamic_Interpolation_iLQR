@@ -34,20 +34,20 @@
 
 #define DQACCDQ_MAX                     250
 
-#define VISUALISE_ROLLOUTS              1
+#define VISUALISE_ROLLOUTS              0
 
 class iLQR
 {
     public:
 
     // constructor - mujoco model, data, initial controls and initial state
-    iLQR(mjModel* m, mjData* d, frankaModel* _modelTranslator, MujocoController* _mujocoController);
+    iLQR(mjModel* m, mjData* d, taskTranslator* _modelTranslator, MujocoController* _mujocoController);
 
     /*      Data     */
     // MuJoCo model and data
     mjModel* model;
     mjData* mdata = NULL;
-    frankaModel *modelTranslator;
+    taskTranslator *modelTranslator;
     MujocoController *mujocoController;
 
     // Array of mujoco data structure along the trajectory

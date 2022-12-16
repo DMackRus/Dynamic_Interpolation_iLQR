@@ -4,9 +4,7 @@
 
 #include "modelTranslator.h"
 
-extern MujocoController *globalMujocoController;
-
-frankaModel::frankaModel(){
+taskTranslator::taskTranslator(){
 
     for(int i = 0; i < 7; i++) {
         stateNames.push_back(std::string());
@@ -68,22 +66,22 @@ frankaModel::frankaModel(){
 #ifdef OBJECT_PUSHING_TASK
     taskNumber = 2;
     stateNames.push_back(std::string());
-//    stateNames[0] = "panda0_link1";
-//    stateNames[1] = "panda0_link2";
-//    stateNames[2] = "panda0_link3";
-//    stateNames[3] = "panda0_link4";
-//    stateNames[4] = "panda0_link5";
-//    stateNames[5] = "panda0_link6";
-//    stateNames[6] = "panda0_link7";
-//    stateNames[7] = "goal";
-    stateNames[0] = "link1";
-    stateNames[1] = "link2";
-    stateNames[2] = "link3";
-    stateNames[3] = "link4";
-    stateNames[4] = "link5";
-    stateNames[5] = "link6";
-    stateNames[6] = "link7";
-    stateNames[7] = "tin";
+    stateNames[0] = "panda0_link1";
+    stateNames[1] = "panda0_link2";
+    stateNames[2] = "panda0_link3";
+    stateNames[3] = "panda0_link4";
+    stateNames[4] = "panda0_link5";
+    stateNames[5] = "panda0_link6";
+    stateNames[6] = "panda0_link7";
+    stateNames[7] = "goal";
+//    stateNames[0] = "link1";
+//    stateNames[1] = "link2";
+//    stateNames[2] = "link3";
+//    stateNames[3] = "link4";
+//    stateNames[4] = "link5";
+//    stateNames[5] = "link6";
+//    stateNames[6] = "link7";
+//    stateNames[7] = "tin";
 
     armControlCosts = 0;
     double armStateCosts = 0;
@@ -185,19 +183,22 @@ frankaModel::frankaModel(){
 
 }
 
-void frankaModel::init(mjModel *m){
+void taskTranslator::init(mjModel *m){
     model = m;
 }
 
-void frankaModel::setDesiredState(m_state _desiredState){
-    X_desired = _desiredState.replicate(1, 1);
-}
-
 // Set the controls of a mujoco data object
-void frankaModel::setControls(mjData *d, m_ctrl U, bool grippersOpen){
+void taskTranslator::setControls(mjData *d, m_ctrl U, bool grippersOpen){
+
+#ifdef OBJECT_PUSHING
     for(int i = 0; i < NUM_CTRL; i++){
         d->ctrl[i] = U(i) + d->qfrc_bias[i];
     }
+#else
+    for(int i = 0; i < NUM_CTRL; i++){
+        d->ctrl[i] = U(i);
+    }
+#endif
 
 #ifndef DOUBLE_PENDULUM
     if(grippersOpen){
@@ -212,7 +213,7 @@ void frankaModel::setControls(mjData *d, m_ctrl U, bool grippersOpen){
 }
 
 // Return the controls of a mujoco data object
-m_ctrl frankaModel::returnControls(mjData *d){
+m_ctrl taskTranslator::returnControls(mjData *d){
     m_ctrl controls;
     for(int i = 0; i < NUM_CTRL; i++){
         controls(i) = d->ctrl[i];
@@ -221,7 +222,7 @@ m_ctrl frankaModel::returnControls(mjData *d){
     return controls;
 }
 
-void frankaModel::perturbVelocity(mjData *perturbedData, mjData *origData, int stateIndex, double eps){
+void taskTranslator::perturbVelocity(mjData *perturbedData, mjData *origData, int stateIndex, double eps){
     int stateNameIndex = stateIndexToStateName[stateIndex];
     int bodyId = mj_name2id(model, mjOBJ_BODY, stateNames[stateNameIndex].c_str());
     bool freeJoint;
@@ -240,7 +241,7 @@ void frankaModel::perturbVelocity(mjData *perturbedData, mjData *origData, int s
 
 }
 
-void frankaModel::perturbPosition(mjData *perturbedData, mjData *origData, int stateIndex, double eps){
+void taskTranslator::perturbPosition(mjData *perturbedData, mjData *origData, int stateIndex, double eps){
     int stateNameIndex = stateIndexToStateName[stateIndex];
     int bodyId = mj_name2id(model, mjOBJ_BODY, stateNames[stateNameIndex].c_str());
     bool freeJoint;
@@ -274,13 +275,13 @@ void frankaModel::perturbPosition(mjData *perturbedData, mjData *origData, int s
     }
 }
 
-void frankaModel::stepModel(mjData *d, int numSteps){
+void taskTranslator::stepModel(mjData *d, int numSteps){
     for(int i = 0; i < numSteps; i++){
         mj_step(model, d);
     }
 }
 
-bool frankaModel::isStateInCollision(mjData *d, m_state state){
+bool taskTranslator::isStateInCollision(mjData *d, m_state state){
     bool collision = false;
     mjData *resetData;
     resetData = mj_makeData(model);

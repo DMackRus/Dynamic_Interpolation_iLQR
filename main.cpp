@@ -14,13 +14,14 @@
 #define NUM_TRAJECTORIES_DATA_COLLECTION 50
 #define NUM_TESTS_EXTRAPOLATION  6
 
+#define READ_TASK_FROM_FILE     1
 
 extern MujocoController *globalMujocoController;
 extern mjModel* model;						// MuJoCo model
 extern mjData* mdata;						// MuJoCo data
 
 extern iLQR* optimiser;
-frankaModel* modelTranslator;
+taskTranslator* modelTranslator;
 
 typedef Matrix<double, (2), 1> m_cube;
 
@@ -66,26 +67,16 @@ extern mjvOption opt;			        // visualization options
 extern mjrContext con;				    // custom GPU context
 extern GLFWwindow *window;
 
-extern std::vector<m_ctrl> testInitControls;
+extern std::vector<m_ctrl> initControls;
 extern std::vector<bool> grippersOpen;
-extern mjData* d_init_test;
-mjData* masterReset;
-extern m_point intermediatePoint;
+extern mjData* d_init;
 
-std::string names[3] = { "Testing_Data/StartAndGoalStates/Pendulum.csv", "Testing_Data/StartAndGoalStates/Reaching.csv", "Testing_Data/StartAndGoalStates/Pushing.csv"};
 std::string DataCollecNames[3] = {"Pendulum_Data.csv", "Reaching_Data.csv", "Pushing_Data.csv"};
 
 void saveStates();
 void saveTrajecToCSV();
 
-void testILQR(m_state X0);
-
 void simpleTest();
-
-void updateStartGoalAndData();
-void initControls();
-m_state generateRandomStartState();
-m_state generateRandomGoalState(m_state startState);
 
 void saveMatricesToCSV();
 void saveStatesToCSV();
@@ -95,19 +86,14 @@ void saveTestingData(int numTestingData, const std::string& name);
 void readStartAndGoalFromFile(int requiredRow);
 
 int main() {
-    modelTranslator = new frankaModel();
+    // Create a new modelTranslator, initialise mujoco and then pass mujoco model to modelTranslator
+    modelTranslator = new taskTranslator();
     initMujoco(modelTranslator->taskNumber, 0.004);
-
     modelTranslator->init(model);
-    d_init_test = mj_makeData(model);
-    masterReset = mj_makeData(model);
-    cpMjData(model, masterReset, mdata);
-
-    cout << "model nv: " << model->nv << endl;
-    cout << "model nq: " << model->nq << endl;
 
     if(RUN_ILQR){
 
+        // Initialise optimiser
         optimiser = new iLQR(model, mdata, modelTranslator, globalMujocoController);
         optimiser->makeDataForOptimisation();
 
@@ -115,22 +101,20 @@ int main() {
         // 2 is a good example of decent initilisation + final trajec
         // 3 is a good example of a bad initialisation
         // ----- For reaching ------
-        readStartAndGoalFromFile(2);
+        X0 = modelTranslator->setupTask(d_init, false, 2);
         cout << "X desired: " << X_desired << endl;
-        //X_desired(7) = 0.6;
-        //X_desired(8) = -0.1;
-        modelTranslator->setDesiredState(X_desired);
-        optimiser->resetInitialStates(d_init_test, X0);
+
+
 
         for(int i = 0; i < 1; i++){
-            testInitControls.clear();
+            initControls.clear();
             auto iLQRStart = high_resolution_clock::now();
 
             optimiser->updateNumStepsPerDeriv(5);
 
-            cpMjData(model, mdata, optimiser->d_init);
-            initControls();
-            optimiser->setInitControls(testInitControls, grippersOpen);
+            initControls = modelTranslator->initControls(mdata, d_init, X0);
+            optimiser->resetInitialStates(d_init, X0);
+            optimiser->setInitControls(initControls, grippersOpen);
 
 //            optimiser->rollOutTrajectory();
 //            optimiser->getDerivativesStatically();
@@ -198,16 +182,14 @@ int main() {
 
         int validTrajectories = 0;
 
-
         while(validTrajectories < 1000){
-            testInitControls.clear();
+            initControls.clear();
             optimiser->updateNumStepsPerDeriv(1);
             // updates X0, X_desired and d_init_test
-            updateStartGoalAndData();
-            modelTranslator->setDesiredState(X_desired);
-            optimiser->resetInitialStates(d_init_test, X0);
-            initControls();
-            optimiser->setInitControls(testInitControls, grippersOpen);
+            X_desired = modelTranslator->setupTask(mdata, true, 0);
+            optimiser->resetInitialStates(d_init, X0);
+            initControls = modelTranslator->initControls(mdata, d_init, X0);
+            optimiser->setInitControls(initControls, grippersOpen);
 
             optimiser->rollOutTrajectory();
 
@@ -248,10 +230,9 @@ int main() {
             for(int i = 0; i < NUM_TRAJECTORIES_DATA_COLLECTION; i++){
 
                 // randomly generate start and goal state, reinitialise initial state data object
-                testInitControls.clear();
-                readStartAndGoalFromFile(i);
-                modelTranslator->setDesiredState(X_desired);
-                initControls();
+                initControls.clear();
+                X_desired = modelTranslator->setupTask(mdata, false, i);
+                initControls = modelTranslator->initControls(mdata, d_init, X0);
 
                 std::vector<float> _initCosts;
                 std::vector<float> _finalsCosts;
@@ -263,8 +244,8 @@ int main() {
                 for(int j = 0; j < NUM_TESTS_EXTRAPOLATION; j++){
                     auto iLQRStart = high_resolution_clock::now();
                     optimiser->updateNumStepsPerDeriv(scalingLevels[j]);
-                    optimiser->resetInitialStates(d_init_test, X0);
-                    optimiser->setInitControls(testInitControls, grippersOpen);
+                    optimiser->resetInitialStates(d_init, X0);
+                    optimiser->setInitControls(initControls, grippersOpen);
 
                     optimiser->optimise();
 
@@ -294,10 +275,9 @@ int main() {
             for(int i = 0; i < NUM_TRAJECTORIES_DATA_COLLECTION; i++) {
 
                 // randomly generate start and goal state, reinitialise initial state data object
-                testInitControls.clear();
-                readStartAndGoalFromFile(i);
-                modelTranslator->setDesiredState(X_desired);
-                initControls();
+                initControls.clear();
+                X_desired = modelTranslator->setupTask(mdata, false, i);
+                initControls = modelTranslator->initControls(mdata, d_init, X0);
 
                 std::vector<float> _initCosts;
                 std::vector<float> _finalsCosts;
@@ -309,8 +289,8 @@ int main() {
 
                 auto iLQRStart = high_resolution_clock::now();
                 optimiser->updateNumStepsPerDeriv(5);
-                optimiser->resetInitialStates(d_init_test, X0);
-                optimiser->setInitControls(testInitControls, grippersOpen);
+                optimiser->resetInitialStates(d_init, X0);
+                optimiser->setInitControls(initControls, grippersOpen);
 
                 optimiser->optimise();
 
@@ -352,123 +332,22 @@ int main() {
 
         }
 
-        saveTestingData(numTestingData, names[modelTranslator->taskNumber]);
+        saveTestingData(numTestingData, modelTranslator->names[modelTranslator->taskNumber]);
     }
     else{
 
         optimiser = new iLQR(model, mdata, modelTranslator, globalMujocoController);
+        X0 = modelTranslator->setupTask(mdata, false, 2);
+        cpMjData(model, d_init, mdata);
 
-        readStartAndGoalFromFile(1);
-        optimiser->resetInitialStates(d_init_test, X0);
         simpleTest();
+        optimiser->resetInitialStates(d_init, X0);
 
         render_simpleTest();
     }
 
     return 0;
 }
-
-void updateStartGoalAndData(){
-    X0 = modelTranslator->generateRandomStartState(mdata);
-    //cout << "-------------- random init state ----------------" << endl << X0 << endl;
-    X_desired = modelTranslator->generateRandomGoalState(X0, mdata);
-    //cout << "-------------- random desired state ----------------" << endl << X_desired << endl;
-    cpMjData(model, mdata, masterReset);
-    modelTranslator->setState(mdata, X0);
-
-    for(int i = 0; i < 10; i++){
-        mj_step(model, mdata);
-    }
-    cpMjData(model, d_init_test, mdata);
-
-}
-
-void readStartAndGoalFromFile(int requiredRow){
-
-    cout << "here" << endl;
-
-    std::string nameOfFile = names[modelTranslator->taskNumber];
-
-    fstream fin;
-
-    fin.open(nameOfFile, ios::in);
-    std::vector<string> row;
-    std::string line, word, temp;
-
-    int counter = 0;
-
-    while(fin >> temp){
-        row.clear();
-
-        getline(fin, line);
-
-        stringstream s(temp);
-
-        while(getline(s, word, ',')){
-            row.push_back(word);
-        }
-
-        if(counter == requiredRow){
-            for(int i = 0; i < (2 * DOF); i++){
-                X0(i) = stod(row[i]);
-                X_desired(i) = stod(row[i + (2 * DOF)]);
-            }
-        }
-
-        counter++;
-    }
-
-    X0(5) += PI/2;
-    X0(6) += PI/4;
-
-    cpMjData(model, mdata, masterReset);
-    modelTranslator->setState(mdata, X0);
-
-//    if(modelTranslator->taskNumber == 2){
-//        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_goal");
-//
-//        m_pose goalPose;
-//        goalPose.setZero();
-//        goalPose(0) = X_desired(7);
-//        goalPose(1) = X_desired(8);
-//
-//        globalMujocoController->setBodyPose(model, mdata, visualGoalId, goalPose);
-//    }
-
-
-
-    for(int i = 0; i < 1; i++){
-        mj_step(model, mdata);
-    }
-    cpMjData(model, d_init_test, mdata);
-
-}
-
-// Init controls code for different tasks
-#ifdef DOUBLE_PENDULUM
-void initControls(){
-
-    for(int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++){
-
-        testInitControls.push_back(m_ctrl());
-        grippersOpen.push_back(bool());
-        grippersOpen[i] = false;
-
-        for(int k = 0; k < NUM_CTRL; k++){
-
-//            testInitControls[i](k) = mdata->qfrc_bias[k];
-            testInitControls[i](k) = 0;
-            mdata->ctrl[k] = testInitControls[i](k);
-
-        }
-
-        for(int j = 0; j < 1; j++){
-            mj_step(model, mdata);
-        }
-    }
-}
-
-#endif
 
 #ifdef REACHING
 void initControls(){
@@ -528,165 +407,6 @@ void initControls(){
     }
 }
 
-#endif
-
-#ifdef OBJECT_PUSHING
-void initControls() {
-    cpMjData(model, mdata, d_init_test);
-
-    //const std::string endEffecName = "franka_gripper";
-    //panda0_leftfinger
-    const std::string EE_Name = "right_finger";
-    const std::string goalName = "tin";
-
-    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
-    int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
-
-    m_pose startPose = globalMujocoController->returnBodyPose(model, mdata, EE_id);
-    m_quat startQuat = globalMujocoController->returnBodyQuat(model, mdata, EE_id);
-
-    // TODO hard coded - get it programmatically? - also made it slightly bigger so trajectory has room to improve
-    float cylinder_radius = 0.04;
-    float x_cylinder0ffset = cylinder_radius * sin(PI/4);
-    float y_cylinder0ffset = cylinder_radius * cos(PI/4);
-
-    float endPointX = X_desired(7) - x_cylinder0ffset;
-    float endPointY;
-    if(X_desired(8) - startPose(0) > 0){
-        endPointY = X_desired(8) - y_cylinder0ffset;
-    }
-    else{
-        endPointY = X_desired(8) + y_cylinder0ffset;
-    }
-
-    float cylinderObjectX = X0(7);
-    float cylinderObjectY = X0(8);
-    float intermediatePointX;
-    float intermediatePointY;
-
-    float angle = atan2(endPointY - cylinderObjectY, endPointX - cylinderObjectX);
-
-    if(endPointY > cylinderObjectY){
-        angle += 0.4;
-    }
-    else{
-        angle -= 0.4;
-    }
-
-    float h = 0.15;
-
-    float deltaX = h * cos(angle);
-    float deltaY = h * sin(angle);
-
-    // Calculate intermediate waypoint to position end effector behind cube such that it can be pushed to desired goal position
-//    if(X_desired(8) - startPose(0) > 0){
-//        intermediatePointY = cylinderObjectY + deltaY;
-//    }
-//    else{
-//        intermediatePointY = cylinderObjectY - deltaY;
-//    }
-    intermediatePointY = cylinderObjectY - deltaY;
-    intermediatePointX = cylinderObjectX - deltaX;
-
-    intermediatePoint(0) = intermediatePointX;
-    intermediatePoint(1) = intermediatePointY;
-
-//    if(endPointY - cylinderObjectY > 0){
-//        intermediatePointY -= 0.1;
-//    }
-//    else{
-//        intermediatePointY += 0.1;
-//    }
-
-    float x_diff = intermediatePointX - startPose(0);
-    float y_diff = intermediatePointY - startPose(1);
-
-    m_point initPath[MUJ_STEPS_HORIZON_LENGTH];
-    initPath[0](0) = startPose(0);
-    initPath[0](1) = startPose(1);
-    initPath[0](2) = startPose(2);
-
-    int splitIndex = 1000;
-
-    for (int i = 0; i < 1000; i++) {
-        initPath[i + 1](0) = initPath[i](0) + (x_diff / splitIndex);
-        initPath[i + 1](1) = initPath[i](1) + (y_diff / splitIndex);
-        initPath[i + 1](2) = initPath[i](2);
-    }
-
-    x_diff = endPointX - intermediatePointX;
-    y_diff = endPointY - intermediatePointY;
-
-    // Deliberately make initial;isation slightly worse so trajectory optimiser can do something
-    for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
-        initPath[i + 1](0) = initPath[i](0) + (x_diff / (5000 - splitIndex));
-        initPath[i + 1](1) = initPath[i](1) + (y_diff / (5000 - splitIndex));
-        initPath[i + 1](2) = initPath[i](2);
-    }
-
-//    for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
-//        initPath[i + 1](0) = initPath[i](0) + (x_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
-//        initPath[i + 1](1) = initPath[i](1) + (y_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
-//        initPath[i + 1](2) = initPath[i](2);
-//    }
-
-    for (int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++) {
-
-        m_pose currentEEPose = globalMujocoController->returnBodyPose(model, mdata, EE_id);
-        m_quat currentQuat = globalMujocoController->returnBodyQuat(model, mdata, EE_id);
-
-        m_quat invQuat = globalMujocoController->invQuat(currentQuat);
-        m_quat quatDiff = globalMujocoController->multQuat(startQuat, invQuat);
-
-        m_point axisDiff = globalMujocoController->quat2Axis(quatDiff);
-
-        m_pose differenceFromPath;
-        float gains[6] = {1, 1, 1, 0, 0, 0};
-        for (int j = 0; j < 3; j++) {
-            differenceFromPath(j) = initPath[i](j) - currentEEPose(j);
-            differenceFromPath(j + 3) = axisDiff(j);
-        }
-
-//        cout << "current path point: " << initPath[i] << endl;
-//        cout << "currentEE Pose: " << currentEEPose << endl;
-//        cout << "diff from path: " << differenceFromPath << endl;
-
-        m_pose desiredEEForce;
-
-        for (int j = 0; j < 6; j++) {
-            desiredEEForce(j) = differenceFromPath(j) * gains[j];
-        }
-
-        //cout << "desiredEEForce " << desiredEEForce << endl;
-
-        MatrixXd Jac = globalMujocoController->calculateJacobian(model, mdata, EE_id);
-
-        MatrixXd Jac_t = Jac.transpose();
-        MatrixXd Jac_inv = Jac.completeOrthogonalDecomposition().pseudoInverse();
-
-        m_ctrl desiredControls;
-
-        desiredControls = Jac_inv * desiredEEForce;
-
-        testInitControls.push_back(m_ctrl());
-        grippersOpen.push_back(bool());
-        grippersOpen[i] = false;
-
-
-        for (int k = 0; k < NUM_CTRL; k++) {
-
-            testInitControls[i](k) = desiredControls(k);
-//            testInitControls[i](k) = 0.0;
-            //mdata->ctrl[k] = testInitControls[i](k);
-        }
-
-        modelTranslator->setControls(mdata, testInitControls[i], grippersOpen[i]);
-
-        for (int j = 0; j < 1; j++) {
-            mj_step(model, mdata);
-        }
-    }
-}
 #endif
 
 #ifdef REACHING_CLUTTER
@@ -810,7 +530,7 @@ void initControls(){
 #endif
 
 void simpleTest(){
-    initControls();
+    initControls = modelTranslator->initControls(mdata, d_init, X0);
 }
 
 void saveTrajecToCSV(){
