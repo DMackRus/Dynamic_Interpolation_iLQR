@@ -49,6 +49,8 @@
 #define GRIPPERS_OPEN   0.04
 #define GRIPPERS_CLOSED 0
 
+#define TERMINAL_STATE_MULT     100000
+
 typedef Matrix<double, NUM_CTRL, 1> m_ctrl;
 typedef Matrix<double, DOF, 1> m_dof;
 
@@ -82,7 +84,7 @@ public:
 
     // State vector is: 7 joint angles, two cube pos (X and Y), cube rot, 7 joint velocities, two cube velocities (X and Y)
 
-    double terminalConstant = 20;
+    double terminalConstant = 0;
     std::string names[3] = { "Testing_Data/StartAndGoalStates/Pendulum.csv", "Testing_Data/StartAndGoalStates/Reaching.csv", "Testing_Data/StartAndGoalStates/Pushing.csv"};
 
     double A = 0.1;
@@ -108,12 +110,12 @@ public:
 
     //double getCost(mjData *d, m_ctrl lastControl, int controlNum, int totalControls, bool firstControl);
     // Given a set of mujoco data, what is the cost of its state and controls
-    double costFunction(mjData *d, int controlNum, int totalControls, m_ctrl lastControl, bool firstControl);
+    double costFunction(mjData *d, int controlNum, int totalControls, m_ctrl lastControl);
 
     // Given a set of mujoco data, what are its cost derivates with respect to state and control
     void costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, m_ctrl lastU);
-    void costDerivatives_fd(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, m_ctrl U_last,  bool firstControl);
-    m_ctrl costDerivatives_fd_1stOrder(m_state X, m_ctrl U, m_ctrl U_last, int controlNum, int totalControls, bool firstControl);
+//    void costDerivatives_fd(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, m_ctrl U_last,  bool firstControl);
+//    m_ctrl costDerivatives_fd_1stOrder(m_state X, m_ctrl U, m_ctrl U_last, int controlNum, int totalControls, bool firstControl);
     void costDerivsControlsAnalytical(mjData *d, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, m_ctrl lastControl);
 
     // set the state of a mujoco data object as per this model

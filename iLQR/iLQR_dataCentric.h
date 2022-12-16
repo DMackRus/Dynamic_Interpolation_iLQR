@@ -34,21 +34,20 @@
 
 #define DQACCDQ_MAX                     250
 
-#define VISUALISE_ROLLOUTS              0
+#define VISUALISE_ROLLOUTS              1
 
 class iLQR
 {
     public:
 
     // constructor - mujoco model, data, initial controls and initial state
-    iLQR(mjModel* m, mjData* d, taskTranslator* _modelTranslator, MujocoController* _mujocoController);
+    iLQR(mjModel* m, mjData* d, taskTranslator* _modelTranslator);
 
     /*      Data     */
     // MuJoCo model and data
     mjModel* model;
     mjData* mdata = NULL;
     taskTranslator *modelTranslator;
-    MujocoController *mujocoController;
 
     // Array of mujoco data structure along the trajectory
     mjData* dArray[MUJ_STEPS_HORIZON_LENGTH + 1];
@@ -138,9 +137,9 @@ class iLQR
     bool backwardsPass_Vxx_reg();
     bool isMatrixPD(Ref<MatrixXd> matrix);
 
-    float forwardsPass(float oldCost);
+    float forwardsPass(float oldCost, bool costReduced);
 
-    bool checkForConvergence(float newCost, float oldCost);
+    bool checkForConvergence(float newCost, float oldCost, bool costReduced);
 
     bool updateScaling();
     void updateDataStructures();
@@ -153,7 +152,6 @@ class iLQR
     void deleteMujocoData();
     void updateNumStepsPerDeriv(int stepPerDeriv);
     void resetInitialStates(mjData *_d_init, m_state _X0);
-
 
     double calcVariance(std::vector<int> data);
 

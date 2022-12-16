@@ -88,7 +88,7 @@ int main() {
     if(RUN_ILQR){
 
         // Initialise optimiser
-        optimiser = new iLQR(model, mdata, modelTranslator, globalMujocoController);
+        optimiser = new iLQR(model, mdata, modelTranslator);
         optimiser->makeDataForOptimisation();
 
         // For pushing - screenshots are from trajectory 2.
@@ -112,7 +112,7 @@ int main() {
         render();
     }
     else if(GENERATE_A_B){
-        optimiser = new iLQR(model, mdata, modelTranslator, globalMujocoController);
+        optimiser = new iLQR(model, mdata, modelTranslator);
         optimiser->makeDataForOptimisation();
 
         int validTrajectories = 0;
@@ -158,7 +158,7 @@ int main() {
     }
     else if(ILQR_DATA_COLLECTION){
         // Only need to be done once - initialise optimiser and make data for optimisation
-        optimiser = new iLQR(model, mdata, modelTranslator, globalMujocoController);
+        optimiser = new iLQR(model, mdata, modelTranslator);
         optimiser->makeDataForOptimisation();
 
         if(!DYNAMIC_LINEAR_DERIVS){
@@ -271,7 +271,7 @@ int main() {
     }
     else{
 
-        optimiser = new iLQR(model, mdata, modelTranslator, globalMujocoController);
+        optimiser = new iLQR(model, mdata, modelTranslator);
         X0 = modelTranslator->setupTask(mdata, false, 0);
         cpMjData(model, d_init, mdata);
 

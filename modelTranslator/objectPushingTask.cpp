@@ -13,7 +13,7 @@ extern mjrContext con;				    // custom GPU context
 extern GLFWwindow *window;
 
 #ifdef OBJECT_PUSHING
-double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls, m_ctrl lastControl, bool firstControl){
+double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls, m_ctrl lastControl){
     double stateCost = 0;
     m_state X = returnState(d);
     m_ctrl U = returnControls(d);
@@ -24,17 +24,25 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
     // actual - desired
     X_diff = X - X_desired;
     double percentageDone = (double)controlNum / (double)totalControls;
-    double terminalScalar;
-    if(percentageDone < 0.6){
-        terminalScalar = 0;
-    }
-    else{
-        terminalScalar = (terminalConstant * pow(percentageDone, 2)) + 1;
-    }
+    double terminalScalar = 1.0;
+//    if(percentageDone < 0.6){
+//        terminalScalar = 0;
+//    }
+//    else{
+//        terminalScalar = (terminalConstant * pow(percentageDone, 2)) + 1;
+//    }
 
     DiagonalMatrix<double, 2 * DOF> Q_scaled;
     for(int i = 0; i < DOF; i++){
-        Q_scaled.diagonal()[i] = terminalScalar * Q.diagonal()[i];
+        if(controlNum == (totalControls - 1)){
+            cout << "terminal" << endl;
+            cout << "controlNum: " << controlNum << " - total controls: " << totalControls << endl;
+            Q_scaled.diagonal()[i] = TERMINAL_STATE_MULT * Q.diagonal()[i];
+        }
+        else{
+            Q_scaled.diagonal()[i] = Q.diagonal()[i];
+        }
+
         Q_scaled.diagonal()[i + DOF] = Q.diagonal()[i + DOF];
     }
 
@@ -60,17 +68,24 @@ void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_st
     // actual - desired
     X_diff = X - X_desired;
     double percentageDone = (double)controlNum / (double)totalControls;
-    double terminalScalar;
-    if(percentageDone < 0.7){
-        terminalScalar = 0;
-    }
-    else{
-        terminalScalar = (terminalConstant * pow(percentageDone, 2)) + 1;
-    }
+    double terminalScalar = 1.0;
+//    if(percentageDone < 0.6){
+//        terminalScalar = 0;
+//    }
+//    else{
+//        terminalScalar = (terminalConstant * pow(percentageDone, 2)) + 1;
+//    }
 
     DiagonalMatrix<double, 2 * DOF> Q_scaled;
     for(int i = 0; i < DOF; i++){
-        Q_scaled.diagonal()[i] = terminalScalar * Q.diagonal()[i];
+        if(controlNum == (totalControls - 1)){
+            cout << "terminal" << endl;
+            cout << "controlNum: " << controlNum << " - total controls: " << totalControls << endl;
+            Q_scaled.diagonal()[i] = TERMINAL_STATE_MULT * Q.diagonal()[i];
+        }
+        else{
+            Q_scaled.diagonal()[i] = Q.diagonal()[i];
+        }
         Q_scaled.diagonal()[i + DOF] = Q.diagonal()[i + DOF];
     }
 

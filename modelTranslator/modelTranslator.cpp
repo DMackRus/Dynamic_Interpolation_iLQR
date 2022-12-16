@@ -85,7 +85,7 @@ taskTranslator::taskTranslator(){
 
     armControlCosts = 0;
     double armStateCosts = 0;
-    double armVelCosts = 0.4;
+    double armVelCosts = 0.1;
 
     for(int i = 0; i < NUM_CTRL; i++){
         R.diagonal()[i] = armControlCosts;
