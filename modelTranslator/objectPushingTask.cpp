@@ -395,7 +395,7 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
             desiredEEForce(j) = differenceFromPath(j) * gains[j];
         }
 
-        cout << "desiredEEForce " << desiredEEForce << endl;
+        //cout << "desiredEEForce " << desiredEEForce << endl;
 
         MatrixXd Jac = globalMujocoController->calculateJacobian(model, d, EE_id);
 

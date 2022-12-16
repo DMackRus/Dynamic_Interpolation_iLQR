@@ -61,12 +61,6 @@ std::string matricesFileName = "matrices_A.csv";
 
 ofstream outputDataCollection;
 
-extern mjvCamera cam;                   // abstract camera
-extern mjvScene scn;                    // abstract scene
-extern mjvOption opt;			        // visualization options
-extern mjrContext con;				    // custom GPU context
-extern GLFWwindow *window;
-
 extern std::vector<m_ctrl> initControls;
 extern std::vector<bool> grippersOpen;
 extern mjData* d_init;
@@ -104,75 +98,16 @@ int main() {
         X0 = modelTranslator->setupTask(d_init, false, 2);
         cout << "X desired: " << X_desired << endl;
 
+        initControls.clear();
+        auto iLQRStart = high_resolution_clock::now();
 
+        optimiser->updateNumStepsPerDeriv(5);
 
-        for(int i = 0; i < 1; i++){
-            initControls.clear();
-            auto iLQRStart = high_resolution_clock::now();
+        initControls = modelTranslator->initControls(mdata, d_init, X0);
+        optimiser->resetInitialStates(d_init, X0);
+        optimiser->setInitControls(initControls, grippersOpen);
 
-            optimiser->updateNumStepsPerDeriv(5);
-
-            initControls = modelTranslator->initControls(mdata, d_init, X0);
-            optimiser->resetInitialStates(d_init, X0);
-            optimiser->setInitControls(initControls, grippersOpen);
-
-//            optimiser->rollOutTrajectory();
-//            optimiser->getDerivativesStatically();
-//            optimiser->copyDerivatives();
-//
-//            for(int j = 0; j < MUJ_STEPS_HORIZON_LENGTH; j++){
-//                A_matrices.push_back(m_state_state());
-//                A_matrices[j] = optimiser->f_x[j].replicate(1, 1);
-//
-//                B_matrices.push_back(m_state_ctrl());
-//                B_matrices[j] = optimiser->f_u[j].replicate(1, 1);
-//
-//                savedStates.push_back(m_state());
-//                savedStates[j] = optimiser->X_old[j].replicate(1,1);
-//
-//                savedControls.push_back(m_ctrl());
-//                savedControls[j] = optimiser->U_new[j].replicate(1,1);
-//            }
-
-
-            optimiser->optimise();
-
-//            for(int j = 0; j < MUJ_STEPS_HORIZON_LENGTH; j++){
-//                A_matrices.push_back(m_state_state());
-//                A_matrices[(MUJ_STEPS_HORIZON_LENGTH) + j] = optimiser->f_x[j].replicate(1, 1);
-//
-//                B_matrices.push_back(m_state_ctrl());
-//                B_matrices[(MUJ_STEPS_HORIZON_LENGTH) + j] = optimiser->f_u[j].replicate(1, 1);
-//
-//                savedStates.push_back(m_state());
-//                savedStates[MUJ_STEPS_HORIZON_LENGTH + j] = optimiser->X_old[j].replicate(1,1);
-//
-//                savedControls.push_back(m_ctrl());
-//                savedControls[MUJ_STEPS_HORIZON_LENGTH + j] = optimiser->U_new[j].replicate(1,1);
-//            }
-//            saveMatricesToCSV();
-
-            auto iLQRStop = high_resolution_clock::now();
-            auto iLQRDur = duration_cast<microseconds>(iLQRStop - iLQRStart);
-
-            float milliiLQRTime = iLQRDur.count()/1000;
-//            iLQRTime.push_back(milliiLQRTime/1000);
-//            finalsCosts.push_back(optimiser->finalCost);
-//            avgLinTime.push_back(optimiser->avgLinTime);
-//            numIterations.push_back(optimiser->numIterations);
-
-        }
-
-//        for(int i = 0; i < 1; i++){
-//            cout << "----------------------------------------------------" << endl;
-//
-//            cout << "iLQR convergence time: " << iLQRTime[i] << endl;
-//            cout << "Final cost: " << finalsCosts[i] << endl;
-//            cout << "Num Iterations: " << numIterations[i] << endl;
-//            cout << "Average time linearising: " << avgLinTime[i] << endl;
-//
-//            cout << "-----------------------------------------------------" << endl;
-//        }
+        optimiser->optimise();
 
         render();
     }

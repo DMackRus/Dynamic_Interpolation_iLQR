@@ -1,0 +1,3 @@
+/home/dave/projects/c++/cmake-build-debug/CMakeFiles/Mujoco_Acrobot_Control.dir
+/home/dave/projects/c++/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/dave/projects/c++/cmake-build-debug/CMakeFiles/rebuild_cache.dir

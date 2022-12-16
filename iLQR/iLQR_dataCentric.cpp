@@ -363,7 +363,6 @@ double iLQR::calcVariance(std::vector<int> data){
 }
 
 void iLQR::getDerivativesDynamically(){
-    cout << "num waypoints is: " << evaluationWaypoints.size() << endl;
     numEvals.push_back(evaluationWaypoints.size());
 //    for(int i = 0; i < evaluationWaypoints.size(); i++){
 //        cout << evaluationWaypoints[i] << " ";
@@ -811,6 +810,8 @@ float iLQR::forwardsPass(float oldCost){
     float newCost = 0.0;
     bool costReduction = false;
     int alphaCount = 0;
+    float alphaReduc = 0.1;
+    int alphaMax = (1 / alphaReduc) - 1;
 
     while(!costReduction){
         cpMjData(model, mdata, d_init);
@@ -899,7 +900,7 @@ float iLQR::forwardsPass(float oldCost){
         else{
             alpha = alpha - 0.1;
             alphaCount++;
-            if(alpha <= 0){
+            if(alphaCount >= alphaMax){
                 break;
             }
         }
@@ -927,16 +928,19 @@ float iLQR::forwardsPass(float oldCost){
         }
 
         cpMjData(model, dArray[ilqr_horizon_length], mdata);
+
+        cout << "best alpha was " << alpha << endl;
+        cout << "cost improved in F.P - new cost: " << newCost << endl;
+        return newCost;
     }
 
     //m_state termStateBest = modelTranslator->returnState(mdata);
     //cout << "terminal state best: " << endl << termStateBest << endl;
-    cout << "best alpha was " << alpha << endl;
     //cout << "best final control: " << modelTranslator->returnControls(dArray[ilqr_horizon_length - 1]) << endl;
 //    cout << "best cost was " << newCost << endl;
 //    cout << "-------------------- END FORWARDS PASS ------------------------" << endl;
 
-    return newCost;
+    return oldCost;
 }
 
 bool iLQR::checkForConvergence(float newCost, float oldCost){
@@ -953,7 +957,6 @@ bool iLQR::checkForConvergence(float newCost, float oldCost){
 
     std::cout << "New cost: " << newCost <<  std::endl;
     std::cout << "--------------------------------------------------" <<  std::endl;
-
 
     numIterations++;
     float costGrad = (oldCost - newCost)/newCost;
