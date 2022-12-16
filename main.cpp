@@ -95,7 +95,7 @@ int main() {
         // 2 is a good example of decent initilisation + final trajec
         // 3 is a good example of a bad initialisation
         // ----- For reaching ------
-        X0 = modelTranslator->setupTask(d_init, false, 0);
+        X0 = modelTranslator->setupTask(d_init, false, 5);
         cout << "X desired: " << X_desired << endl;
 
         initControls.clear();
@@ -272,7 +272,7 @@ int main() {
     else{
 
         optimiser = new iLQR(model, mdata, modelTranslator, globalMujocoController);
-        X0 = modelTranslator->setupTask(mdata, false, 2);
+        X0 = modelTranslator->setupTask(mdata, false, 0);
         cpMjData(model, d_init, mdata);
 
         simpleTest();

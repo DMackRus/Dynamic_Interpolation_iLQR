@@ -271,6 +271,7 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
 
 // Generate initial trajectory
 std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_state X0) {
+
     std::vector<m_ctrl> initControls;
     cpMjData(model, d, d_init);
 
@@ -308,11 +309,21 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
 
     float angle = atan2(endPointY - cylinderObjectY, endPointX - cylinderObjectX);
 
-    if(endPointY > cylinderObjectY){
-        angle += 0.4;
+    if(TORQUE_CONTROL){
+        if(endPointY > cylinderObjectY){
+            angle += 0.4;
+        }
+        else{
+            angle -= 0.4;
+        }
     }
     else{
-        angle -= 0.4;
+        if(endPointY > cylinderObjectY){
+            angle += 0.1;
+        }
+        else{
+            angle -= 0.1;
+        }
     }
 
     float h = 0.15;
@@ -348,7 +359,7 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     initPath[0](1) = startPose(1);
     initPath[0](2) = startPose(2);
 
-    int splitIndex = 1000;
+    int splitIndex = 500;
 
     for (int i = 0; i < 1000; i++) {
         initPath[i + 1](0) = initPath[i](0) + (x_diff / splitIndex);
@@ -366,7 +377,16 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
         initPath[i + 1](2) = initPath[i](2);
     }
 
+    m_ctrl desiredControls;
 
+    if(!TORQUE_CONTROL){
+        m_state startState = returnState(d);
+        for(int i = 0; i < NUM_CTRL; i++){
+            desiredControls(i) = startState(i);
+        }
+    }
+
+    cout << "start state" << desiredControls << endl;
 
     for (int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++) {
 
@@ -389,22 +409,32 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
 //        cout << "currentEE Pose: " << currentEEPose << endl;
 //        cout << "diff from path: " << differenceFromPath << endl;
 
-        m_pose desiredEEForce;
-
-        for (int j = 0; j < 6; j++) {
-            desiredEEForce(j) = differenceFromPath(j) * gains[j];
-        }
-
-        //cout << "desiredEEForce " << desiredEEForce << endl;
-
+        // Calculate jacobian inverse
         MatrixXd Jac = globalMujocoController->calculateJacobian(model, d, EE_id);
-
         MatrixXd Jac_t = Jac.transpose();
         MatrixXd Jac_inv = Jac.completeOrthogonalDecomposition().pseudoInverse();
 
-        m_ctrl desiredControls;
+        m_pose desiredEEForce;
 
-        desiredControls = Jac_inv * desiredEEForce;
+
+        if(TORQUE_CONTROL){
+            for (int j = 0; j < 6; j++) {
+                desiredEEForce(j) = differenceFromPath(j) * gains[j];
+            }
+            desiredControls = Jac_inv * desiredEEForce;
+        }
+        else{
+            // Position control
+            for (int j = 0; j < 6; j++) {
+                desiredEEForce(j) = differenceFromPath(j) * gains[j] * 0.000001;
+            }
+            desiredControls += Jac_inv * desiredEEForce;
+            //cout << "desired controls: " << desiredControls << endl;
+        }
+
+
+        //cout << "desiredEEForce " << desiredEEForce << endl;
+
 
         initControls.push_back(m_ctrl());
 
@@ -412,27 +442,12 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
         for (int k = 0; k < NUM_CTRL; k++) {
 
             initControls[i](k) = desiredControls(k);
-//            initControls[i](k) = 0.0;
         }
 
         setControls(d, initControls[i], false);
 
         stepModel(d, 1);
 
-//        if( i % 20 == 0){
-//            mjrRect viewport = { 0, 0, 0, 0 };
-//            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
-//
-//            // update scene and render
-//            mjv_updateScene(model, d, &opt, NULL, &cam, mjCAT_ALL, &scn);
-//            mjr_render(viewport, &scn, &con);
-//
-//            // swap OpenGL buffers (blocking call due to v-sync)
-//            glfwSwapBuffers(window);
-//
-//            // process pending GUI events, call GLFW callbacks
-//            glfwPollEvents();
-//        }
     }
 
     return initControls;

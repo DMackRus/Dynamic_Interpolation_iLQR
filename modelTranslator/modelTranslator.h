@@ -10,9 +10,11 @@
 #include "../Utility/MujocoController/MujocoController.h"
 
 //#define DOUBLE_PENDULUM 1
-#define REACHING 1
-//#define OBJECT_PUSHING 1
+//#define REACHING 1
+#define OBJECT_PUSHING 1
 //#define PUSHING_CLUTTER
+
+#define TORQUE_CONTROL 0
 
 #ifdef DOUBLE_PENDULUM
 #define DOF 2
@@ -75,12 +77,12 @@ public:
 #ifdef OBJECT_PUSHING_TASK
     double cubeXPosCost = 1;
     double cubeYPosCost = 1;
-    double cubeVelCosts = 0.5;
+    double cubeVelCosts = 0.8;
 #endif
 
     // State vector is: 7 joint angles, two cube pos (X and Y), cube rot, 7 joint velocities, two cube velocities (X and Y)
 
-    double terminalConstant = 10;
+    double terminalConstant = 20;
     std::string names[3] = { "Testing_Data/StartAndGoalStates/Pendulum.csv", "Testing_Data/StartAndGoalStates/Reaching.csv", "Testing_Data/StartAndGoalStates/Pushing.csv"};
 
     double A = 0.1;

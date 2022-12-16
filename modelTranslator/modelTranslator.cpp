@@ -85,12 +85,17 @@ taskTranslator::taskTranslator(){
 
     armControlCosts = 0;
     double armStateCosts = 0;
-    double armVelCosts = 0;
+    double armVelCosts = 0.4;
 
     for(int i = 0; i < NUM_CTRL; i++){
         R.diagonal()[i] = armControlCosts;
-        //J.diagonal()[i] = 0.0007;
-        J.diagonal()[i] = 0.0007;
+        if(TORQUE_CONTROL){
+            J.diagonal()[i] = 0.0007;
+        }
+        else{
+            J.diagonal()[i] = 0.02;
+        }
+
         stateIndexToStateName[i] = i;
         stateIndexToFreeJntIndex[i] = 0;
     }
@@ -191,9 +196,17 @@ void taskTranslator::init(mjModel *m){
 void taskTranslator::setControls(mjData *d, m_ctrl U, bool grippersOpen){
 
 #ifdef OBJECT_PUSHING
-    for(int i = 0; i < NUM_CTRL; i++){
-        d->ctrl[i] = U(i) + d->qfrc_bias[i];
+    if(TORQUE_CONTROL){
+        for(int i = 0; i < NUM_CTRL; i++){
+            d->ctrl[i] = U(i) + d->qfrc_bias[i];
+        }
     }
+    else{
+        for(int i = 0; i < NUM_CTRL; i++){
+            d->ctrl[i] = U(i);
+        }
+    }
+
 #else
     for(int i = 0; i < NUM_CTRL; i++){
         d->ctrl[i] = U(i);
@@ -238,7 +251,6 @@ void taskTranslator::perturbVelocity(mjData *perturbedData, mjData *origData, in
     double origVelocity = globalMujocoController->return_qVelVal(model, origData, bodyId, freeJoint, freeJntIndex);
     double perturbedVel = origVelocity + eps;
     globalMujocoController->set_qVelVal(model, perturbedData, bodyId, freeJoint, freeJntIndex, perturbedVel);
-
 }
 
 void taskTranslator::perturbPosition(mjData *perturbedData, mjData *origData, int stateIndex, double eps){

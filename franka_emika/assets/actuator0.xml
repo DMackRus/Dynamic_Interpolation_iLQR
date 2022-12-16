@@ -8,13 +8,13 @@
 ====================================================== -->
 
     <actuator>
-        <!-- <position name="panda0_joint1" joint="panda0_joint1" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> 
-        <position name="panda0_joint2" joint="panda0_joint2" class="panda" kp="870" forcerange="-87 87" ctrlrange="-1.8326 1.8326"/> 
-        <position name="panda0_joint3" joint="panda0_joint3" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> 
-        <position name="panda0_joint4" joint="panda0_joint4" class="panda" kp="870" forcerange="-87 87" ctrlrange="-3.1416 0.0"/> 
-        <position name="panda0_joint5" joint="panda0_joint5" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> 
-        <position name="panda0_joint6" joint="panda0_joint6" class="panda" kp="120" forcerange="-12 12" ctrlrange="-1.66 2.1817"/> 
-        <position name="panda0_joint7" joint="panda0_joint7" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> -->
+        <position name="panda0_joint1" joint="panda0_joint1" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/>
+        <position name="panda0_joint2" joint="panda0_joint2" class="panda" kp="870" forcerange="-87 87" ctrlrange="-1.8326 1.8326"/>
+        <position name="panda0_joint3" joint="panda0_joint3" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/>
+        <position name="panda0_joint4" joint="panda0_joint4" class="panda" kp="870" forcerange="-87 87" ctrlrange="-3.1416 0.0"/>
+        <position name="panda0_joint5" joint="panda0_joint5" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/>
+        <position name="panda0_joint6" joint="panda0_joint6" class="panda" kp="120" forcerange="-12 12" ctrlrange="-1.66 2.1817"/>
+        <position name="panda0_joint7" joint="panda0_joint7" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/>
 		
 		<!-- <velocity name="panda0_joint1" joint="panda0_joint1" class="panda" kv="1000" forcerange="-87 87" ctrlrange="-2.175 2.175"/>
 		<velocity name="panda0_joint2" joint="panda0_joint2" class="panda" kv="1000" forcerange="-87 87" ctrlrange="-2.175 2.175"/>
@@ -25,17 +25,17 @@
 		<velocity name="panda0_joint6" joint="panda0_joint6" class="panda" kv="500" forcerange="-12 12" ctrlrange="-2.61 2.61"/>
 		<velocity name="panda0_joint7" joint="panda0_joint7" class="panda" kv="500" forcerange="-12 12" ctrlrange="-2.61 2.61"/> -->
 		
-		<motor name="panda0_joint1" joint="panda0_joint1" class="panda"  forcerange="-87 87" ctrlrange="-87 87"/> 
-		<motor name="panda0_joint2" joint="panda0_joint2" class="panda"  forcerange="-87 87" ctrlrange="-87 87"/> 
-		<motor name="panda0_joint3" joint="panda0_joint3" class="panda"  forcerange="-87 87" ctrlrange="-87 87"/> 
-		<motor name="panda0_joint4" joint="panda0_joint4" class="panda"  forcerange="-87 87" ctrlrange="-87 87"/> 
-		
-		<motor name="panda0_joint5" joint="panda0_joint5" class="panda"  forcerange="-12 12" ctrlrange="-12 12"/> 
-		<motor name="panda0_joint6" joint="panda0_joint6" class="panda"  forcerange="-12 12" ctrlrange="-12 12"/>
-		<motor name="panda0_joint7" joint="panda0_joint7" class="panda"  forcerange="-12 12" ctrlrange="-12 12"/> 
+<!--		<motor name="panda0_joint1" joint="panda0_joint1" class="panda"  forcerange="-87 87" ctrlrange="-87 87"/> -->
+<!--		<motor name="panda0_joint2" joint="panda0_joint2" class="panda"  forcerange="-87 87" ctrlrange="-87 87"/> -->
+<!--		<motor name="panda0_joint3" joint="panda0_joint3" class="panda"  forcerange="-87 87" ctrlrange="-87 87"/> -->
+<!--		<motor name="panda0_joint4" joint="panda0_joint4" class="panda"  forcerange="-87 87" ctrlrange="-87 87"/> -->
+<!--		-->
+<!--		<motor name="panda0_joint5" joint="panda0_joint5" class="panda"  forcerange="-12 12" ctrlrange="-12 12"/> -->
+<!--		<motor name="panda0_joint6" joint="panda0_joint6" class="panda"  forcerange="-12 12" ctrlrange="-12 12"/>-->
+<!--		<motor name="panda0_joint7" joint="panda0_joint7" class="panda"  forcerange="-12 12" ctrlrange="-12 12"/> -->
 
 		<position name="panda1_leftfinger" joint="panda0_finger_joint1" class="panda" kp="120" forcerange="-20 20" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
-        	<position name="panda1_rightfinger" joint="panda0_finger_joint2" class="panda" kp="120" forcerange="-20 20" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
+		<position name="panda1_rightfinger" joint="panda0_finger_joint2" class="panda" kp="120" forcerange="-20 20" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
 	
     </actuator>
 </mujocoinclude>

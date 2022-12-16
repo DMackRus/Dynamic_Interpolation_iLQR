@@ -228,15 +228,14 @@ void render(){
     bool showFinalControls = true;
     m_ctrl nextControl;
     cpMjData(model, mdata, d_init);
-//    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
-//    cout << "visual goal id: " << visualGoalId << endl;
-//
-//    m_pose interPose;
-//    interPose.setZero();
-//    interPose(0) = intermediatePoint(0);
-//    interPose(1) = intermediatePoint(1);
-//
-//    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
+
+    m_pose interPose;
+    interPose.setZero();
+    interPose(0) = intermediatePoint(0);
+    interPose(1) = intermediatePoint(1);
+
+    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
     while (!glfwWindowShouldClose(window))
     {
         // advance interactive simulation for 1/60 sec
@@ -257,15 +256,14 @@ void render(){
                 simstart = mdata->time;
                 showFinalControls = 1 - showFinalControls;
 
-//                int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
-//                cout << "visual goal id: " << visualGoalId << endl;
-//
-//                m_pose interPose;
-//                interPose.setZero();
-//                interPose(0) = intermediatePoint(0);
-//                interPose(1) = intermediatePoint(1);
-//
-//                globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+                int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
+
+                m_pose interPose;
+                interPose.setZero();
+                interPose(0) = intermediatePoint(0);
+                interPose(1) = intermediatePoint(1);
+
+                globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
             }
         }
 
@@ -330,15 +328,14 @@ void render_simpleTest(){
                 controlNum = 0;
                 cpMjData(model, mdata, d_init);
                 simstart = mdata->time;
-//                int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
-//                cout << "visual goal id: " << visualGoalId << endl;
-//
-//                m_pose interPose;
-//                interPose.setZero();
-//                interPose(0) = intermediatePoint(0);
-//                interPose(1) = intermediatePoint(1);
-//
-//                globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+                int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
+
+                m_pose interPose;
+                interPose.setZero();
+                interPose(0) = intermediatePoint(0);
+                interPose(1) = intermediatePoint(1);
+
+                globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
             }
 
         }

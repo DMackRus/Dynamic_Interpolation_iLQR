@@ -211,43 +211,72 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
 std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_state X0){
     std::vector<m_ctrl> initControls;
     cpMjData(model, d, d_init);
-    m_ctrl lastControl;
-    lastControl.setZero();
-    int jerkLimit = 1;
-    int K[7] = {200, 200, 200, 200, 50, 50, 50};
 
-    for(int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++){
+    // Use a PID Controller
+    if(TORQUE_CONTROL){
+        m_ctrl lastControl;
+        lastControl.setZero();
+        int jerkLimit = 1;
+        int K[7] = {200, 200, 200, 200, 50, 50, 50};
 
-        initControls.push_back(m_ctrl());
-        m_state X_diff;
-        m_state X = returnState(d);
-        m_ctrl nextControl;
-        X_diff = X_desired - X;
+        for(int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++){
 
-        for(int k = 0; k < NUM_CTRL; k++){
-            nextControl(k) = X_diff(k) * K[k];
+            initControls.push_back(m_ctrl());
+            m_state X_diff;
+            m_state X = returnState(d);
+            m_ctrl nextControl;
+            X_diff = X_desired - X;
 
-            if(nextControl(k) - lastControl(k) > jerkLimit){
-                nextControl(k) = lastControl(k) + jerkLimit;
+            for(int k = 0; k < NUM_CTRL; k++){
+                nextControl(k) = X_diff(k) * K[k];
+
+                if(nextControl(k) - lastControl(k) > jerkLimit){
+                    nextControl(k) = lastControl(k) + jerkLimit;
+                }
+
+                if(nextControl(k) - lastControl(k) < -jerkLimit){
+                    nextControl(k) = lastControl(k) - jerkLimit;
+                }
+
+                if(nextControl(k) > torqueLims[k]) nextControl(k) = torqueLims[k];
+                if(nextControl(k) < -torqueLims[k]) nextControl(k) = -torqueLims[k];
+
+                initControls[i](k) = nextControl(k);
+                d->ctrl[k] = initControls[i](k);
+
+                lastControl = nextControl.replicate(1,1);
+
             }
 
-            if(nextControl(k) - lastControl(k) < -jerkLimit){
-                nextControl(k) = lastControl(k) - jerkLimit;
-            }
-
-            if(nextControl(k) > torqueLims[k]) nextControl(k) = torqueLims[k];
-            if(nextControl(k) < -torqueLims[k]) nextControl(k) = -torqueLims[k];
-
-            initControls[i](k) = nextControl(k);
-            d->ctrl[k] = initControls[i](k);
-
-            lastControl = nextControl.replicate(1,1);
+            stepModel(d, 1);
 
         }
-
-        stepModel(d, 1);
-
     }
+    else{
+        m_dof desiredState;
+        m_state stateDiff = X_desired - X0;
+        m_state currControlState = X0.replicate(1, 1);
+        m_ctrl nextControl;
+
+
+        for(int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++){
+
+            initControls.push_back(m_ctrl());
+            currControlState += (stateDiff/MUJ_STEPS_HORIZON_LENGTH);
+
+            for(int k = 0; k < NUM_CTRL; k++){
+                nextControl(k) = currControlState(k);
+
+                initControls[i](k) = nextControl(k);
+
+            }
+
+            setControls(d, initControls[i], false);
+
+            stepModel(d, 1);
+        }
+    }
+
     return initControls;
 }
 
