@@ -10,8 +10,8 @@
 #include "../Utility/MujocoController/MujocoController.h"
 
 //#define DOUBLE_PENDULUM 1
-//#define REACHING 1
-#define OBJECT_PUSHING 1
+#define REACHING 1
+//#define OBJECT_PUSHING 1
 //#define PUSHING_CLUTTER
 
 #ifdef DOUBLE_PENDULUM

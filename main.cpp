@@ -95,7 +95,7 @@ int main() {
         // 2 is a good example of decent initilisation + final trajec
         // 3 is a good example of a bad initialisation
         // ----- For reaching ------
-        X0 = modelTranslator->setupTask(d_init, false, 2);
+        X0 = modelTranslator->setupTask(d_init, false, 0);
         cout << "X desired: " << X_desired << endl;
 
         initControls.clear();
@@ -283,66 +283,6 @@ int main() {
 
     return 0;
 }
-
-#ifdef REACHING
-void initControls(){
-
-    m_ctrl lastControl;
-    lastControl.setZero();
-    int jerkLimit = 1;
-    for(int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++){
-
-        m_state X_diff;
-        m_state X = modelTranslator->returnState(mdata);
-        m_ctrl nextControl;
-        X_diff = X_desired - X;
-        int K[7] = {200, 200, 200, 200, 50, 50, 50};
-
-        testInitControls.push_back(m_ctrl());
-        grippersOpen.push_back(bool());
-        grippersOpen[i] = false;
-
-        nextControl(0) = X_diff(0) * K[0];
-        nextControl(1) = X_diff(1) * K[1];
-        nextControl(2) = X_diff(2) * K[2];
-        nextControl(3) = X_diff(3) * K[3];
-        nextControl(4) = X_diff(4) * K[4];
-        nextControl(5) = X_diff(5) * K[5];
-        nextControl(6) = X_diff(6) * K[6];
-
-
-        for(int k = 0; k < NUM_CTRL; k++){
-
-            if(nextControl(k) - lastControl(k) > jerkLimit){
-                nextControl(k) = lastControl(k) + jerkLimit;
-            }
-
-            if(nextControl(k) - lastControl(k) < -jerkLimit){
-                nextControl(k) = lastControl(k) - jerkLimit;
-            }
-
-            if(nextControl(k) > modelTranslator->torqueLims[k]) nextControl(k) = modelTranslator->torqueLims[k];
-            if(nextControl(k) < -modelTranslator->torqueLims[k]) nextControl(k) = -modelTranslator->torqueLims[k];
-
-            //nextControl(k) = X_diff(k) * K[i];
-            testInitControls[i](k) = nextControl(k);
-            mdata->ctrl[k] = testInitControls[i](k);
-
-        }
-
-        lastControl = nextControl.replicate(1,1);
-
-//        cout << "x_diff[i]" << X_diff << endl;
-//        cout << "next control: " << nextControl << endl;
-//        cout << "testInitControls[i]" << testInitControls[i] << endl;
-
-        for(int j = 0; j < 1; j++){
-            mj_step(model, mdata);
-        }
-    }
-}
-
-#endif
 
 #ifdef REACHING_CLUTTER
 void initControls(){
