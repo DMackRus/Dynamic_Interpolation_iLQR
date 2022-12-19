@@ -151,7 +151,13 @@ void iLQR::optimise(){
             // STEP 3 - Forwards pass to calculate new optimal controls - with optional alpha backtracking line search
             auto fdStart = high_resolution_clock::now();
             bool costReduced = false;
-            newCost = forwardsPass(oldCost, &costReduced);
+            if(!DYNAMIC_LINEAR_DERIVS){
+                newCost = forwardsPassStatic(oldCost, costReduced);
+            }
+            else{
+                newCost = forwardsPassDynamic(oldCost, costReduced);
+            }
+
             if(costReduced){
                 cout << "cost reduced" << endl;
             }
@@ -178,7 +184,7 @@ void iLQR::optimise(){
     }
 
     for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
-        finalControls[i] = U_new[i].replicate(1, 1);
+        finalControls[i] = U_old[i].replicate(1, 1);
     }
 
     auto optstop = high_resolution_clock::now();
@@ -200,10 +206,10 @@ float iLQR::rollOutTrajectory(){
         modelTranslator->setControls(mdata, U_old[i], grippersOpen_iLQR[i]);
         float stateCost;
         if(i == 0){
-            stateCost = modelTranslator->costFunction(mdata, i, MUJ_STEPS_HORIZON_LENGTH, U_old[0]);
+            stateCost = modelTranslator->costFunction(mdata, i, MUJ_STEPS_HORIZON_LENGTH, d_init);
         }
         else{
-            stateCost = modelTranslator->costFunction(mdata, i, MUJ_STEPS_HORIZON_LENGTH, U_old[i-1]);
+            stateCost = modelTranslator->costFunction(mdata, i, MUJ_STEPS_HORIZON_LENGTH, dArray[i - 1]);
         }
 
         cost += (stateCost * MUJOCO_DT);
@@ -219,21 +225,6 @@ float iLQR::rollOutTrajectory(){
 //            //mj_forward(model, dArray[dArrayCounter]);
 //            dArrayCounter++;
 //            stepsCounter = num_mj_steps_per_control;
-//        }
-
-//        if( i % 20 == 0){
-//            mjrRect viewport = { 0, 0, 0, 0 };
-//            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
-//
-//            // update scene and render
-//            mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
-//            mjr_render(viewport, &scn, &con);
-//
-//            // swap OpenGL buffers (blocking call due to v-sync)
-//            glfwSwapBuffers(window);
-//
-//            // process pending GUI events, call GLFW callbacks
-//            glfwPollEvents();
 //        }
 
     }
@@ -329,11 +320,11 @@ void iLQR::generateEvaluationWaypoints(){
         distBetweenIndices.push_back(evaluationWaypoints[i+1] - evaluationWaypoints[i]);
 
     }
-    double variance;
-
-    variance = calcVariance(distBetweenIndices);
-
-    evalsVariance.push_back(variance);
+//    double variance;
+//
+//    variance = calcVariance(distBetweenIndices);
+//
+//    evalsVariance.push_back(variance);
 
 
 }
@@ -400,15 +391,15 @@ void iLQR::getDerivativesDynamically(){
             lastControl = modelTranslator->returnControls(dArray[i - 1]);
         }
 
-        modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, lastControl);
+        modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i-1]);
     }
 
     m_ctrl lastControl;
-    lastControl.setZero();
-    modelTranslator->costDerivatives(dArray[MUJ_STEPS_HORIZON_LENGTH], l_x[MUJ_STEPS_HORIZON_LENGTH], l_xx[MUJ_STEPS_HORIZON_LENGTH], l_u[MUJ_STEPS_HORIZON_LENGTH - 1], l_uu[MUJ_STEPS_HORIZON_LENGTH - 1], MUJ_STEPS_HORIZON_LENGTH - 1, MUJ_STEPS_HORIZON_LENGTH, lastControl);
+    lastControl = modelTranslator->returnControls(dArray[MUJ_STEPS_HORIZON_LENGTH - 1]);
+    modelTranslator->costDerivatives(dArray[MUJ_STEPS_HORIZON_LENGTH], l_x[MUJ_STEPS_HORIZON_LENGTH], l_xx[MUJ_STEPS_HORIZON_LENGTH], l_u[MUJ_STEPS_HORIZON_LENGTH - 1], l_uu[MUJ_STEPS_HORIZON_LENGTH - 1], MUJ_STEPS_HORIZON_LENGTH - 1, MUJ_STEPS_HORIZON_LENGTH, dArray[MUJ_STEPS_HORIZON_LENGTH-1]);
 
-    l_xx[MUJ_STEPS_HORIZON_LENGTH] = l_xx[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
-    l_x[MUJ_STEPS_HORIZON_LENGTH] = l_x[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
+//    l_xx[MUJ_STEPS_HORIZON_LENGTH] = l_xx[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
+//    l_x[MUJ_STEPS_HORIZON_LENGTH] = l_x[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
 }
 
 void iLQR::getDerivativesStatically(){
@@ -439,11 +430,12 @@ void iLQR::getDerivativesStatically(){
             lastControl = modelTranslator->returnControls(dArray[i - 1]);
         }
 
-        modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, lastControl);
+        modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i - 1]);
     }
 
-    l_x[MUJ_STEPS_HORIZON_LENGTH] = l_x[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
-    l_xx[MUJ_STEPS_HORIZON_LENGTH] = l_xx[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
+    m_ctrl lastControl;
+    lastControl = modelTranslator->returnControls(dArray[MUJ_STEPS_HORIZON_LENGTH - 1]);
+    modelTranslator->costDerivatives(dArray[MUJ_STEPS_HORIZON_LENGTH], l_x[MUJ_STEPS_HORIZON_LENGTH], l_xx[MUJ_STEPS_HORIZON_LENGTH], l_u[MUJ_STEPS_HORIZON_LENGTH - 1], l_uu[MUJ_STEPS_HORIZON_LENGTH - 1], MUJ_STEPS_HORIZON_LENGTH - 1, MUJ_STEPS_HORIZON_LENGTH, dArray[MUJ_STEPS_HORIZON_LENGTH - 1]);
 
     model->opt.iterations = save_iterations;
     model->opt.tolerance = save_tolerance;
@@ -809,13 +801,149 @@ bool iLQR::isMatrixPD(Ref<MatrixXd> matrix){
     return matrixPD;
 }
 
-float iLQR::forwardsPass(float oldCost, bool costReduced){
+float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
     float alpha = 1.0;
     float newCost = 0.0;
     bool costReduction = false;
     int alphaCount = 0;
     float alphaReduc = 0.1;
     int alphaMax = (1 / alphaReduc) - 1;
+    mjData *d_old;
+    d_old = mj_makeData(model);
+
+    while(!costReduction){
+        cpMjData(model, mdata, d_init);
+        cpMjData(model, d_old, mdata);
+        newCost = 0;
+        m_state stateFeedback;
+        m_state _X;
+        m_state X_new;
+        m_ctrl _U;
+
+        for(int t = 0; t < MUJ_STEPS_HORIZON_LENGTH; t++) {
+            // Step 1 - get old state and old control that were linearised around
+            _X = modelTranslator->returnState(dArray[t]);
+            _U = modelTranslator->returnControls(dArray[t]);
+
+            X_new = modelTranslator->returnState(mdata);
+
+            // Calculate difference from new state to old state
+            stateFeedback = X_new - _X;
+
+            m_ctrl feedBackGain = K[t] * stateFeedback;
+
+            // Calculate new optimal controls
+            U_new[t] = _U + (alpha * k[t]) + feedBackGain;
+
+            // Clamp torques within torque limits
+            if (TORQUE_CONTROL) {
+                for (int k = 0; k < NUM_CTRL; k++) {
+                    if (U_new[t](k) > modelTranslator->torqueLims[k]) U_new[t](k) = modelTranslator->torqueLims[k];
+                    if (U_new[t](k) < -modelTranslator->torqueLims[k]) U_new[t](k) = -modelTranslator->torqueLims[k];
+                }
+            }
+
+
+//                cout << "old control: " << endl << U_old[(t * num_mj_steps_per_control) + i] << endl;
+//                cout << "state feedback" << endl << stateFeedback << endl;
+//                cout << "new control: " << endl << U_new[(t * num_mj_steps_per_control) + i] << endl;
+
+            modelTranslator->setControls(mdata, U_new[t], grippersOpen_iLQR[t]);
+
+            float currentCost;
+            if (t == 0) {
+                currentCost = modelTranslator->costFunction(mdata, t, MUJ_STEPS_HORIZON_LENGTH, d_old);
+            } else {
+                currentCost = modelTranslator->costFunction(mdata, t, MUJ_STEPS_HORIZON_LENGTH, d_old);
+            }
+
+            newCost += (currentCost * MUJOCO_DT);
+
+            if (VISUALISE_ROLLOUTS) {
+                if (t % 40 == 0) {
+                    mjrRect viewport = {0, 0, 0, 0};
+                    glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+
+                    // update scene and render
+                    mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+                    mjr_render(viewport, &scn, &con);
+
+                    // swap OpenGL buffers (blocking call due to v-sync)
+                    glfwSwapBuffers(window);
+
+                    // process pending GUI events, call GLFW callbacks
+                    glfwPollEvents();
+                }
+            }
+            cpMjData(model, d_old, mdata);
+            modelTranslator->stepModel(mdata, 1);
+        }
+
+        cout << "cost from alpha: " << alphaCount << ": " << newCost << endl;
+
+        if(newCost < oldCost){
+            costReduction = true;
+            costReduced = true;
+        }
+        else{
+            alpha = alpha - 0.1;
+            alphaCount++;
+            if(alphaCount >= alphaMax){
+                break;
+            }
+        }
+    }
+
+    mj_deleteData(d_old);
+
+    // If the cost was reduced
+    if(newCost < oldCost){
+
+        // Copy initial data to main data
+        cpMjData(model, mdata, d_init);
+
+//        for(int k = 0; k < NUM_CTRL; k++){
+//            mdata->ctrl[k] = U_new[0](k);
+//        }
+        modelTranslator->setControls(mdata, U_new.at(0), grippersOpen_iLQR[0]);
+
+        cpMjData(model, dArray[0], mdata);
+
+        for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+
+            X_final[i] = modelTranslator->returnState(mdata);
+            modelTranslator->setControls(mdata, U_new.at(i), grippersOpen_iLQR[i]);
+            X_old.at(i) = modelTranslator->returnState(mdata);
+
+            modelTranslator->stepModel(mdata, 1);
+            cpMjData(model, dArray[i + 1], mdata);
+        }
+
+        cout << "best alpha was " << alpha << endl;
+        cout << "cost improved in F.P - new cost: " << newCost << endl;
+        m_state termStateBest = modelTranslator->returnState(dArray[MUJ_STEPS_HORIZON_LENGTH]);
+        if(modelTranslator->taskNumber == 2){
+            double cubeXDiff = termStateBest(7) - modelTranslator->X_desired(7);
+            double cubeYDiff = termStateBest(8) - modelTranslator->X_desired(8);
+            cout << "final cube pos, x: " << termStateBest(7) << ", y: " << termStateBest(8) << endl;
+            cout << "final cube pos, x desired: " << modelTranslator->X_desired(7) << ", y: " << modelTranslator->X_desired(8) << endl;
+            cout << "final cube pos, x diff: " << cubeXDiff << ", y: " << cubeYDiff << endl;
+        }
+        return newCost;
+    }
+
+    return oldCost;
+}
+
+float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
+    float alpha = 1.0;
+    float newCost = 0.0;
+    bool costReduction = false;
+    int alphaCount = 0;
+    float alphaReduc = 0.1;
+    int alphaMax = (1 / alphaReduc) - 1;
+    mjData *d_old;
+    d_old = mj_makeData(model);
 
     while(!costReduction){
         cpMjData(model, mdata, d_init);
@@ -869,12 +997,12 @@ float iLQR::forwardsPass(float oldCost, bool costReduced){
                 modelTranslator->setControls(mdata, U_new[(t * num_mj_steps_per_control) + i], grippersOpen_iLQR[(t * num_mj_steps_per_control) + i]);
 
                 float currentCost;
-                if(t == 0){
-                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, U_new[0]);
-                }
-                else{
-                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, U_new[(t * num_mj_steps_per_control) + i - 1]);
-                }
+//                if(t == 0){
+//                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, U_new[0]);
+//                }
+//                else{
+//                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, U_new[(t * num_mj_steps_per_control) + i - 1]);
+//                }
 
                 newCost += (currentCost * MUJOCO_DT);
 
@@ -894,6 +1022,7 @@ float iLQR::forwardsPass(float oldCost, bool costReduced){
                         glfwPollEvents();
                     }
                 }
+                cpMjData(model, d_old, mdata);
                 modelTranslator->stepModel(mdata, 1);
             }
         }
@@ -912,6 +1041,8 @@ float iLQR::forwardsPass(float oldCost, bool costReduced){
             }
         }
     }
+
+    mj_deleteData(d_old);
 
     if(newCost < oldCost){
 
@@ -972,18 +1103,10 @@ bool iLQR::checkForConvergence(float newCost, float oldCost, bool costReduced){
         convergence = true;
         cout << "ilQR converged, num Iterations: " << numIterations << " final cost: " << newCost << endl;
         float linTimeSum = 0.0f;
-        int evalsSum = 0;
-        double varianceSum = 0.0f;
         for(int i = 0; i < numIterations; i++){
             linTimeSum += linTimes[i];
-            if(DYNAMIC_LINEAR_DERIVS){
-                evalsSum += numEvals[i];
-                varianceSum += evalsVariance[i];
-            }
         }
         avgLinTime = linTimeSum / numIterations;
-        avgNumEvals = evalsSum / numIterations;
-        avgVariance = varianceSum / numIterations;
         finalCost = newCost;
         //cubeTermPos(0) = cubeX;
         //cubeTermPos(1) = cubeY;
@@ -1348,12 +1471,10 @@ void iLQR::deleteMujocoData(){
 
 void iLQR::updateNumStepsPerDeriv(int stepPerDeriv){
     num_mj_steps_per_control = stepPerDeriv;
-    ilqr_dt = MUJOCO_DT * num_mj_steps_per_control;
     ilqr_horizon_length = MUJ_STEPS_HORIZON_LENGTH / num_mj_steps_per_control;
     numIterations = 0;
     linTimes.clear();
     numEvals.clear();
-    evalsVariance.clear();
 
 }
 

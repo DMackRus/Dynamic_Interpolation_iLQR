@@ -85,15 +85,41 @@ taskTranslator::taskTranslator(){
 
     armControlCosts = 0;
     double armStateCosts = 0;
-    double armVelCosts = 0.1;
+    double armVelCosts = 0.5;
+    if(OBJECT_PUSHING_TASK){
+        if(TORQUE_CONTROL){
+            jerkVals[0] = 0.0007;
+            jerkVals[1] = 0.0007;
+            jerkVals[2] = 0.0007;
+            jerkVals[3] = 0.0007;
+            jerkVals[4] = 0.0007;
+            jerkVals[5] = 0.0007;
+            jerkVals[6] = 0.0007;
+        }
+        else{
+            jerkVals[0] = 0.5;
+            jerkVals[1] = 1.0;
+            jerkVals[2] = 0.5;
+            jerkVals[3] = 1.0;
+            jerkVals[4] = 0.5;
+            jerkVals[5] = 0.5;
+            jerkVals[6] = 0.5;
+        }
+    }
+    else{
+        for(int i = 0; i < NUM_CTRL; i++){
+            jerkVals[i] = 0.007;
+        }
+    }
+
 
     for(int i = 0; i < NUM_CTRL; i++){
         R.diagonal()[i] = armControlCosts;
         if(TORQUE_CONTROL){
-            J.diagonal()[i] = 0.0007;
+            J.diagonal()[i] = jerkVals[i];
         }
         else{
-            J.diagonal()[i] = 0.02;
+            J.diagonal()[i] = jerkVals[i];
         }
 
         stateIndexToStateName[i] = i;

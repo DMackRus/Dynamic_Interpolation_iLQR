@@ -13,10 +13,18 @@ extern mjrContext con;				    // custom GPU context
 extern GLFWwindow *window;
 
 #ifdef OBJECT_PUSHING
-double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls, m_ctrl lastControl){
+double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls, mjData *d_last){
     double stateCost = 0;
     m_state X = returnState(d);
     m_ctrl U = returnControls(d);
+    m_dof velocities = returnVelocities(d);
+    m_dof velocities_last = returnVelocities(d_last);
+    m_ctrl armVels_now;
+    m_ctrl armVels_last;
+    for(int i = 0; i < NUM_CTRL; i++){
+        armVels_now(i) = velocities(i);
+        armVels_last(i) = velocities_last(i);
+    }
     m_state X_diff;
 
     VectorXd temp(1);
@@ -32,11 +40,15 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
 //        terminalScalar = (terminalConstant * pow(percentageDone, 2)) + 1;
 //    }
 
+    bool terminal = false;
+    if(controlNum == (totalControls - 1)){
+        terminal = true;
+        cout << "terminal" << endl;
+    }
+
     DiagonalMatrix<double, 2 * DOF> Q_scaled;
     for(int i = 0; i < DOF; i++){
-        if(controlNum == (totalControls - 1)){
-            cout << "terminal" << endl;
-            cout << "controlNum: " << controlNum << " - total controls: " << totalControls << endl;
+        if(terminal){
             Q_scaled.diagonal()[i] = TERMINAL_STATE_MULT * Q.diagonal()[i];
         }
         else{
@@ -46,7 +58,10 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
         Q_scaled.diagonal()[i + DOF] = Q.diagonal()[i + DOF];
     }
 
-    temp = ((X_diff.transpose() * Q_scaled * X_diff)) + (U.transpose() * R * U);
+    //m_ctrl controlDiff = U - lastControl;
+    m_ctrl velDiff = armVels_now - armVels_last;
+
+    temp = ((X_diff.transpose() * Q_scaled * X_diff)) + (U.transpose() * R * U) + (velDiff.transpose() * J * velDiff);
 
     stateCost = temp(0);
 
@@ -55,14 +70,23 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
 }
 
 // Given a set of mujoco data, what are its cost derivates with respect to state and control
-void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, m_ctrl lastU){
+void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, mjData *d_last){
     m_state X_diff;
     m_state X;
     m_ctrl U;
     m_ctrl U_diff;
+    m_dof velocities = returnVelocities(d);
+    m_dof velocities_last = returnVelocities(d_last);
+    m_ctrl armVels_now;
+    m_ctrl armVels_last;
+    for(int i = 0; i < NUM_CTRL; i++){
+        armVels_now(i) = velocities(i);
+        armVels_last(i) = velocities_last(i);
+    }
 
     X = returnState(d);
     U = returnControls(d);
+    m_ctrl lastU = returnControls(d_last);
     U_diff = U - lastU;
 
     // actual - desired
@@ -76,11 +100,15 @@ void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_st
 //        terminalScalar = (terminalConstant * pow(percentageDone, 2)) + 1;
 //    }
 
+    bool terminal = false;
+    if(controlNum == (totalControls - 1)){
+        terminal = true;
+        cout << "terminal" << endl;
+    }
+
     DiagonalMatrix<double, 2 * DOF> Q_scaled;
     for(int i = 0; i < DOF; i++){
-        if(controlNum == (totalControls - 1)){
-            cout << "terminal" << endl;
-            cout << "controlNum: " << controlNum << " - total controls: " << totalControls << endl;
+        if(terminal){
             Q_scaled.diagonal()[i] = TERMINAL_STATE_MULT * Q.diagonal()[i];
         }
         else{
@@ -89,11 +117,14 @@ void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_st
         Q_scaled.diagonal()[i + DOF] = Q.diagonal()[i + DOF];
     }
 
+    m_ctrl velDiff = armVels_now - armVels_last;
+
     l_x = 2 *  Q_scaled * X_diff;
     l_xx = 2 * Q_scaled;
 
-    l_u = (2 * R * U) + (2 * J * U_diff);
+    l_u = (2 * R * U) + (2 * J * velDiff);
     l_uu = (2 * R) + (2 * J);
+
 }
 
 // set the state of a mujoco data object as per this model

@@ -76,10 +76,12 @@ public:
     int stateIndexToStateName[DOF];
     int stateIndexToFreeJntIndex[DOF];
 
+    double jerkVals[NUM_CTRL];
+
 #ifdef OBJECT_PUSHING_TASK
     double cubeXPosCost = 1;
     double cubeYPosCost = 1;
-    double cubeVelCosts = 0.8;
+    double cubeVelCosts = 2;
 #endif
 
     // State vector is: 7 joint angles, two cube pos (X and Y), cube rot, 7 joint velocities, two cube velocities (X and Y)
@@ -110,10 +112,10 @@ public:
 
     //double getCost(mjData *d, m_ctrl lastControl, int controlNum, int totalControls, bool firstControl);
     // Given a set of mujoco data, what is the cost of its state and controls
-    double costFunction(mjData *d, int controlNum, int totalControls, m_ctrl lastControl);
+    double costFunction(mjData *d, int controlNum, int totalControls, mjData *d_last);
 
     // Given a set of mujoco data, what are its cost derivates with respect to state and control
-    void costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, m_ctrl lastU);
+    void costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, mjData *d_last);
 //    void costDerivatives_fd(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, m_ctrl U_last,  bool firstControl);
 //    m_ctrl costDerivatives_fd_1stOrder(m_state X, m_ctrl U, m_ctrl U_last, int controlNum, int totalControls, bool firstControl);
     void costDerivsControlsAnalytical(mjData *d, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, m_ctrl lastControl);

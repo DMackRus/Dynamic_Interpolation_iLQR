@@ -34,7 +34,7 @@
 
 #define DQACCDQ_MAX                     250
 
-#define VISUALISE_ROLLOUTS              1
+#define VISUALISE_ROLLOUTS              0
 
 class iLQR
 {
@@ -70,7 +70,6 @@ class iLQR
     int scalingLevelCount = 0;
     int scalingLevel[NUM_SCALING_LEVELS] = {1};
     int num_mj_steps_per_control;
-    float ilqr_dt;
     int ilqr_horizon_length;
 
     float avgLinTime;
@@ -137,7 +136,8 @@ class iLQR
     bool backwardsPass_Vxx_reg();
     bool isMatrixPD(Ref<MatrixXd> matrix);
 
-    float forwardsPass(float oldCost, bool costReduced);
+    float forwardsPassStatic(float oldCost, bool &costReduced);
+    float forwardsPassDynamic(float oldCost, bool &costReduced);
 
     bool checkForConvergence(float newCost, float oldCost, bool costReduced);
 
