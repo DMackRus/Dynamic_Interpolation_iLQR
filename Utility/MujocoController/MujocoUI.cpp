@@ -12,9 +12,11 @@ extern mjvOption opt;			        // visualization options
 extern mjrContext con;				    // custom GPU context
 extern GLFWwindow *window;
 extern MujocoController *globalMujocoController;
-extern iLQR* optimiser;
+//extern iLQR* optimiser;
+taskTranslator* modelTranslator;
 
 std::vector<m_ctrl> initControls;
+std::vector<m_ctrl> finalControls;
 std::vector<bool> grippersOpen;
 mjData* d_init;
 m_point intermediatePoint;
@@ -244,7 +246,14 @@ void render(){
         //  Otherwise add a cpu timer and exit this loop when it is time to render.
         mjtNum simstart = mdata->time;
         while (mdata->time - simstart < 1.0 / 60.0){
-            optimiser->modelTranslator->setControls(mdata, optimiser->returnDesiredControl(controlNum, showFinalControls), false);
+            if(showFinalControls){
+                modelTranslator->setControls(mdata, finalControls[controlNum], false);
+            }
+            else{
+                modelTranslator->setControls(mdata, initControls[controlNum], false);
+            }
+
+
 
             mj_step(model, mdata);
 
@@ -318,9 +327,9 @@ void render_simpleTest(){
         mjtNum simstart = mdata->time;
         while (mdata->time - simstart < 1.0 / 60.0) {
 
-            optimiser->modelTranslator->setControls(mdata, initControls[controlNum], false);
+            modelTranslator->setControls(mdata, initControls[controlNum], false);
 
-            optimiser->modelTranslator->stepModel(mdata, 1);
+            modelTranslator->stepModel(mdata, 1);
 
             controlNum++;
 
@@ -368,10 +377,10 @@ void render_simpleTest(){
 //    cpMjData(model, mdata, d_init);
 //
 //    while (!glfwWindowShouldClose(window)){
-//        //optimiser->modelTranslator->setControls(mdata, initControls[controlNum], false);
+//        //modelTranslator->setControls(mdata, initControls[controlNum], false);
 //        cout << "model timestep " << model->opt.timestep << ": " << initControls[controlNum] <<std::endl;
 //
-//        //optimiser->modelTranslator->stepModel(mdata, 1);
+//        //modelTranslator->stepModel(mdata, 1);
 //        mj_step(model, mdata);
 //
 //        controlNum++;

@@ -88,6 +88,12 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/dave/projects/c++/STOMP/STOMP.cpp">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/STOMP/STOMP.h">
+			<Option target="Mujoco_Acrobot_Control"/>
+		</Unit>
 		<Unit filename="/home/dave/projects/c++/Utility/MujocoController/MujocoController.cpp">
 			<Option target="Mujoco_Acrobot_Control"/>
 		</Unit>

@@ -1,5 +1,6 @@
 #include "Utility/MujocoController/MujocoUI.h"
 #include "iLQR/iLQR_dataCentric.h"
+#include "STOMP/STOMP.h"
 #include "modelTranslator/modelTranslator.h"
 #include "Utility/stdInclude/stdInclude.h"
 
@@ -7,6 +8,7 @@
 
 // Different operating modes for my code
 #define RUN_ILQR                1       // RUN_ILQR - runs a simple iLQR optimisation for given task
+#define RUN_STOMP               0
 #define GENERATE_A_B            0       // GENERATE_A_B - runs initial trajectory and generates and saves A, B matrices over that trajectory for every timestep
 #define ILQR_DATA_COLLECTION    0       // ILQR_DATA_COLLECTION - runs iLQR for many trajectories and saves useful data to csv file
 #define MAKE_TESTING_DATA       0       // MAKE_TESTING_DATA - Creates a set number of valid starting and desired states for a certain task and saves them to a .csv file for later use.
@@ -21,7 +23,8 @@ extern mjModel* model;						// MuJoCo model
 extern mjData* mdata;						// MuJoCo data
 
 extern iLQR* optimiser;
-taskTranslator* modelTranslator;
+extern STOMP* optimiser_stomp;
+extern taskTranslator* modelTranslator;
 
 typedef Matrix<double, (2), 1> m_cube;
 
@@ -62,6 +65,7 @@ std::string matricesFileName = "matrices_A.csv";
 ofstream outputDataCollection;
 
 extern std::vector<m_ctrl> initControls;
+extern std::vector<m_ctrl> finalControls;
 extern std::vector<bool> grippersOpen;
 extern mjData* d_init;
 
@@ -107,7 +111,24 @@ int main() {
         optimiser->resetInitialStates(d_init, X0);
         optimiser->setInitControls(initControls, grippersOpen);
 
-        optimiser->optimise();
+        finalControls = optimiser->optimise();
+
+        render();
+    }
+    else if(RUN_STOMP){
+        // Initialise optimiser
+        optimiser_stomp = new STOMP(model, mdata, modelTranslator);
+
+        X0 = modelTranslator->setupTask(d_init, false, 5);
+        cout << "X desired: " << X_desired << endl;
+
+        initControls.clear();
+        auto iLQRStart = high_resolution_clock::now();
+
+        initControls = modelTranslator->initControls(mdata, d_init, X0);
+
+        optimiser_stomp->initialise(d_init);
+        finalControls = optimiser_stomp->optimise(initControls);
 
         render();
     }
@@ -182,7 +203,7 @@ int main() {
                     optimiser->resetInitialStates(d_init, X0);
                     optimiser->setInitControls(initControls, grippersOpen);
 
-                    optimiser->optimise();
+                    finalControls = optimiser->optimise();
 
                     auto iLQRStop = high_resolution_clock::now();
                     auto iLQRDur = duration_cast<microseconds>(iLQRStop - iLQRStart);
@@ -227,7 +248,7 @@ int main() {
                 optimiser->resetInitialStates(d_init, X0);
                 optimiser->setInitControls(initControls, grippersOpen);
 
-                optimiser->optimise();
+                finalControls = optimiser->optimise();
 
                 auto iLQRStop = high_resolution_clock::now();
                 auto iLQRDur = duration_cast<microseconds>(iLQRStop - iLQRStart);

@@ -64,7 +64,7 @@ iLQR::iLQR(mjModel* m, mjData* d, taskTranslator* _modelTranslator){
 
 }
 
-void iLQR::optimise(){
+std::vector<m_ctrl> iLQR::optimise(){
     bool optimisationFinished = false;
     float newCost = 0;
     float oldCost = 1000;
@@ -183,13 +183,11 @@ void iLQR::optimise(){
         }
     }
 
-    for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
-        finalControls[i] = U_old[i].replicate(1, 1);
-    }
-
     auto optstop = high_resolution_clock::now();
     auto optduration = duration_cast<microseconds>(optstop - optstart);
     cout << "Optimisation took: " << optduration.count()/1000 << " milliseconds" << endl;
+
+    return U_old;
 }
 
 float iLQR::rollOutTrajectory(){
@@ -1426,15 +1424,6 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
     //cout << "A matrix is: " << _A << endl;
 //    cout << " B Mtrix is: " << _B << endl;
 
-}
-
-m_ctrl iLQR::returnDesiredControl(int controlIndex, bool finalControl){
-    if(finalControl){
-        return finalControls[controlIndex];
-    }
-    else{
-        return initControls[controlIndex];
-    }
 }
 
 void iLQR::setInitControls(std::vector<m_ctrl> _initControls, std::vector<bool> _grippersOpen){

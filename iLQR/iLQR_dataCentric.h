@@ -118,7 +118,7 @@ class iLQR
     int numIterations = 0;
     bool trajecCollisionFree = true;
 
-    void optimise();
+    std::vector<m_ctrl> optimise();
     float rollOutTrajectory();
 
     void generateEvaluationWaypoints();
@@ -146,7 +146,6 @@ class iLQR
 
     void lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *linearisedData);
 
-    m_ctrl returnDesiredControl(int controlIndex, bool finalControl);
     void setInitControls(std::vector<m_ctrl> _initControls, std::vector<bool> _gripperOpen);
     void makeDataForOptimisation();
     void deleteMujocoData();

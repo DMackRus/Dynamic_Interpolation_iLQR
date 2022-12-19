@@ -129,6 +129,30 @@ Mujoco_Acrobot_Control/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/build
 .PHONY : Mujoco_Acrobot_Control/fast
 
+STOMP/STOMP.o: STOMP/STOMP.cpp.o
+.PHONY : STOMP/STOMP.o
+
+# target to build an object file
+STOMP/STOMP.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/STOMP/STOMP.cpp.o
+.PHONY : STOMP/STOMP.cpp.o
+
+STOMP/STOMP.i: STOMP/STOMP.cpp.i
+.PHONY : STOMP/STOMP.i
+
+# target to preprocess a source file
+STOMP/STOMP.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/STOMP/STOMP.cpp.i
+.PHONY : STOMP/STOMP.cpp.i
+
+STOMP/STOMP.s: STOMP/STOMP.cpp.s
+.PHONY : STOMP/STOMP.s
+
+# target to generate assembly for a file
+STOMP/STOMP.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/STOMP/STOMP.cpp.s
+.PHONY : STOMP/STOMP.cpp.s
+
 Utility/MujocoController/MujocoController.o: Utility/MujocoController/MujocoController.cpp.o
 .PHONY : Utility/MujocoController/MujocoController.o
 
@@ -378,6 +402,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Mujoco_Acrobot_Control"
+	@echo "... STOMP/STOMP.o"
+	@echo "... STOMP/STOMP.i"
+	@echo "... STOMP/STOMP.s"
 	@echo "... Utility/MujocoController/MujocoController.o"
 	@echo "... Utility/MujocoController/MujocoController.i"
 	@echo "... Utility/MujocoController/MujocoController.s"

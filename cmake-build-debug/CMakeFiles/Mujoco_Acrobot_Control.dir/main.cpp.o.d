@@ -411,5 +411,10 @@ CMakeFiles/Mujoco_Acrobot_Control.dir/main.cpp.o: \
  /home/dave/projects/c++/iLQR/../modelTranslator/../Utility/stdInclude/stdInclude.h \
  /home/dave/projects/c++/iLQR/../modelTranslator/../Utility/MujocoController/MujocoController.h \
  /home/dave/projects/c++/iLQR/../Utility/MujocoController/MujocoUI.h \
+ /home/dave/projects/c++/STOMP/STOMP.h \
+ /home/dave/projects/c++/STOMP/../Utility/stdInclude/stdInclude.h \
+ /home/dave/projects/c++/STOMP/../modelTranslator/modelTranslator.h \
+ /home/dave/projects/c++/STOMP/../Utility/MujocoController/MujocoUI.h \
+ /usr/include/c++/11/iterator /usr/include/c++/11/bits/stream_iterator.h \
  /home/dave/projects/c++/modelTranslator/modelTranslator.h \
  /home/dave/projects/c++/Utility/stdInclude/stdInclude.h

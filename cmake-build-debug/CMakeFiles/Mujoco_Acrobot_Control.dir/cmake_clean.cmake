@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "/home/dave/projects/c++/Mujoco_Acrobot_Control"
   "/home/dave/projects/c++/Mujoco_Acrobot_Control.pdb"
+  "CMakeFiles/Mujoco_Acrobot_Control.dir/STOMP/STOMP.cpp.o"
+  "CMakeFiles/Mujoco_Acrobot_Control.dir/STOMP/STOMP.cpp.o.d"
   "CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoController.cpp.o"
   "CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoController.cpp.o.d"
   "CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoUI.cpp.o"

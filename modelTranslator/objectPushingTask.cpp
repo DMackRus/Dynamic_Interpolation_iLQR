@@ -43,7 +43,6 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
     bool terminal = false;
     if(controlNum == (totalControls - 1)){
         terminal = true;
-        cout << "terminal" << endl;
     }
 
     DiagonalMatrix<double, 2 * DOF> Q_scaled;
