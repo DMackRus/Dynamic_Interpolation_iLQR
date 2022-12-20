@@ -62,17 +62,31 @@ iLQR::iLQR(mjModel* m, mjData* d, taskTranslator* _modelTranslator){
 
     d_init = mj_makeData(model);
 
+    makeDataForOptimisation();
+
 }
 
-std::vector<m_ctrl> iLQR::optimise(){
+std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations){
+    // Setup Initial variables
     bool optimisationFinished = false;
     float newCost = 0;
     float oldCost = 1000;
+    // time how long it took to compute optimal controls
     auto optstart = high_resolution_clock::now();
+    cpMjData(model, d_init, _d_init);
+    lamda = 10;
+    numIterations = 0;
+    std::vector<bool> tempGripperControls;
+    setInitControls(initControls, tempGripperControls);
+
+
+
 
     oldCost = rollOutTrajectory();
     cout << "initial Trajectory cost: " << oldCost << endl;
     cout << "---------------------------------------------------- " << endl;
+
+
 
     // iterate until optimisation finished, convergence or if lamda > maxLamda
     for(int i = 0; i < maxIterations; i++){
@@ -214,20 +228,12 @@ float iLQR::rollOutTrajectory(){
         modelTranslator->stepModel(mdata, 1);
         X_old[i + 1] = modelTranslator->returnState(mdata);
 
-        cpMjData(model, dArray[dArrayCounter], mdata);
-        dArrayCounter++;
-
-//        stepsCounter--;
-//        if(stepsCounter == 0){
-//            cpMjData(model, dArray[dArrayCounter], mdata);
-//            //mj_forward(model, dArray[dArrayCounter]);
-//            dArrayCounter++;
-//            stepsCounter = num_mj_steps_per_control;
-//        }
+        cpMjData(model, dArray[i+1], mdata);
+//        dArrayCounter++;
 
     }
 
-    m_state termState = modelTranslator->returnState(dArray[ilqr_horizon_length]);
+    m_state termState = modelTranslator->returnState(mdata);
     if(modelTranslator->taskNumber == 2){
         double cubeXDiff = termState(7) - modelTranslator->X_desired(7);
         double cubeYDiff = termState(8) - modelTranslator->X_desired(8);
@@ -877,7 +883,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
             modelTranslator->stepModel(mdata, 1);
         }
 
-        cout << "cost from alpha: " << alphaCount << ": " << newCost << endl;
+//        cout << "cost from alpha: " << alphaCount << ": " << newCost << endl;
 
         if(newCost < oldCost){
             costReduction = true;
@@ -983,10 +989,13 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
                 }
 
                 // Clamp torques within torque limits
-                for(int k = 0; k < NUM_CTRL; k++){
-                    if(U_new[(t * num_mj_steps_per_control) + i](k) > modelTranslator->torqueLims[k]) U_new[(t * num_mj_steps_per_control) + i](k) = modelTranslator->torqueLims[k];
-                    if(U_new[(t * num_mj_steps_per_control) + i](k) < -modelTranslator->torqueLims[k]) U_new[(t * num_mj_steps_per_control) + i](k) = -modelTranslator->torqueLims[k];
+                if(TORQUE_CONTROL){
+                    for(int k = 0; k < NUM_CTRL; k++){
+                        if(U_new[(t * num_mj_steps_per_control) + i](k) > modelTranslator->torqueLims[k]) U_new[(t * num_mj_steps_per_control) + i](k) = modelTranslator->torqueLims[k];
+                        if(U_new[(t * num_mj_steps_per_control) + i](k) < -modelTranslator->torqueLims[k]) U_new[(t * num_mj_steps_per_control) + i](k) = -modelTranslator->torqueLims[k];
+                    }
                 }
+
 
 //                cout << "old control: " << endl << U_old[(t * num_mj_steps_per_control) + i] << endl;
 //                cout << "state feedback" << endl << stateFeedback << endl;
@@ -995,12 +1004,12 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
                 modelTranslator->setControls(mdata, U_new[(t * num_mj_steps_per_control) + i], grippersOpen_iLQR[(t * num_mj_steps_per_control) + i]);
 
                 float currentCost;
-//                if(t == 0){
-//                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, U_new[0]);
-//                }
-//                else{
-//                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, U_new[(t * num_mj_steps_per_control) + i - 1]);
-//                }
+                if(t == 0){
+                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, d_old);
+                }
+                else{
+                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, d_old);
+                }
 
                 newCost += (currentCost * MUJOCO_DT);
 
@@ -1120,41 +1129,6 @@ bool iLQR::checkForConvergence(float newCost, float oldCost, bool costReduced){
 
     return convergence;
 }
-
-//bool iLQR::updateScaling(){
-//    bool algorithmFinished = false;
-//    scalingLevelCount++;
-//
-//    if(scalingLevelCount < NUM_SCALING_LEVELS){
-//        num_mj_steps_per_control = scalingLevel[scalingLevelCount];
-//        ilqr_dt = MUJOCO_DT * num_mj_steps_per_control;
-//        ilqr_horizon_length = MUJ_STEPS_HORIZON_LENGTH / num_mj_steps_per_control;
-//        updateDataStructures();
-//        cout << "Scaling updated: num steps per linearisation: " << num_mj_steps_per_control << "horizon: " << ilqr_horizon_length <<  endl;
-//    }
-//    else{
-//        algorithmFinished = true;
-//    }
-//
-//    return algorithmFinished;
-//}
-
-//void iLQR::updateDataStructures(){
-//    cpMjData(model, mdata, d_init);
-//    for(int i = 0; i < ilqr_horizon_length; i++){
-////        cout << "index: " << (i * num_mj_steps_per_control) << endl;
-////        cout << "control: " << U_old[(i * num_mj_steps_per_control)] << endl;
-//        modelTranslator->setControls(mdata, U_old[(i * num_mj_steps_per_control)], grippersOpen_iLQR[i]);
-//
-//        cpMjData(model, dArray[i], mdata);
-//
-//        for(int i = 0; i < num_mj_steps_per_control; i++){
-//            modelTranslator->stepModel(mdata, 1);
-//        }
-//    }
-//
-//    cpMjData(model, mdata, d_init);
-//}
 
 void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *linearisedData){
     // Initialise variables
@@ -1448,8 +1422,6 @@ void iLQR::makeDataForOptimisation(){
     dArray[MUJ_STEPS_HORIZON_LENGTH] = mj_makeData(model);
     cpMjData(model, dArray[MUJ_STEPS_HORIZON_LENGTH], mdata);
 
-    // reset mdata back to initial state
-    cpMjData(model, mdata, d_init);
 }
 
 void iLQR::deleteMujocoData(){
@@ -1468,11 +1440,6 @@ void iLQR::updateNumStepsPerDeriv(int stepPerDeriv){
 }
 
 void iLQR::resetInitialStates(mjData *_d_init, m_state _X0){
-    cpMjData(model, d_init, _d_init);
-    X0 = _X0.replicate(1,1);
-    trajecCollisionFree = true;
-    lamda = 10;
-    numIterations = 0;
 
 }
 

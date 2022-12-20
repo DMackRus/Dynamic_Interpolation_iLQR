@@ -16,8 +16,8 @@
 
 // ------ These three methods of interpolation are implemented, ONLY activate 1 at a time, otherwise probably will crash ---------
 #define COPYING_DERIVS          0
-#define LINEAR_INTERP_DERIVS    0
-#define DYNAMIC_LINEAR_DERIVS   1
+#define LINEAR_INTERP_DERIVS    1
+#define DYNAMIC_LINEAR_DERIVS   0
 
 
 // ------- Unimplemented methods of inteprolating derivatives ------
@@ -65,7 +65,6 @@ class iLQR
     float minLamda = 0.00001;           // Minimum lamda
     float lamdaFactor = 10;             // Lamda multiplicative factor
     float epsConverge = 0.02;          // Satisfactory convergence of cost function
-    int maxIterations = 15;
 
     int scalingLevelCount = 0;
     int scalingLevel[NUM_SCALING_LEVELS] = {1};
@@ -118,7 +117,7 @@ class iLQR
     int numIterations = 0;
     bool trajecCollisionFree = true;
 
-    std::vector<m_ctrl> optimise();
+    std::vector<m_ctrl> optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations);
     float rollOutTrajectory();
 
     void generateEvaluationWaypoints();

@@ -88,12 +88,12 @@ int main() {
     modelTranslator = new taskTranslator();
     initMujoco(modelTranslator->taskNumber, 0.004);
     modelTranslator->init(model);
+    initControls.clear();
 
     if(RUN_ILQR){
 
-        // Initialise optimiser
+        // Initialise optimiser - creates all the data objects
         optimiser = new iLQR(model, mdata, modelTranslator);
-        optimiser->makeDataForOptimisation();
 
         // For pushing - screenshots are from trajectory 2.
         // 2 is a good example of decent initilisation + final trajec
@@ -102,16 +102,15 @@ int main() {
         X0 = modelTranslator->setupTask(d_init, false, 5);
         cout << "X desired: " << X_desired << endl;
 
-        initControls.clear();
         auto iLQRStart = high_resolution_clock::now();
 
         optimiser->updateNumStepsPerDeriv(5);
 
         initControls = modelTranslator->initControls(mdata, d_init, X0);
-        optimiser->resetInitialStates(d_init, X0);
-        optimiser->setInitControls(initControls, grippersOpen);
+//        optimiser->resetInitialStates(d_init, X0);
+//        optimiser->setInitControls(initControls, grippersOpen);
 
-        finalControls = optimiser->optimise();
+        finalControls = optimiser->optimise(d_init, initControls, 10);
 
         render();
     }
@@ -203,7 +202,7 @@ int main() {
                     optimiser->resetInitialStates(d_init, X0);
                     optimiser->setInitControls(initControls, grippersOpen);
 
-                    finalControls = optimiser->optimise();
+                    finalControls = optimiser->optimise(d_init, initControls, 10);
 
                     auto iLQRStop = high_resolution_clock::now();
                     auto iLQRDur = duration_cast<microseconds>(iLQRStop - iLQRStart);
@@ -248,7 +247,7 @@ int main() {
                 optimiser->resetInitialStates(d_init, X0);
                 optimiser->setInitControls(initControls, grippersOpen);
 
-                finalControls = optimiser->optimise();
+                finalControls = optimiser->optimise(d_init, initControls, 10);
 
                 auto iLQRStop = high_resolution_clock::now();
                 auto iLQRDur = duration_cast<microseconds>(iLQRStop - iLQRStart);

@@ -17,6 +17,7 @@ taskTranslator* modelTranslator;
 
 std::vector<m_ctrl> initControls;
 std::vector<m_ctrl> finalControls;
+std::vector<m_ctrl> MPCControls;
 std::vector<bool> grippersOpen;
 mjData* d_init;
 m_point intermediatePoint;
