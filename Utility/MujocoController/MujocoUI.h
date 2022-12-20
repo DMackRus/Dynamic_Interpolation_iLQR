@@ -15,6 +15,8 @@ void keyboard(GLFWwindow* window, int key, int scancode, int act, int mods);
 void setupMujocoWorld(int taskNumber, double timestep);
 void render();
 void render_simpleTest();
+void renderMPCAfter();
+void renderOnce(mjData *renderData);
 void initMujoco(int taskNumber, double timestep);
 void updateScreen();
 

@@ -13,7 +13,7 @@ extern GLFWwindow *window;
 
 iLQR::iLQR(mjModel* m, mjData* d, taskTranslator* _modelTranslator){
     numIterations = 0;
-    lamda = 0.00001;
+    lamda = 0.1;
 
     for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
         A.push_back(m_state_state());
@@ -74,24 +74,24 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
     // time how long it took to compute optimal controls
     auto optstart = high_resolution_clock::now();
     cpMjData(model, d_init, _d_init);
-    lamda = 10;
     numIterations = 0;
     std::vector<bool> tempGripperControls;
     setInitControls(initControls, tempGripperControls);
 
-
-
+    auto start = high_resolution_clock::now();
+    auto stop = high_resolution_clock::now();
+    auto linDuration = duration_cast<microseconds>(stop - start);
+    auto bpDuration = duration_cast<microseconds>(stop - start);
 
     oldCost = rollOutTrajectory();
+    cout << "////////////////////////////////////////////////////////////////////////////////////" << endl;
     cout << "initial Trajectory cost: " << oldCost << endl;
     cout << "---------------------------------------------------- " << endl;
-
-
 
     // iterate until optimisation finished, convergence or if lamda > maxLamda
     for(int i = 0; i < maxIterations; i++){
 
-        auto start = high_resolution_clock::now();
+        start = high_resolution_clock::now();
 
         // Linearise the dynamics and save cost values at each state
         // STEP 1 - Linearise dynamics and calculate cost quadratics at every time step
@@ -126,10 +126,9 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
             std::cout << "error, no valid method for calculating intermediate derivatives" << std::endl;
         }
 
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<microseconds>(stop - start);
-        cout << "Linearising model: " << duration.count()/1000 << " milliseconds" << endl;
-        linTimes.push_back(duration.count()/1000);
+        stop = high_resolution_clock::now();
+        linDuration = duration_cast<microseconds>(stop - start);
+        linTimes.push_back(linDuration.count()/1000);
 
         bool validBackPass = false;
         bool lamdaExit = false;
@@ -138,11 +137,10 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
         while(!validBackPass) {
 
             // STEP 2 - Backwards pass to compute optimal linear and feedback gain matrices k and K
-            auto bpStart = high_resolution_clock::now();
+            start = high_resolution_clock::now();
             validBackPass = backwardsPass_Quu_reg();
-            auto bpstop = high_resolution_clock::now();
-            auto bpduration = duration_cast<microseconds>(bpstop - bpStart);
-            cout << "backwards pass: " << bpduration.count()/1000 << " milliseconds" << endl;
+            stop = high_resolution_clock::now();
+            bpDuration = duration_cast<microseconds>(stop - start);
 
 
             if (!validBackPass) {
@@ -163,7 +161,7 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
 
         if(!lamdaExit){
             // STEP 3 - Forwards pass to calculate new optimal controls - with optional alpha backtracking line search
-            auto fdStart = high_resolution_clock::now();
+            start = high_resolution_clock::now();
             bool costReduced = false;
             if(!DYNAMIC_LINEAR_DERIVS){
                 newCost = forwardsPassStatic(oldCost, costReduced);
@@ -172,12 +170,9 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
                 newCost = forwardsPassDynamic(oldCost, costReduced);
             }
 
-            if(costReduced){
-                cout << "cost reduced" << endl;
-            }
-            auto fdstop = high_resolution_clock::now();
-            auto fdduration = duration_cast<microseconds>(fdstop - fdStart);
-            cout << "forward pass: " << fdduration.count()/1000 << " milliseconds" << endl;
+            stop = high_resolution_clock::now();
+            auto fPDuration = duration_cast<microseconds>(stop - start);
+            cout << "Lin: " << linDuration.count()/1000 << " ms," << " BP: " << bpDuration.count()/1000 << " ms," << " FP: " << fPDuration.count()/1000 << " ms" << endl;
             // STEP 4 - Check for convergence
             bool currentStepsConverged = checkForConvergence(newCost, oldCost, costReduced);
             if(currentStepsConverged){
@@ -197,9 +192,21 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
         }
     }
 
+    cout << "-----------------------------------------------------------------------------------" << endl;
+    m_state terminalState = modelTranslator->returnState(mdata);
+    if(modelTranslator->taskNumber == 2){
+        double cubeXDiff = terminalState(7) - modelTranslator->X_desired(7);
+        double cubeYDiff = terminalState(8) - modelTranslator->X_desired(8);
+        cout << "final cube pos, x: " << terminalState(7) << ", y: " << terminalState(8) << endl;
+        cout << "final cube pos, x desired: " << modelTranslator->X_desired(7) << ", y: " << modelTranslator->X_desired(8) << endl;
+        cout << "final cube pos, x diff: " << cubeXDiff << ", y: " << cubeYDiff << endl;
+    }
+
+
     auto optstop = high_resolution_clock::now();
     auto optduration = duration_cast<microseconds>(optstop - optstart);
     cout << "Optimisation took: " << optduration.count()/1000 << " milliseconds" << endl;
+    cout << "////////////////////////////////////////////////////////////////////////////////////" << endl;
 
     return U_old;
 }
@@ -211,8 +218,6 @@ float iLQR::rollOutTrajectory(){
     X_old[0] = modelTranslator->returnState(mdata);
     cpMjData(model, dArray[0], mdata);
     int stepsCounter = num_mj_steps_per_control;
-    int dArrayCounter = 1;
-    cout << "start of rollout" << endl;
 
     for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
         modelTranslator->setControls(mdata, U_old[i], grippersOpen_iLQR[i]);
@@ -229,7 +234,23 @@ float iLQR::rollOutTrajectory(){
         X_old[i + 1] = modelTranslator->returnState(mdata);
 
         cpMjData(model, dArray[i+1], mdata);
-//        dArrayCounter++;
+
+        if (VISUALISE_ROLLOUTS) {
+            if (i % 40 == 0) {
+                mjrRect viewport = {0, 0, 0, 0};
+                glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+
+                // update scene and render
+                mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+                mjr_render(viewport, &scn, &con);
+
+                // swap OpenGL buffers (blocking call due to v-sync)
+                glfwSwapBuffers(window);
+
+                // process pending GUI events, call GLFW callbacks
+                glfwPollEvents();
+            }
+        }
 
     }
 
@@ -414,8 +435,6 @@ void iLQR::getDerivativesStatically(){
     model->opt.iterations = 30;
     model->opt.tolerance = 0;
 
-    auto iLQRStart = high_resolution_clock::now();
-
     // Linearise the dynamics along the trajectory
     #pragma omp parallel for default(none)
     for(int t = 0; t < ilqr_horizon_length; t++){
@@ -455,10 +474,6 @@ void iLQR::getDerivativesStatically(){
 //        m_state test = modelTranslator->returnState(dArray[i]);
 
 //    }
-
-    auto iLQRStop = high_resolution_clock::now();
-    auto iLQRDur = duration_cast<microseconds>(iLQRStop - iLQRStart);
-    cout << "time taken to get derivatives " << iLQRDur.count() / 1000 << endl;
 
 }
 
@@ -863,22 +878,22 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
 
             newCost += (currentCost * MUJOCO_DT);
 
-            if (VISUALISE_ROLLOUTS) {
-                if (t % 40 == 0) {
-                    mjrRect viewport = {0, 0, 0, 0};
-                    glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
-
-                    // update scene and render
-                    mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
-                    mjr_render(viewport, &scn, &con);
-
-                    // swap OpenGL buffers (blocking call due to v-sync)
-                    glfwSwapBuffers(window);
-
-                    // process pending GUI events, call GLFW callbacks
-                    glfwPollEvents();
-                }
-            }
+//            if (VISUALISE_ROLLOUTS) {
+//                if (t % 40 == 0) {
+//                    mjrRect viewport = {0, 0, 0, 0};
+//                    glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+//
+//                    // update scene and render
+//                    mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+//                    mjr_render(viewport, &scn, &con);
+//
+//                    // swap OpenGL buffers (blocking call due to v-sync)
+//                    glfwSwapBuffers(window);
+//
+//                    // process pending GUI events, call GLFW callbacks
+//                    glfwPollEvents();
+//                }
+//            }
             cpMjData(model, d_old, mdata);
             modelTranslator->stepModel(mdata, 1);
         }
@@ -1005,10 +1020,10 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
 
                 float currentCost;
                 if(t == 0){
-                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, d_old);
+                    currentCost = modelTranslator->costFunction(mdata, (t * num_mj_steps_per_control) + i, MUJ_STEPS_HORIZON_LENGTH, d_old);
                 }
                 else{
-                    currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, d_old);
+                    currentCost = modelTranslator->costFunction(mdata, (t * num_mj_steps_per_control) + i, MUJ_STEPS_HORIZON_LENGTH, d_old);
                 }
 
                 newCost += (currentCost * MUJOCO_DT);
@@ -1034,7 +1049,7 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
             }
         }
 
-        cout << "cost from alpha: " << alphaCount << ": " << newCost << endl;
+//        cout << "cost from alpha: " << alphaCount << ": " << newCost << endl;
 
         if(newCost < oldCost){
             costReduction = true;
@@ -1074,16 +1089,28 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
 
         cpMjData(model, dArray[ilqr_horizon_length], mdata);
 
-        cout << "best alpha was " << alpha << endl;
-        cout << "cost improved in F.P - new cost: " << newCost << endl;
+        m_state terminalState = modelTranslator->returnState(mdata);
+        if(modelTranslator->taskNumber == 2){
+            double cubeXDiff = terminalState(7) - modelTranslator->X_desired(7);
+            double cubeYDiff = terminalState(8) - modelTranslator->X_desired(8);
+            cout << "final cube pos, x: " << terminalState(7) << ", y: " << terminalState(8) << endl;
+            cout << "final cube pos, x desired: " << modelTranslator->X_desired(7) << ", y: " << modelTranslator->X_desired(8) << endl;
+            cout << "final cube pos, x diff: " << cubeXDiff << ", y: " << cubeYDiff << endl;
+        }
+
+//        cout << "best alpha was " << alpha << endl;
+//        cout << "cost improved in F.P - new cost: " << newCost << endl;
         return newCost;
     }
 
-    //m_state termStateBest = modelTranslator->returnState(mdata);
-    //cout << "terminal state best: " << endl << termStateBest << endl;
-    //cout << "best final control: " << modelTranslator->returnControls(dArray[ilqr_horizon_length - 1]) << endl;
-//    cout << "best cost was " << newCost << endl;
-//    cout << "-------------------- END FORWARDS PASS ------------------------" << endl;
+    m_state terminalState = modelTranslator->returnState(mdata);
+    if(modelTranslator->taskNumber == 2){
+        double cubeXDiff = terminalState(7) - modelTranslator->X_desired(7);
+        double cubeYDiff = terminalState(8) - modelTranslator->X_desired(8);
+        cout << "final cube pos, x: " << terminalState(7) << ", y: " << terminalState(8) << endl;
+        cout << "final cube pos, x desired: " << modelTranslator->X_desired(7) << ", y: " << modelTranslator->X_desired(8) << endl;
+        cout << "final cube pos, x diff: " << cubeXDiff << ", y: " << cubeYDiff << endl;
+    }
 
     return oldCost;
 }
@@ -1092,13 +1119,13 @@ bool iLQR::checkForConvergence(float newCost, float oldCost, bool costReduced){
     bool convergence = false;
     m_state terminalState = modelTranslator->returnState(mdata);
 
-    if(modelTranslator->taskNumber == 2){
-        double cubeXDiff = terminalState(7) - modelTranslator->X_desired(7);
-        double cubeYDiff = terminalState(8) - modelTranslator->X_desired(8);
-        cout << "final cube pos, x: " << terminalState(7) << ", y: " << terminalState(8) << endl;
-        cout << "final cube pos, x desired: " << modelTranslator->X_desired(7) << ", y: " << modelTranslator->X_desired(8) << endl;
-        cout << "final cube pos, x diff: " << cubeXDiff << ", y: " << cubeYDiff << endl;
-    }
+//    if(modelTranslator->taskNumber == 2){
+//        double cubeXDiff = terminalState(7) - modelTranslator->X_desired(7);
+//        double cubeYDiff = terminalState(8) - modelTranslator->X_desired(8);
+//        cout << "final cube pos, x: " << terminalState(7) << ", y: " << terminalState(8) << endl;
+//        cout << "final cube pos, x desired: " << modelTranslator->X_desired(7) << ", y: " << modelTranslator->X_desired(8) << endl;
+//        cout << "final cube pos, x diff: " << cubeXDiff << ", y: " << cubeYDiff << endl;
+//    }
 
     std::cout << "New cost: " << newCost <<  std::endl;
     std::cout << "--------------------------------------------------" <<  std::endl;
@@ -1126,6 +1153,9 @@ bool iLQR::checkForConvergence(float newCost, float oldCost, bool costReduced){
             U_old[i] = U_new[i].replicate(1, 1);
         }
     }
+//    else{
+//        lamda *= lamdaFactor;
+//    }
 
     return convergence;
 }

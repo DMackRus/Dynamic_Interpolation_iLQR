@@ -49,7 +49,7 @@
 #define GRIPPERS_OPEN   0.04
 #define GRIPPERS_CLOSED 0
 
-#define TERMINAL_STATE_MULT     100000
+#define TERMINAL_STATE_MULT     50000
 
 typedef Matrix<double, NUM_CTRL, 1> m_ctrl;
 typedef Matrix<double, DOF, 1> m_dof;
@@ -153,6 +153,15 @@ public:
     m_state setupTask(mjData *d, bool randomTask, int taskRow);
 
     std::vector<m_ctrl> initControls(mjData *d, mjData *d_init, m_state X0);
+
+    // Given a set of mujoco data, is the task completed?
+    bool taskCompleted(mjData *d);
+
+    // Given a set of mujoco data, is the task failed?
+    bool taskFailed(mjData *d);
+
+    // Returns true if the predicted state and real state are too different
+    bool predictiveStateMismatch(mjData *d, m_state predictedState);
 
 };
 

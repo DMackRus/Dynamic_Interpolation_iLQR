@@ -7,8 +7,9 @@
 #include "mujoco.h"
 
 // Different operating modes for my code
-#define RUN_ILQR                1       // RUN_ILQR - runs a simple iLQR optimisation for given task
-#define RUN_STOMP               0
+#define RUN_ILQR                0       // RUN_ILQR - runs a simple iLQR optimisation for given task and renders on repeat
+#define RUN_STOMP               0       // RUN_STOMP - runs a simple stomp optimiser for given task and renders on repeat
+#define MPC_TESTING             1       // MPC_TESTING - Runs an MPC controller to achieve desired task and renders controls live
 #define GENERATE_A_B            0       // GENERATE_A_B - runs initial trajectory and generates and saves A, B matrices over that trajectory for every timestep
 #define ILQR_DATA_COLLECTION    0       // ILQR_DATA_COLLECTION - runs iLQR for many trajectories and saves useful data to csv file
 #define MAKE_TESTING_DATA       0       // MAKE_TESTING_DATA - Creates a set number of valid starting and desired states for a certain task and saves them to a .csv file for later use.
@@ -21,6 +22,8 @@
 extern MujocoController *globalMujocoController;
 extern mjModel* model;						// MuJoCo model
 extern mjData* mdata;						// MuJoCo data
+//mjData *opt_mdata;                          // Optimisation data
+extern mjData* d_initMPC;
 
 extern iLQR* optimiser;
 extern STOMP* optimiser_stomp;
@@ -66,6 +69,7 @@ ofstream outputDataCollection;
 
 extern std::vector<m_ctrl> initControls;
 extern std::vector<m_ctrl> finalControls;
+extern std::vector<m_ctrl> MPCControls;
 extern std::vector<bool> grippersOpen;
 extern mjData* d_init;
 
@@ -88,7 +92,12 @@ int main() {
     modelTranslator = new taskTranslator();
     initMujoco(modelTranslator->taskNumber, 0.004);
     modelTranslator->init(model);
-    initControls.clear();
+    //initControls.clear();
+
+    for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+        initControls.push_back(m_ctrl());
+        finalControls.push_back(m_ctrl());
+    }
 
     if(RUN_ILQR){
 
@@ -99,16 +108,12 @@ int main() {
         // 2 is a good example of decent initilisation + final trajec
         // 3 is a good example of a bad initialisation
         // ----- For reaching ------
-        X0 = modelTranslator->setupTask(d_init, false, 5);
+        X0 = modelTranslator->setupTask(d_init, false, 4);
         cout << "X desired: " << X_desired << endl;
-
-        auto iLQRStart = high_resolution_clock::now();
 
         optimiser->updateNumStepsPerDeriv(5);
 
         initControls = modelTranslator->initControls(mdata, d_init, X0);
-//        optimiser->resetInitialStates(d_init, X0);
-//        optimiser->setInitControls(initControls, grippersOpen);
 
         finalControls = optimiser->optimise(d_init, initControls, 10);
 
@@ -121,15 +126,80 @@ int main() {
         X0 = modelTranslator->setupTask(d_init, false, 5);
         cout << "X desired: " << X_desired << endl;
 
-        initControls.clear();
-        auto iLQRStart = high_resolution_clock::now();
-
         initControls = modelTranslator->initControls(mdata, d_init, X0);
 
         optimiser_stomp->initialise(d_init);
         finalControls = optimiser_stomp->optimise(initControls);
 
         render();
+    }
+    else if(MPC_TESTING){
+
+        // Initialise optimiser - creates all the data objects
+        optimiser = new iLQR(model, mdata, modelTranslator);
+        X0 = modelTranslator->setupTask(d_init, false, 5);
+        cout << "X desired: " << X_desired << endl;
+        optimiser->updateNumStepsPerDeriv(5);
+        initControls = modelTranslator->initControls(mdata, d_init, X0);
+        finalControls = optimiser->optimise(d_init, initControls, 2);
+        bool taskComplete = false;
+        int currentControlCounter = 0;
+        int visualCounter = 0;
+
+        cpMjData(model, mdata, d_init);
+        cpMjData(model, d_initMPC, d_init);
+
+        auto MPCStart = high_resolution_clock::now();
+
+        while(!taskComplete){
+
+            m_ctrl nextControl = finalControls.at(0);
+            // Delete control we have applied
+            finalControls.erase(finalControls.begin());
+            // add control to back - replicate last control for now
+            finalControls.push_back(finalControls.at(finalControls.size() - 1));
+
+            // Store applied control in a std::vector for replayability
+            MPCControls.push_back(nextControl);
+            modelTranslator->setControls(mdata, nextControl, false);
+            modelTranslator->stepModel(mdata, 1);
+            currentControlCounter++;
+
+            // check if problem is solved?
+            if(modelTranslator->taskCompleted(mdata)){
+                cout << "task completed" << endl;
+                taskComplete = true;
+            }
+
+            // State we predicted we would be at at this point. TODO - always true at the moment as no noise in system
+            m_state predictedState = modelTranslator->returnState(mdata);
+            //Check states mismatched
+            bool replanNeeded = false;
+            if(modelTranslator->predictiveStateMismatch(mdata, predictedState)){
+                replanNeeded = true;
+            }
+
+            if(currentControlCounter > 500){
+                replanNeeded = true;
+                currentControlCounter = 0;
+                cpMjData(model, d_init, mdata);
+                finalControls = optimiser->optimise(d_init, finalControls, 2);
+
+            }
+
+            visualCounter++;
+            if(visualCounter >= 20){
+                renderOnce(mdata);
+                visualCounter = 0;
+            }
+        }
+
+        auto MPCStop = high_resolution_clock::now();
+        auto MPCDuration = duration_cast<microseconds>(MPCStop - MPCStart);
+        float trajecTime = MPCControls.size() * MUJOCO_DT;
+        cout << "duration of MPC was: " << MPCDuration.count()/1000 << " ms. Trajec length of " << trajecTime << " s" << endl;
+
+        renderMPCAfter();
     }
     else if(GENERATE_A_B){
         optimiser = new iLQR(model, mdata, modelTranslator);

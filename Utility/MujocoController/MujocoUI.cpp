@@ -12,7 +12,6 @@ extern mjvOption opt;			        // visualization options
 extern mjrContext con;				    // custom GPU context
 extern GLFWwindow *window;
 extern MujocoController *globalMujocoController;
-//extern iLQR* optimiser;
 taskTranslator* modelTranslator;
 
 std::vector<m_ctrl> initControls;
@@ -20,6 +19,7 @@ std::vector<m_ctrl> finalControls;
 std::vector<m_ctrl> MPCControls;
 std::vector<bool> grippersOpen;
 mjData* d_init;
+mjData* d_initMPC;
 m_point intermediatePoint;
 
 bool button_left = false;
@@ -28,14 +28,19 @@ bool button_right = false;
 double lastx = 0;
 double lasty = 0;
 
+bool MPCReplay = false;
+int MPCControlCounter = 0;
+
 // keyboard callback
 void keyboard(GLFWwindow* window, int key, int scancode, int act, int mods){
     // backspace: reset simulation
-//    if (act == GLFW_PRESS && key == GLFW_KEY_BACKSPACE)
-//    {
-//        mj_resetData(model, mdata);
-//        mj_forward(model, mdata);
-//    }
+    if (act == GLFW_PRESS && key == GLFW_KEY_BACKSPACE)
+    {
+        cout << "reset MPC sim" << endl;
+        cpMjData(model, mdata, d_initMPC);
+        MPCReplay = true;
+        MPCControlCounter = 0;
+    }
 //
 //    float ctrlChange = 0.02;
 //    if(key == 265 && act == GLFW_PRESS ){
@@ -187,6 +192,7 @@ void setupMujocoWorld(int taskNumber, double timestep){
     // make data corresponding to model
     mdata = mj_makeData(model);         //mdata - main data, used for computaitons and displaying final trajectory
     d_init = mj_makeData(model);        //d_init saves the initial state of the starting data for a task
+    d_initMPC = mj_makeData(model);
 
     // init GLFW, create window, make OpenGL context current, request v-sync
     // init GLFW
@@ -370,6 +376,88 @@ void render_simpleTest(){
         glfwPollEvents();
     }
 }
+
+void renderMPCAfter(){
+    // TODO - want some logic in here that when a callback keyboard is pressed, it resets simulation to
+    // start and replays the list of stored MPC controls
+
+    while (!glfwWindowShouldClose(window)){
+        if(MPCReplay){
+            mjtNum simstart = mdata->time;
+            while (mdata->time - simstart < 1.0 / 60.0) {
+
+
+                modelTranslator->setControls(mdata, MPCControls[MPCControlCounter], false);
+
+                modelTranslator->stepModel(mdata, 1);
+
+                MPCControlCounter++;
+
+                if (MPCControlCounter > MPCControls.size()) {
+                    MPCReplay = false;
+                }
+            }
+            mjrRect viewport = { 0, 0, 0, 0 };
+            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+
+            // update scene and render
+            mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+            mjr_render(viewport, &scn, &con);
+
+            mjrRect rect{0, 0, 100, 100};
+            mjr_rectangle(rect, 0, 0, 0, 0);
+
+            mjr_overlay(0, mjGRID_TOPLEFT, rect, "MPC Replay", 0, &con);
+
+            // swap OpenGL buffers (blocking call due to v-sync)
+            glfwSwapBuffers(window);
+
+            // process pending GUI events, call GLFW callbacks
+            glfwPollEvents();
+        }
+        else{
+            mjrRect viewport = { 0, 0, 0, 0 };
+            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+
+            // update scene and render
+            mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+            mjr_render(viewport, &scn, &con);
+
+            mjrRect rect{0, 0, 100, 100};
+            mjr_rectangle(rect, 0, 0, 0, 0);
+
+            mjr_overlay(0, mjGRID_TOPLEFT, rect, "MPC Replay", 0, &con);
+
+            // swap OpenGL buffers (blocking call due to v-sync)
+            glfwSwapBuffers(window);
+
+            // process pending GUI events, call GLFW callbacks
+            glfwPollEvents();
+        }
+    }
+}
+
+void renderOnce(mjData *renderData){
+    // get framebuffer viewport
+    mjrRect viewport = { 0, 0, 0, 0 };
+    glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+
+    // update scene and render
+    mjv_updateScene(model, renderData, &opt, NULL, &cam, mjCAT_ALL, &scn);
+    mjr_render(viewport, &scn, &con);
+
+    mjrRect rect{0, 0, 100, 100};
+    mjr_rectangle(rect, 0, 0, 0, 0);
+
+    mjr_overlay(0, mjGRID_TOPLEFT, rect, "MPC Live", 0, &con);
+
+    // swap OpenGL buffers (blocking call due to v-sync)
+    glfwSwapBuffers(window);
+
+    // process pending GUI events, call GLFW callbacks
+    glfwPollEvents();
+}
+
 
 //void render_simpleTest(){
 //

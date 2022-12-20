@@ -43,6 +43,7 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
     bool terminal = false;
     if(controlNum == (totalControls - 1)){
         terminal = true;
+        //cout << "terminal" << endl;
     }
 
     DiagonalMatrix<double, 2 * DOF> Q_scaled;
@@ -102,7 +103,6 @@ void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_st
     bool terminal = false;
     if(controlNum == (totalControls - 1)){
         terminal = true;
-        cout << "terminal" << endl;
     }
 
     DiagonalMatrix<double, 2 * DOF> Q_scaled;
@@ -404,7 +404,7 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     initPath[0](1) = startPose(1);
     initPath[0](2) = startPose(2);
 
-    int splitIndex = 500;
+    int splitIndex = (MUJ_STEPS_HORIZON_LENGTH) / 6.0f;
 
     for (int i = 0; i < 1000; i++) {
         initPath[i + 1](0) = initPath[i](0) + (x_diff / splitIndex);
@@ -433,7 +433,7 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
 
     cout << "start state" << desiredControls << endl;
 
-    for (int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++) {
+    for (int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++) {
 
         m_pose currentEEPose = globalMujocoController->returnBodyPose(model, d, EE_id);
         m_quat currentQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
@@ -495,7 +495,52 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
 
     }
 
+    cout << "init controls size: " << initControls.size() << endl;
+    cout << "fisr control " << initControls[0] << endl;
+    cout << "last control " << initControls[MUJ_STEPS_HORIZON_LENGTH] << endl;
     return initControls;
+}
+
+bool taskTranslator::taskCompleted(mjData *d){
+    bool taskComplete = false;
+
+    m_state currentState = returnState(d);
+
+    // for the pushing task, the task is complete if the object is within a certain range of the destination
+    float diffX = X_desired(7) - currentState(7);
+    float diffY = X_desired(8) - currentState(8);
+    float dist = sqrt(pow(diffX, 2) + pow(diffY, 2));
+
+    // if object distance to goal is below some threshold, then task complete
+    if(dist < 0.05){
+        taskComplete = true;
+    }
+
+    return taskComplete;
+}
+
+bool taskTranslator::taskFailed(mjData *d){
+    bool taskFailed = false;
+
+    return taskFailed;
+}
+
+bool taskTranslator::predictiveStateMismatch(mjData *d, m_state predictedState){
+    bool stateMismatch = false;
+
+    double cumError = 0.0f;
+    m_state actualState = returnState(d);
+
+    for(int i = 0; i < DOF; i++){
+        cumError += abs(actualState(i) - predictedState(i));
+    }
+
+    // if cumulative error is greater than some threshold
+    if(cumError > 0.1){
+        stateMismatch = true;
+    }
+
+    return stateMismatch;
 }
 
 #endif

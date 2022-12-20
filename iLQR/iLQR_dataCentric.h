@@ -16,8 +16,8 @@
 
 // ------ These three methods of interpolation are implemented, ONLY activate 1 at a time, otherwise probably will crash ---------
 #define COPYING_DERIVS          0
-#define LINEAR_INTERP_DERIVS    1
-#define DYNAMIC_LINEAR_DERIVS   0
+#define LINEAR_INTERP_DERIVS    0
+#define DYNAMIC_LINEAR_DERIVS   1
 
 
 // ------- Unimplemented methods of inteprolating derivatives ------
