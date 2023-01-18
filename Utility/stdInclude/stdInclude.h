@@ -30,9 +30,9 @@ enum VecPos{
     z
 };
 
-typedef Vector<double, 3> m_point;
-typedef Vector<double, 4> m_quat;
-typedef Vector<double, 6> m_pose;
+typedef Matrix<double, 3, 1> m_point;
+typedef Matrix<double, 4, 1> m_quat;
+typedef Matrix<double, 6, 1> m_pose;
 
 
 #endif //MUJOCO_SANDBOX_STDINCLUDE_H

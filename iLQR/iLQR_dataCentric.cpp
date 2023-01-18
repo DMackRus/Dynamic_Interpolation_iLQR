@@ -410,13 +410,15 @@ void iLQR::getDerivativesDynamically(){
     for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
         m_ctrl lastControl;
         if(i == 0){
-            lastControl.setZero();
+//            lastControl.setZero();
+            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i]);
         }
         else{
-            lastControl = modelTranslator->returnControls(dArray[i - 1]);
+//            lastControl = modelTranslator->returnControls(dArray[i - 1]);
+            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i-1]);
         }
 
-        modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i-1]);
+//        modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i-1]);
     }
 
     m_ctrl lastControl;
@@ -707,12 +709,12 @@ bool iLQR::backwardsPass_Quu_reg(){
 
         if(Quu_pd_check_counter >= number_steps_between_pd_checks){
             if(!isMatrixPD(Q_uu_reg)){
-                cout << "iteration " << t << endl;
-                cout << "f_x[t - 3] " << f_x[t - 3] << endl;
-                cout << "f_x[t - 2] " << f_x[t - 2] << endl;
-                cout << "f_x[t - 1] " << f_x[t - 1] << endl;
-                cout << "f_x[t] " << f_x[t] << endl;
-                cout << "Q_uu_reg " << Q_uu_reg << endl;
+//                cout << "iteration " << t << endl;
+//                cout << "f_x[t - 3] " << f_x[t - 3] << endl;
+//                cout << "f_x[t - 2] " << f_x[t - 2] << endl;
+//                cout << "f_x[t - 1] " << f_x[t - 1] << endl;
+//                cout << "f_x[t] " << f_x[t] << endl;
+//                cout << "Q_uu_reg " << Q_uu_reg << endl;
                 return false;
             }
             Quu_pd_check_counter = 0;

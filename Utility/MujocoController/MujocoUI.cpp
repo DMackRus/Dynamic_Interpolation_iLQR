@@ -171,8 +171,8 @@ void setupMujocoWorld(int taskNumber, double timestep){
     }
     // Franka arm plus a cylinder to push along ground
     else if(taskNumber == 2){
-        model = mj_loadXML("franka_emika/object_pushing.xml", NULL, error, 1000);
-        //model = mj_loadXML("franka_emika/franka_emika_panda/pushing_scene.xml", NULL, error, 1000);
+        //model = mj_loadXML("franka_emika/object_pushing.xml", NULL, error, 1000);
+        model = mj_loadXML("/home/davidrussell/catkin_ws/src/realRobotExperiments_TrajOpt/Dynamic_Interpolation_iLQR/franka_emika/object_pushing.xml", NULL, error, 1000);
     }
     // Franka arm reaches through mild clutter to goal object
     else if(taskNumber == 3){
@@ -228,6 +228,8 @@ void setupMujocoWorld(int taskNumber, double timestep){
     glfwSetMouseButtonCallback(window, mouse_button);
     glfwSetScrollCallback(window, scroll);
     glfwSetWindowCloseCallback(window, windowCloseCallback);
+
+    cout << "after callbacks setup \n";
 
 }
 
@@ -315,15 +317,14 @@ void render_simpleTest(){
     m_state currentState;
     int controlNum = 0;
     cpMjData(model, mdata, d_init);
-//    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
-//    cout << "visual goal id: " << visualGoalId << endl;
-//
-//    m_pose interPose;
-//    interPose.setZero();
-//    interPose(0) = intermediatePoint(0);
-//    interPose(1) = intermediatePoint(1);
-//
-//    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
+
+    m_pose interPose;
+    interPose.setZero();
+    interPose(0) = intermediatePoint(0);
+    interPose(1) = intermediatePoint(1);
+
+    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
 
     while (!glfwWindowShouldClose(window))
     {

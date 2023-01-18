@@ -151,6 +151,7 @@ public:
     m_point returnEE_point(mjData *d);
 
     m_state setupTask(mjData *d, bool randomTask, int taskRow);
+    void setX_Desired(m_state _X_desired, mjData *d);
 
     std::vector<m_ctrl> initControls(mjData *d, mjData *d_init, m_state X0);
 

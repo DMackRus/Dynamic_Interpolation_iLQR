@@ -122,7 +122,9 @@ void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_st
     l_xx = 2 * Q_scaled;
 
     l_u = (2 * R * U) + (2 * J * velDiff);
-    l_uu = (2 * R) + (2 * J);
+    for(int i = 0; i < NUM_CTRL; i++){
+        l_uu(i, i) = (2 * R.diagonal()[i]) + (2 * J.diagonal()[i]);
+    }
 
 }
 
@@ -314,6 +316,21 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
     return X0;
 }
 
+void taskTranslator::setX_Desired(m_state _X_desired, mjData *d){
+    X_desired = _X_desired.replicate(1, 1);
+
+    if(taskNumber == 2){
+        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_goal");
+
+        m_pose goalPose;
+        goalPose.setZero();
+        goalPose(0) = X_desired(7);
+        goalPose(1) = X_desired(8);
+
+        globalMujocoController->setBodyPose(model, d, visualGoalId, goalPose);
+    }
+}
+
 // Generate initial trajectory
 std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_state X0) {
 
@@ -334,17 +351,20 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     m_quat startQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
 
     // TODO hard coded - get it programmatically? - also made it slightly bigger so trajectory has room to improve
-    float cylinder_radius = 0.04;
+    float cylinder_radius = 0.068;
     float x_cylinder0ffset = cylinder_radius * sin(PI/4);
     float y_cylinder0ffset = cylinder_radius * cos(PI/4);
 
-    float endPointX = X_desired(7) - x_cylinder0ffset;
+    float desired_endPointX = X_desired(7) - x_cylinder0ffset;
+    float desired_endPointY;
+
+    float endPointX;
     float endPointY;
     if(X_desired(8) - startPose(0) > 0){
-        endPointY = X_desired(8) - y_cylinder0ffset;
+        desired_endPointY = X_desired(8) - y_cylinder0ffset;
     }
     else{
-        endPointY = X_desired(8) + y_cylinder0ffset;
+        desired_endPointY = X_desired(8) + y_cylinder0ffset;
     }
 
     float cylinderObjectX = X0(7);
@@ -352,7 +372,7 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     float intermediatePointX;
     float intermediatePointY;
 
-    float angle = atan2(endPointY - cylinderObjectY, endPointX - cylinderObjectX);
+    float angle = atan2(desired_endPointY - cylinderObjectY, desired_endPointX - cylinderObjectX);
 
     if(TORQUE_CONTROL){
         if(endPointY > cylinderObjectY){
@@ -386,8 +406,30 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     intermediatePointY = cylinderObjectY - deltaY;
     intermediatePointX = cylinderObjectX - deltaX;
 
+    // Setting this up so we can visualise where the intermediate point is located
     intermediatePoint(0) = intermediatePointX;
     intermediatePoint(1) = intermediatePointY;
+
+    float maxDistTravelled = 0.05 * ((5.0f/6.0f) * MUJ_STEPS_HORIZON_LENGTH * MUJOCO_DT);
+    cout << "max EE travel dist: " << maxDistTravelled << endl;
+    float desiredDistTravelled = sqrt(pow((desired_endPointX - intermediatePointX),2) + pow((desired_endPointY - intermediatePointY),2));
+    float proportionOfDistTravelled = maxDistTravelled / desiredDistTravelled;
+    cout << "proportion" << proportionOfDistTravelled << endl;
+    if(proportionOfDistTravelled > 1){
+        endPointX = desired_endPointX;
+        endPointY = desired_endPointY;
+    }
+    else{
+        endPointX = intermediatePointX + ((desired_endPointX - intermediatePointX) * proportionOfDistTravelled);
+        endPointY = intermediatePointY + ((desired_endPointY - intermediatePointY) * proportionOfDistTravelled);
+    }
+
+    cout << "desired X: " << desired_endPointX << endl;
+    cout << "desired Y: " << desired_endPointY << endl;
+    cout << "actual X: " << endPointX << endl;
+    cout << "actual Y: " << endPointY << endl;
+    cout << "inter X: " << intermediatePointX << endl;
+    cout << "inter Y: " << intermediatePointY << endl;
 
 //    if(endPointY - cylinderObjectY > 0){
 //        intermediatePointY -= 0.1;
@@ -492,6 +534,21 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
         setControls(d, initControls[i], false);
 
         stepModel(d, 1);
+
+//        if (i % 40 == 0) {
+//            mjrRect viewport = {0, 0, 0, 0};
+//            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+//
+//            // update scene and render
+//            mjv_updateScene(model, d, &opt, NULL, &cam, mjCAT_ALL, &scn);
+//            mjr_render(viewport, &scn, &con);
+//
+//            // swap OpenGL buffers (blocking call due to v-sync)
+//            glfwSwapBuffers(window);
+//
+//            // process pending GUI events, call GLFW callbacks
+//            glfwPollEvents();
+//        }
 
     }
 

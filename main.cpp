@@ -92,7 +92,6 @@ int main() {
     modelTranslator = new taskTranslator();
     initMujoco(modelTranslator->taskNumber, 0.004);
     modelTranslator->init(model);
-    //initControls.clear();
 
     for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
         initControls.push_back(m_ctrl());
