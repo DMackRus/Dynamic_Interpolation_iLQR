@@ -351,7 +351,7 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     m_quat startQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
 
     // TODO hard coded - get it programmatically? - also made it slightly bigger so trajectory has room to improve
-    float cylinder_radius = 0.068;
+    float cylinder_radius = 0.08;
     float x_cylinder0ffset = cylinder_radius * sin(PI/4);
     float y_cylinder0ffset = cylinder_radius * cos(PI/4);
 
@@ -598,6 +598,54 @@ bool taskTranslator::predictiveStateMismatch(mjData *d, m_state predictedState){
     }
 
     return stateMismatch;
+}
+
+// Be careful with the math in this function, kind of changed x and Y around due to mujoco x being forwards from robot perspective
+bool taskTranslator::newControlInitialisationNeeded(mjData *d){
+
+    // Get End effector position
+    const std::string EE_Name = "franka_gripper";
+    const std::string goalName = "goal";
+
+    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+    int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
+
+    m_pose EE_Pose = globalMujocoController->returnBodyPose(model, d, EE_id);
+    // Get object position
+    m_point objectPos;
+    m_state currentState = returnState(d);
+    objectPos(0) = currentState(7);
+    objectPos(1) = currentState(8);
+
+    // calculate angle between goal and EE
+    float angle_goal_EE = atan2(X_desired(7) - EE_Pose(0), X_desired(8) - EE_Pose(1));
+
+    // calculate angle between goal and object
+    float angle_goal_object = atan2(X_desired(7) - objectPos(0), X_desired(8) - objectPos(1));
+
+    float angleDiff;
+    angleDiff = angle_goal_object - angle_goal_EE;
+    cout << "angle diff " << angleDiff << "\n";
+    if(X_desired(8) < objectPos(1)){
+        if(angleDiff > (PI / 10)){
+            return true;
+        }
+    }
+    else{
+        if(angleDiff < -(PI / 10)){
+            return true;
+        }
+    }
+
+    // compare this angle and if greater than some threshold, return true
+
+
+//    if(angleDiff > (PI/8)){
+//        cout << "EE not behind object enough, REINITIALISE CONTROLS \n";
+//        return true;
+//    }
+
+    return false;
 }
 
 #endif

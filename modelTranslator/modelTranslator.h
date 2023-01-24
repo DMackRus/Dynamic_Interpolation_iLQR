@@ -49,7 +49,7 @@
 #define GRIPPERS_OPEN   0.04
 #define GRIPPERS_CLOSED 0
 
-#define TERMINAL_STATE_MULT     50000
+#define TERMINAL_STATE_MULT     10000
 
 typedef Matrix<double, NUM_CTRL, 1> m_ctrl;
 typedef Matrix<double, DOF, 1> m_dof;
@@ -163,6 +163,8 @@ public:
 
     // Returns true if the predicted state and real state are too different
     bool predictiveStateMismatch(mjData *d, m_state predictedState);
+
+    bool newControlInitialisationNeeded(mjData *d);
 
 };
 
