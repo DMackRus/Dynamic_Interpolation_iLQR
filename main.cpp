@@ -75,17 +75,20 @@ extern mjData* d_init;
 
 std::string DataCollecNames[3] = {"Pendulum_Data.csv", "Reaching_Data.csv", "Pushing_Data.csv"};
 
-void saveStates();
-void saveTrajecToCSV();
+
 
 void simpleTest();
+void MPCControl();
 
+
+// --------------------------------------------------------------------------------------------------------
+//                                      Utility writing to files
+// --------------------------------------------------------------------------------------------------------
 void saveMatricesToCSV();
-void saveStatesToCSV();
 void saveDataCollectionToCSV();
 void saveTestingData(int numTestingData, const std::string& name);
-
-void readStartAndGoalFromFile(int requiredRow);
+void saveStates();
+void saveTrajecToCSV();
 
 int main() {
     // Create a new modelTranslator, initialise mujoco and then pass mujoco model to modelTranslator
@@ -133,72 +136,7 @@ int main() {
         render();
     }
     else if(MPC_TESTING){
-
-        // Initialise optimiser - creates all the data objects
-        optimiser = new iLQR(model, mdata, modelTranslator);
-        X0 = modelTranslator->setupTask(d_init, false, 5);
-        cout << "X desired: " << X_desired << endl;
-        optimiser->updateNumStepsPerDeriv(5);
-        initControls = modelTranslator->initControls(mdata, d_init, X0);
-        finalControls = optimiser->optimise(d_init, initControls, 2);
-        bool taskComplete = false;
-        int currentControlCounter = 0;
-        int visualCounter = 0;
-
-        cpMjData(model, mdata, d_init);
-        cpMjData(model, d_initMPC, d_init);
-
-        auto MPCStart = high_resolution_clock::now();
-
-        while(!taskComplete){
-
-            m_ctrl nextControl = finalControls.at(0);
-            // Delete control we have applied
-            finalControls.erase(finalControls.begin());
-            // add control to back - replicate last control for now
-            finalControls.push_back(finalControls.at(finalControls.size() - 1));
-
-            // Store applied control in a std::vector for replayability
-            MPCControls.push_back(nextControl);
-            modelTranslator->setControls(mdata, nextControl, false);
-            modelTranslator->stepModel(mdata, 1);
-            currentControlCounter++;
-
-            // check if problem is solved?
-            if(modelTranslator->taskCompleted(mdata)){
-                cout << "task completed" << endl;
-                taskComplete = true;
-            }
-
-            // State we predicted we would be at at this point. TODO - always true at the moment as no noise in system
-            m_state predictedState = modelTranslator->returnState(mdata);
-            //Check states mismatched
-            bool replanNeeded = false;
-            if(modelTranslator->predictiveStateMismatch(mdata, predictedState)){
-                replanNeeded = true;
-            }
-
-            if(currentControlCounter > 500){
-                replanNeeded = true;
-                currentControlCounter = 0;
-                cpMjData(model, d_init, mdata);
-                finalControls = optimiser->optimise(d_init, finalControls, 2);
-
-            }
-
-            visualCounter++;
-            if(visualCounter >= 20){
-                renderOnce(mdata);
-                visualCounter = 0;
-            }
-        }
-
-        auto MPCStop = high_resolution_clock::now();
-        auto MPCDuration = duration_cast<microseconds>(MPCStop - MPCStart);
-        float trajecTime = MPCControls.size() * MUJOCO_DT;
-        cout << "duration of MPC was: " << MPCDuration.count()/1000 << " ms. Trajec length of " << trajecTime << " s" << endl;
-
-        renderMPCAfter();
+        MPCControl();
     }
     else if(GENERATE_A_B){
         optimiser = new iLQR(model, mdata, modelTranslator);
@@ -373,6 +311,86 @@ int main() {
     return 0;
 }
 
+void MPCControl(){
+    // Initialise optimiser - creates all the data objects
+    optimiser = new iLQR(model, mdata, modelTranslator);
+    X0 = modelTranslator->setupTask(d_init, false, 0);
+    cout << "X desired: " << X_desired << endl;
+    optimiser->updateNumStepsPerDeriv(5);
+    initControls = modelTranslator->initControls(mdata, d_init, X0);
+    finalControls = optimiser->optimise(d_init, initControls, 2);
+    bool taskComplete = false;
+    int currentControlCounter = 0;
+    int visualCounter = 0;
+    int overallTaskCounter = 0;
+
+    cpMjData(model, mdata, d_init);
+    cpMjData(model, d_initMPC, d_init);
+
+    auto MPCStart = high_resolution_clock::now();
+
+    while(!taskComplete){
+
+        m_ctrl nextControl = finalControls.at(0);
+        // Delete control we have applied
+        finalControls.erase(finalControls.begin());
+        // add control to back - replicate last control for now
+        finalControls.push_back(finalControls.at(finalControls.size() - 1));
+
+        // Store applied control in a std::vector for replayability
+        MPCControls.push_back(nextControl);
+        modelTranslator->setControls(mdata, nextControl, false);
+        modelTranslator->stepModel(mdata, 1);
+        currentControlCounter++;
+        overallTaskCounter++;
+
+        // check if problem is solved?
+        if(modelTranslator->taskCompleted(mdata)){
+            cout << "task completed" << endl;
+            taskComplete = true;
+        }
+
+        // timeout of problem solution
+        if(overallTaskCounter > 3000){
+            cout << "task timeout" << endl;
+            taskComplete = true;
+        }
+
+        // State we predicted we would be at at this point. TODO - always true at the moment as no noise in system
+        m_state predictedState = modelTranslator->returnState(mdata);
+        //Check states mismatched
+        bool replanNeeded = false;
+        if(modelTranslator->predictiveStateMismatch(mdata, predictedState)){
+            replanNeeded = true;
+        }
+
+        if(currentControlCounter > 500){
+            replanNeeded = true;
+            currentControlCounter = 0;
+            cpMjData(model, d_init, mdata);
+            finalControls = optimiser->optimise(d_init, finalControls, 2);
+
+        }
+
+        visualCounter++;
+        if(visualCounter >= 20){
+            renderOnce(mdata);
+            visualCounter = 0;
+        }
+    }
+
+    auto MPCStop = high_resolution_clock::now();
+    auto MPCDuration = duration_cast<microseconds>(MPCStop - MPCStart);
+    float trajecTime = MPCControls.size() * MUJOCO_DT;
+    cout << "duration of MPC was: " << MPCDuration.count()/1000 << " ms. Trajec length of " << trajecTime << " s" << endl;
+
+    renderMPCAfter();
+}
+
+void simpleTest(){
+    initControls = modelTranslator->initControls(mdata, d_init, X0);
+}
+
 #ifdef REACHING_CLUTTER
 void initControls(){
     cpMjData(model, mdata, d_init_test);
@@ -492,10 +510,6 @@ void initControls(){
     }
 }
 #endif
-
-void simpleTest(){
-    initControls = modelTranslator->initControls(mdata, d_init, X0);
-}
 
 void saveTrajecToCSV(){
 

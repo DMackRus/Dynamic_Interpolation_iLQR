@@ -71,6 +71,7 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
     bool optimisationFinished = false;
     float newCost = 0;
     float oldCost = 1000;
+    lamda = 0.1;
     // time how long it took to compute optimal controls
     auto optstart = high_resolution_clock::now();
     cpMjData(model, d_init, _d_init);

@@ -19,7 +19,6 @@
 #define LINEAR_INTERP_DERIVS    0
 #define DYNAMIC_LINEAR_DERIVS   1
 
-
 // ------- Unimplemented methods of inteprolating derivatives ------
 #define QUADRATIC_INTERP_DERIVS 0
 #define NN_INTERP_DERIVS        0

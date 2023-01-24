@@ -171,8 +171,8 @@ void setupMujocoWorld(int taskNumber, double timestep){
     }
     // Franka arm plus a cylinder to push along ground
     else if(taskNumber == 2){
-        //model = mj_loadXML("franka_emika/object_pushing.xml", NULL, error, 1000);
-        model = mj_loadXML("/home/davidrussell/catkin_ws/src/realRobotExperiments_TrajOpt/Dynamic_Interpolation_iLQR/franka_emika/object_pushing.xml", NULL, error, 1000);
+        model = mj_loadXML("franka_emika/object_pushing.xml", NULL, error, 1000);
+        //model = mj_loadXML("/home/davidrussell/catkin_ws/src/realRobotExperiments_TrajOpt/Dynamic_Interpolation_iLQR/franka_emika/object_pushing.xml", NULL, error, 1000);
     }
     // Franka arm reaches through mild clutter to goal object
     else if(taskNumber == 3){
