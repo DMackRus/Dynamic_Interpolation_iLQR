@@ -1,4 +1,4 @@
-/snap/clion/218/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/dave/projects/c++ -B /home/dave/projects/c++/cmake-build-debug
+/snap/clion/219/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/dave/projects/c++ -B /home/dave/projects/c++/cmake-build-debug
 -- OPENMP has been found
 -- Eigen library found
 -- GLFW lib found at: /home/dave/projects/c++/mujoco/include/libglfw.so.3

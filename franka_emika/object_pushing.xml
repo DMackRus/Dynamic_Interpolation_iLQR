@@ -16,7 +16,7 @@
         <include file="assets/chain0.xml"/>
         <body pos="0.7 0.02 0.041" name="goal">
             <joint type="free" />
-            <geom type = "cylinder" pos = "0 0 0" size = "0.085 0.08" mass="0.6" rgba = "0 1 0 1" solimp="0.4 0.99 0.01 0.5 2" solref = "0.1 0.8" condim="4" margin = "0.001"/>
+            <geom type = "cylinder" pos = "0 0 0" size = "0.085 0.08" mass="0.74" rgba = "0 1 0 1" solimp="0.4 0.99 0.01 0.5 2" solref = "0.1 0.8" condim="4" margin = "0.001"/>
         </body>
 
         <body pos="1 0 0" name="display_goal">

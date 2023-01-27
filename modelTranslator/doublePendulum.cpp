@@ -11,7 +11,7 @@ extern GLFWwindow *window;
 
 #ifdef DOUBLE_PENDULUM
 // Given a set of mujoco data, what is the cost of its state and controls
-double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls, m_ctrl lastControl, bool firstControl){
+double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls, mjData *d_last){
     double stateCost = 0;
     m_state X = returnState(d);
     m_ctrl U = returnControls(d);
@@ -19,10 +19,29 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
 
     VectorXd temp(1);
 
+    bool terminal = false;
+    if(controlNum == (totalControls - 1)){
+        terminal = true;
+        //cout << "terminal" << endl;
+    }
+
+    DiagonalMatrix<double, 2 * DOF> Q_scaled;
+    for(int i = 0; i < DOF; i++){
+        if(terminal){
+            Q_scaled.diagonal()[i] = TERMINAL_STATE_MULT * Q.diagonal()[i];
+        }
+        else{
+            Q_scaled.diagonal()[i] = Q.diagonal()[i];
+        }
+
+        Q_scaled.diagonal()[i + DOF] = Q.diagonal()[i + DOF];
+
+    }
+
     // actual - desired
     X_diff = X - X_desired;
 
-    temp = ((X_diff.transpose() * Q * X_diff)) + (U.transpose() * R * U);
+    temp = ((X_diff.transpose() * Q_scaled * X_diff)) + (U.transpose() * R * U);
 
     stateCost = temp(0);
 
@@ -31,24 +50,40 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
 }
 
 // Given a set of mujoco data, what are its cost derivates with respect to state and control
-void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, m_ctrl lastU){
+void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_state> l_xx, Ref<m_ctrl> l_u, Ref<m_ctrl_ctrl> l_uu, int controlNum, int totalControls, mjData *d_last){
     m_state X_diff;
     m_state X;
     m_ctrl U;
-    m_ctrl U_diff;
 
     X = returnState(d);
     U = returnControls(d);
-    U_diff = U - lastU;
+
+    bool terminal = false;
+    if(controlNum == (totalControls - 1)){
+        terminal = true;
+        //cout << "terminal" << endl;
+    }
+
+    DiagonalMatrix<double, 2 * DOF> Q_scaled;
+    for(int i = 0; i < DOF; i++){
+        if(terminal){
+            Q_scaled.diagonal()[i] = TERMINAL_STATE_MULT * Q.diagonal()[i];
+        }
+        else{
+            Q_scaled.diagonal()[i] = Q.diagonal()[i];
+        }
+
+        Q_scaled.diagonal()[i + DOF] = Q.diagonal()[i + DOF];
+    }
 
     // actual - desired
     X_diff = X - X_desired;
 
-    l_x = 2 *  Q * X_diff;
-    l_xx = 2 * Q;
+    l_x = 2 *  Q_scaled * X_diff;
+    l_xx = 2 * Q_scaled;
 
-    l_u = (2 * R * U) + (2 * J * U_diff);
-    l_uu = (2 * R) + (2 * J);
+    l_u = (2 * R * U);
+    l_uu = (2 * R);
 }
 
 // set the state of a mujoco data object as per this model
@@ -198,6 +233,48 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
 
     }
     return initControls;
+}
+
+bool taskTranslator::taskCompleted(mjData *d){
+    bool taskComplete = false;
+
+//    m_state currentState = returnState(d);
+//
+//    // for the pushing task, the task is complete if the object is within a certain range of the destination
+//    float diffX = X_desired(0) - currentState(0);
+//    float diffY = X_desired(1) - currentState(1);
+//    float dist = sqrt(pow(diffX, 2) + pow(diffY, 2));
+//
+//    // if object distance to goal is below some threshold, then task complete
+//    if(dist < 0.05){
+//        taskComplete = true;
+//    }
+
+    return taskComplete;
+}
+
+bool taskTranslator::taskFailed(mjData *d){
+    bool taskFailed = false;
+
+    return taskFailed;
+}
+
+bool taskTranslator::predictiveStateMismatch(mjData *d, m_state predictedState){
+    bool stateMismatch = false;
+
+    double cumError = 0.0f;
+    m_state actualState = returnState(d);
+
+    for(int i = 0; i < DOF; i++){
+        cumError += abs(actualState(i) - predictedState(i));
+    }
+
+    // if cumulative error is greater than some threshold
+    if(cumError > 0.1){
+        stateMismatch = true;
+    }
+
+    return stateMismatch;
 }
 
 #endif

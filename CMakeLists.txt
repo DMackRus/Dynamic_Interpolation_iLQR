@@ -43,6 +43,6 @@ add_executable(${PROJECT_NAME} main.cpp
         Utility/MujocoController/MujocoUI.cpp Utility/MujocoController/MujocoUI.h
         Utility/MujocoController/MujocoController.cpp Utility/MujocoController/MujocoController.h
         iLQR/iLQR_dataCentric.cpp iLQR/iLQR_dataCentric.h
-        modelTranslator/modelTranslator.cpp modelTranslator/modelTranslator.h modelTranslator/doublePendulum.cpp modelTranslator/reachingTask.cpp modelTranslator/objectPushingTask.cpp modelTranslator/objectReachingTask.cpp modelTranslator/boxFlickTask.cpp STOMP/STOMP.cpp STOMP/STOMP.h)
+        modelTranslator/modelTranslator.cpp modelTranslator/modelTranslator.h modelTranslator/doublePendulum.cpp modelTranslator/reachingTask.cpp modelTranslator/objectPushingTask.cpp modelTranslator/objectReachingTask.cpp modelTranslator/boxFlickTask.cpp STOMP/STOMP.cpp STOMP/STOMP.h Utility/savingData/saveData.cpp Utility/savingData/saveData.h)
 
 target_link_libraries(${PROJECT_NAME} Eigen3::Eigen ${LIB_MUJOCO} ${GLFW} libGL.so libglew.so GL)

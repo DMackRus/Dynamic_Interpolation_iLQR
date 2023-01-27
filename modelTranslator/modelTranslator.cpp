@@ -16,9 +16,9 @@ taskTranslator::taskTranslator(){
     stateNames[0] = "upper_arm";
     stateNames[1] = "lower_arm";
 
-    armControlCosts = 0.01;
-    double armStateCosts = 2;
-    double armVelCosts = 1;
+    armControlCosts = 0.05;
+    double armStateCosts = 1;
+    double armVelCosts = 0.01;
 
     for(int i = 0; i < NUM_CTRL; i++){
         R.diagonal()[i] = armControlCosts;

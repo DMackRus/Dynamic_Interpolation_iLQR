@@ -9,9 +9,9 @@
 #include "../Utility/stdInclude/stdInclude.h"
 #include "../Utility/MujocoController/MujocoController.h"
 
-//#define DOUBLE_PENDULUM 1
+#define DOUBLE_PENDULUM 1
 //#define REACHING 1
-#define OBJECT_PUSHING 1
+//#define OBJECT_PUSHING 1
 //#define PUSHING_CLUTTER
 
 #define TORQUE_CONTROL 0
@@ -49,7 +49,7 @@
 #define GRIPPERS_OPEN   0.04
 #define GRIPPERS_CLOSED 0
 
-#define TERMINAL_STATE_MULT     10000
+#define TERMINAL_STATE_MULT     1
 
 typedef Matrix<double, NUM_CTRL, 1> m_ctrl;
 typedef Matrix<double, DOF, 1> m_dof;

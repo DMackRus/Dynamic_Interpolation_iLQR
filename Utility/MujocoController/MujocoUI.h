@@ -12,12 +12,12 @@ void mouse_move(GLFWwindow* window, double xpos, double ypos);
 void mouse_button(GLFWwindow* window, int button, int act, int mods);
 void keyboard(GLFWwindow* window, int key, int scancode, int act, int mods);
 
-void setupMujocoWorld(int taskNumber, double timestep);
+void setupMujocoWorld(double timestep, const char *fileName);
 void render();
 void render_simpleTest();
 void renderMPCAfter();
 void renderOnce(mjData *renderData);
-void initMujoco(int taskNumber, double timestep);
+void initMujoco(double timestep, const char *fileName);
 void updateScreen();
 
 #endif //MUJOCO_SANDBOX_MUJOCOUI_H

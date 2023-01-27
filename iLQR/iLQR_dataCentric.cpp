@@ -407,7 +407,7 @@ void iLQR::getDerivativesDynamically(){
     model->opt.iterations = save_iterations;
     model->opt.tolerance = save_tolerance;
 
-    #pragma omp parallel for default(none)
+    //#pragma omp parallel for default(none)
     for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
         m_ctrl lastControl;
         if(i == 0){
@@ -873,11 +873,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
             modelTranslator->setControls(mdata, U_new[t], grippersOpen_iLQR[t]);
 
             float currentCost;
-            if (t == 0) {
-                currentCost = modelTranslator->costFunction(mdata, t, MUJ_STEPS_HORIZON_LENGTH, d_old);
-            } else {
-                currentCost = modelTranslator->costFunction(mdata, t, MUJ_STEPS_HORIZON_LENGTH, d_old);
-            }
+            currentCost = modelTranslator->costFunction(mdata, t, MUJ_STEPS_HORIZON_LENGTH, d_old);
 
             newCost += (currentCost * MUJOCO_DT);
 
@@ -1019,6 +1015,12 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
 //                cout << "state feedback" << endl << stateFeedback << endl;
 //                cout << "new control: " << endl << U_new[(t * num_mj_steps_per_control) + i] << endl;
 
+                if(((t * num_mj_steps_per_control) + i) < 5){
+                    cout << "new U " << (t * num_mj_steps_per_control) + i << ": " << U_new[(t * num_mj_steps_per_control) + i] << endl;
+                }
+
+
+
                 modelTranslator->setControls(mdata, U_new[(t * num_mj_steps_per_control) + i], grippersOpen_iLQR[(t * num_mj_steps_per_control) + i]);
 
                 float currentCost;
@@ -1032,7 +1034,7 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
                 newCost += (currentCost * MUJOCO_DT);
 
                 if(VISUALISE_ROLLOUTS){
-                    if(t % 20 == 0){
+                    if(t % 10 == 0){
                         mjrRect viewport = { 0, 0, 0, 0 };
                         glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
 
@@ -1152,6 +1154,7 @@ bool iLQR::checkForConvergence(float newCost, float oldCost, bool costReduced){
 
     // store new controls
     if(costReduced){
+        cout << "cost was reduced, copying contrls to U_old" << endl;
         for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
             U_old[i] = U_new[i].replicate(1, 1);
         }

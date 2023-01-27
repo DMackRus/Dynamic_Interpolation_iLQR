@@ -157,30 +157,11 @@ void windowCloseCallback(GLFWwindow * /*window*/) {
     mj_deactivate();
 }
 
-void setupMujocoWorld(int taskNumber, double timestep){
+void setupMujocoWorld(double timestep, const char* fileName){
     char error[1000];
 
-    // Acrobot model
-    if(taskNumber == 0){
-        model = mj_loadXML("franka_emika/Acrobot.xml", NULL, error, 1000);
-    }
-    // General franka_emika arm reaching model
-    else if(taskNumber == 1){
-        model = mj_loadXML("franka_emika/reaching.xml", NULL, error, 1000);
-        //model = mj_loadXML("franka_emika/test_reaching.xml", NULL, error, 1000);
-    }
-    // Franka arm plus a cylinder to push along ground
-    else if(taskNumber == 2){
-        model = mj_loadXML("franka_emika/object_pushing.xml", NULL, error, 1000);
-        //model = mj_loadXML("/home/davidrussell/catkin_ws/src/realRobotExperiments_TrajOpt/Dynamic_Interpolation_iLQR/franka_emika/object_pushing.xml", NULL, error, 1000);
-    }
-    // Franka arm reaches through mild clutter to goal object
-    else if(taskNumber == 3){
-        model = mj_loadXML("franka_emika/reaching_through_clutter.xml", NULL, error, 1000);
-    }
-    else{
-        std::cout << "Valid task number not supplied, program, exiting" << std::endl;
-    }
+
+    model = mj_loadXML(fileName, NULL, error, 1000);
 
     model->opt.timestep = timestep;
 
@@ -239,14 +220,18 @@ void render(){
     bool showFinalControls = true;
     m_ctrl nextControl;
     cpMjData(model, mdata, d_init);
-    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 
-    m_pose interPose;
-    interPose.setZero();
-    interPose(0) = intermediatePoint(0);
-    interPose(1) = intermediatePoint(1);
+    if(modelTranslator->taskNumber == 2){
+        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 
-    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+        m_pose interPose;
+        interPose.setZero();
+        interPose(0) = intermediatePoint(0);
+        interPose(1) = intermediatePoint(1);
+
+        globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+    }
+
     while (!glfwWindowShouldClose(window))
     {
         // advance interactive simulation for 1/60 sec
@@ -262,9 +247,7 @@ void render(){
                 modelTranslator->setControls(mdata, initControls[controlNum], false);
             }
 
-
-
-            mj_step(model, mdata);
+            modelTranslator->stepModel(mdata, 1);
 
             controlNum++;
 
@@ -274,14 +257,16 @@ void render(){
                 simstart = mdata->time;
                 showFinalControls = 1 - showFinalControls;
 
-                int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
+                if(modelTranslator->taskNumber == 2) {
+                    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 
-                m_pose interPose;
-                interPose.setZero();
-                interPose(0) = intermediatePoint(0);
-                interPose(1) = intermediatePoint(1);
+                    m_pose interPose;
+                    interPose.setZero();
+                    interPose(0) = intermediatePoint(0);
+                    interPose(1) = intermediatePoint(1);
 
-                globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+                    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+                }
             }
         }
 
@@ -317,14 +302,16 @@ void render_simpleTest(){
     m_state currentState;
     int controlNum = 0;
     cpMjData(model, mdata, d_init);
-    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
+    if(modelTranslator->taskNumber == 2){
+        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 
-    m_pose interPose;
-    interPose.setZero();
-    interPose(0) = intermediatePoint(0);
-    interPose(1) = intermediatePoint(1);
+        m_pose interPose;
+        interPose.setZero();
+        interPose(0) = intermediatePoint(0);
+        interPose(1) = intermediatePoint(1);
 
-    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+        globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+    }
 
     while (!glfwWindowShouldClose(window))
     {
@@ -345,16 +332,17 @@ void render_simpleTest(){
                 controlNum = 0;
                 cpMjData(model, mdata, d_init);
                 simstart = mdata->time;
-                int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
+                if (modelTranslator->taskNumber == 2) {
+                    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 
-                m_pose interPose;
-                interPose.setZero();
-                interPose(0) = intermediatePoint(0);
-                interPose(1) = intermediatePoint(1);
+                    m_pose interPose;
+                    interPose.setZero();
+                    interPose(0) = intermediatePoint(0);
+                    interPose(1) = intermediatePoint(1);
 
-                globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+                    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+                }
             }
-
         }
 
         // get framebuffer viewport
@@ -508,10 +496,10 @@ void updateScreen(){
     glfwSwapBuffers(window);
 }
 
-void initMujoco(int taskNumber, double timestep){
+void initMujoco(double timestep, const char *fileName){
 
-    setupMujocoWorld(taskNumber, timestep);
+    setupMujocoWorld(timestep, fileName);
     globalMujocoController = new MujocoController();
-    updateScreen();
+    //updateScreen();
 
 }

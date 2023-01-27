@@ -33,7 +33,7 @@ public:
 
     mjData *d_Array[ROLLOUTS_PER_ITERATION];
 
-    double noiseProfile[NUM_CTRL] = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
+    double noiseProfile[NUM_CTRL] = {0.01, 0.01};
 
     void initialise(mjData *_d_init);
     std::vector<m_ctrl> optimise(std::vector<m_ctrl> U_init);
