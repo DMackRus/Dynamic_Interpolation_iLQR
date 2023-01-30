@@ -21,7 +21,7 @@ using namespace std;
 using namespace std::chrono;
 
 #define PI 3.141519265
-#define MUJ_STEPS_HORIZON_LENGTH 1200
+#define MUJ_STEPS_HORIZON_LENGTH 3000
 #define MUJOCO_DT 0.004
 
 enum VecPos{

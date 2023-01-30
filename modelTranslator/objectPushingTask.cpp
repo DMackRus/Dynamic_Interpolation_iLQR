@@ -13,6 +13,11 @@ extern mjrContext con;				    // custom GPU context
 extern GLFWwindow *window;
 
 #ifdef OBJECT_PUSHING
+
+void initControls_findMainWaypoints(mjData *d, mjModel *model, m_point desiredObjectEnd, m_point objectStart, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming);
+std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWayPoints, std::vector<int> wayPointsTiming);
+std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model,std::vector<m_point> initPath);
+
 double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls, mjData *d_last){
     double stateCost = 0;
     m_state X = returnState(d);
@@ -337,38 +342,74 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     std::vector<m_ctrl> initControls;
     cpMjData(model, d, d_init);
 
+    std::vector<m_point> mainWayPoints;
+    std::vector<int> wayPoints_timings;
+
+    m_point desiredObjectEnd;
+    desiredObjectEnd(0) = X_desired(7);
+    desiredObjectEnd(1) = X_desired(8);
+    m_point objectStart;
+    objectStart(0) = X0(7);
+    objectStart(1) = X0(8);
+
+    initControls_findMainWaypoints(d, model, desiredObjectEnd, objectStart, mainWayPoints, wayPoints_timings);
+    for(int i = 0; i < mainWayPoints.size(); i++){
+        cout << "main waypoint " << i << ": " << mainWayPoints[i] << endl;
+        cout << "timing " << wayPoints_timings[i] << endl;
+    }
+    std::vector<m_point> initPath = initControls_createAllWayPoints(mainWayPoints, wayPoints_timings);
+
+    cout << "created initPath, length: " << initPath.size() << endl;
+    cout << "init path points: " << initPath[498] << endl;
+    cout << "init path points: " << initPath[499] << endl;
+    cout << "init path points: " << initPath[500] << endl;
+    cout << "--------------------------------------------" << endl;
+    cout << "init path points: " << initPath[2996] << endl;
+    cout << "init path points: " << initPath[2997] << endl;
+    cout << "init path points: " << initPath[2998] << endl;
+
+    initControls = initControls_generateAllControls(d, model, initPath);
+
+    cout << "created init controls;" << endl;
+
+    return initControls;
+}
+
+void initControls_findMainWaypoints(mjData *d, mjModel *model, m_point desiredObjectEnd, m_point objectStart, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming){
     const std::string EE_Name = "franka_gripper";
     const std::string goalName = "goal";
-    //panda0_leftfinger
-
-//    const std::string EE_Name = "right_finger";
-//    const std::string goalName = "tin";
 
     int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
     int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
 
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
-    m_quat startQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
+
+    m_point mainWayPoint;
+    mainWayPoint(0) = startPose(0);
+    mainWayPoint(1) = startPose(1);
+    mainWayPoint(2) = startPose(2);
+    mainWayPoints.push_back(mainWayPoint);
+    wayPointsTiming.push_back(0);
 
     // TODO hard coded - get it programmatically? - also made it slightly bigger so trajectory has room to improve
     float cylinder_radius = 0.08;
     float x_cylinder0ffset = cylinder_radius * sin(PI/4);
     float y_cylinder0ffset = cylinder_radius * cos(PI/4);
 
-    float desired_endPointX = X_desired(7) - x_cylinder0ffset;
+    float desired_endPointX = desiredObjectEnd(0) - x_cylinder0ffset;
     float desired_endPointY;
 
     float endPointX;
     float endPointY;
-    if(X_desired(8) - startPose(0) > 0){
-        desired_endPointY = X_desired(8) - y_cylinder0ffset;
+    if(desiredObjectEnd(1) - startPose(0) > 0){
+        desired_endPointY = desiredObjectEnd(1) - y_cylinder0ffset;
     }
     else{
-        desired_endPointY = X_desired(8) + y_cylinder0ffset;
+        desired_endPointY = desiredObjectEnd(1) + y_cylinder0ffset;
     }
 
-    float cylinderObjectX = X0(7);
-    float cylinderObjectY = X0(8);
+    float cylinderObjectX = objectStart(0);
+    float cylinderObjectY = objectStart(1);
     float intermediatePointX;
     float intermediatePointY;
 
@@ -410,6 +451,12 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     intermediatePoint(0) = intermediatePointX;
     intermediatePoint(1) = intermediatePointY;
 
+    mainWayPoint(0) = intermediatePoint(0);
+    mainWayPoint(1) = intermediatePoint(1);
+
+    mainWayPoints.push_back(mainWayPoint);
+    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH / 6.0f);
+
     float maxDistTravelled = 0.05 * ((5.0f/6.0f) * MUJ_STEPS_HORIZON_LENGTH * MUJOCO_DT);
     cout << "max EE travel dist: " << maxDistTravelled << endl;
     float desiredDistTravelled = sqrt(pow((desired_endPointX - intermediatePointX),2) + pow((desired_endPointY - intermediatePointY),2));
@@ -431,49 +478,59 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     cout << "inter X: " << intermediatePointX << endl;
     cout << "inter Y: " << intermediatePointY << endl;
 
-//    if(endPointY - cylinderObjectY > 0){
-//        intermediatePointY -= 0.1;
-//    }
-//    else{
-//        intermediatePointY += 0.1;
-//    }
+    mainWayPoint(0) = endPointX;
+    mainWayPoint(1) = endPointY;
 
-    float x_diff = intermediatePointX - startPose(0);
-    float y_diff = intermediatePointY - startPose(1);
+    mainWayPoints.push_back(mainWayPoint);
+    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH - 1 - wayPointsTiming[1]);
 
-    m_point initPath[MUJ_STEPS_HORIZON_LENGTH];
-    initPath[0](0) = startPose(0);
-    initPath[0](1) = startPose(1);
-    initPath[0](2) = startPose(2);
+}
 
-    int splitIndex = (MUJ_STEPS_HORIZON_LENGTH) / 6.0f;
+std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWayPoints, std::vector<int> wayPointsTiming){
+    int numMainWayPoints = mainWayPoints.size();
+    std::vector<m_point> initPath;
 
-    for (int i = 0; i < 1000; i++) {
-        initPath[i + 1](0) = initPath[i](0) + (x_diff / splitIndex);
-        initPath[i + 1](1) = initPath[i](1) + (y_diff / splitIndex);
-        initPath[i + 1](2) = initPath[i](2);
+    initPath.push_back(mainWayPoints[0]);
+    wayPointsTiming[0]--;
+
+    // should only be MUJ_STEPS_HORIZON_LENGTH number of controls
+    int counter = 1;
+    for(int i = 0; i < numMainWayPoints - 1; i++){
+        float x_diff = mainWayPoints[i + 1](0) - mainWayPoints[i](0);
+        float y_diff = mainWayPoints[i + 1](1) - mainWayPoints[i](1);
+        for(int j = 0; j < wayPointsTiming[i + 1]; j++){
+            initPath.push_back(m_point());
+            initPath[counter](0) = initPath[counter - 1](0) + (x_diff / wayPointsTiming[i + 1]);
+            initPath[counter](1) = initPath[counter - 1](1) + (y_diff / wayPointsTiming[i + 1]);
+            initPath[counter](2) = initPath[0](2);
+
+            counter++;
+            if(counter > MUJ_STEPS_HORIZON_LENGTH){
+                cout << "ERROR, TOO MANY POINTS IN INIT PATH" << endl;
+            }
+        }
     }
 
-    x_diff = endPointX - intermediatePointX;
-    y_diff = endPointY - intermediatePointY;
+    return initPath;
+}
 
-    // Deliberately make initial;isation slightly worse so trajectory optimiser can do something
-    for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
-        initPath[i + 1](0) = initPath[i](0) + (x_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
-        initPath[i + 1](1) = initPath[i](1) + (y_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
-        initPath[i + 1](2) = initPath[i](2);
-    }
+std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, std::vector<m_point> initPath){
+    std::vector<m_ctrl> initControls;
+
+    const std::string EE_Name = "franka_gripper";
+    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+    taskTranslator tempModelTranslator;
+    tempModelTranslator.init(model);
+    m_quat startQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
 
     m_ctrl desiredControls;
 
     if(!TORQUE_CONTROL){
-        m_state startState = returnState(d);
+        m_state startState = tempModelTranslator.returnState(d);
         for(int i = 0; i < NUM_CTRL; i++){
             desiredControls(i) = startState(i);
         }
     }
-
-    cout << "start state" << desiredControls << endl;
 
     for (int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++) {
 
@@ -531,9 +588,9 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
             initControls[i](k) = desiredControls(k);
         }
 
-        setControls(d, initControls[i], false);
+        tempModelTranslator.setControls(d, initControls[i], false);
 
-        stepModel(d, 1);
+        tempModelTranslator.stepModel(d, 1);
 
 //        if (i % 40 == 0) {
 //            mjrRect viewport = {0, 0, 0, 0};
@@ -552,9 +609,6 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
 
     }
 
-    cout << "init controls size: " << initControls.size() << endl;
-    cout << "fisr control " << initControls[0] << endl;
-    cout << "last control " << initControls[MUJ_STEPS_HORIZON_LENGTH] << endl;
     return initControls;
 }
 

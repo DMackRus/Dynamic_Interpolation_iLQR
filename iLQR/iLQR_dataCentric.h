@@ -31,6 +31,8 @@
 
 // previous parameters for dynamic linear inteprolation - 5, 50, 0.0001, 0.0005 (minN, maxN, cube sens, joint sens)
 
+#define NUM_ALPHA                       5
+
 #define DQACCDQ_MAX                     250
 
 #define VISUALISE_ROLLOUTS              0
@@ -54,6 +56,9 @@ class iLQR
     mjData* d_init;
     m_state X0;
 
+    mjData *d_alpha[NUM_ALPHA];
+    mjData *d_alpha_last[NUM_ALPHA];
+
     /**************************************************************************
      *
      *  iLQR Parameters
@@ -75,7 +80,6 @@ class iLQR
     double avgVariance;
     float finalCost;
     Matrix<double, 2, 1> cubeTermPos;
-
 
     float initCost;
     std::vector<m_ctrl> initControls;

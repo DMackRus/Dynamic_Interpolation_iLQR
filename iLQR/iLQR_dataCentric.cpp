@@ -70,7 +70,7 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
     // Setup Initial variables
     bool optimisationFinished = false;
     float newCost = 0;
-    float oldCost = 1000;
+    float oldCost;
     lamda = 0.1;
     // time how long it took to compute optimal controls
     auto optstart = high_resolution_clock::now();
@@ -953,6 +953,105 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
     return oldCost;
 }
 
+//float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
+//    float alpha = 1.0;
+//    bool costReduction = false;
+//    mjData *d_old;
+//    d_old = mj_makeData(model);
+//
+//    double newCost[5] = {0.0f};
+//    float alphas[5] = {0.2, 0.4, 0.6, 0.8, 1.0};
+//    std::vector<std::vector<m_ctrl>> U_new_alpha;
+//
+//
+//    #pragma omp parallel for default(none)
+//    for(int i = 0; i < 5; i++){
+//        cpMjData(model, d_alpha[i], d_init);
+//        cpMjData(model, d_alpha_last[i], mdata);
+//        m_state stateFeedback;
+//        m_state _X;
+//        m_state X_new;
+//        m_ctrl _U;
+//
+//        for(int t = 0; t < MUJ_STEPS_HORIZON_LENGTH; t++) {
+//            // Step 1 - get old state and old control that were linearised around
+//            _X = modelTranslator->returnState(dArray[t]);
+//            _U = modelTranslator->returnControls(dArray[t]);
+//
+//            X_new = modelTranslator->returnState(d_alpha[i]);
+//
+//            // Calculate difference from new state to old state
+//            stateFeedback = X_new - _X;
+//
+//            m_ctrl feedBackGain = K[t] * stateFeedback;
+//
+//            // Calculate new optimal controls
+//            U_new[t] = _U + (alphas[i] * k[t]) + feedBackGain;
+//
+//            // Clamp torques within torque limits
+//            if (TORQUE_CONTROL) {
+//                for (int k = 0; k < NUM_CTRL; k++) {
+//                    if (U_new[t](k) > modelTranslator->torqueLims[k]) U_new[t](k) = modelTranslator->torqueLims[k];
+//                    if (U_new[t](k) < -modelTranslator->torqueLims[k]) U_new[t](k) = -modelTranslator->torqueLims[k];
+//                }
+//            }
+//
+//            modelTranslator->setControls(mdata, U_new[t], grippersOpen_iLQR[t]);
+//
+//            float currentCost;
+//            currentCost = modelTranslator->costFunction(mdata, t, MUJ_STEPS_HORIZON_LENGTH, d_alpha_last[i]);
+//
+//            newCost[i] += (currentCost * MUJOCO_DT);
+//
+//            cpMjData(model, d_alpha_last[i], d_alpha[i]);
+//            modelTranslator->stepModel(d_alpha[i], 1);
+//
+//        }
+//    }
+//
+//    for(int i = 0; i < NUM_ALPHA; i++){
+//
+//    }
+//
+//    // If the cost was reduced
+//    if(newCost < oldCost){
+//
+//        // Copy initial data to main data
+//        cpMjData(model, mdata, d_init);
+//
+////        for(int k = 0; k < NUM_CTRL; k++){
+////            mdata->ctrl[k] = U_new[0](k);
+////        }
+//        modelTranslator->setControls(mdata, U_new.at(0), grippersOpen_iLQR[0]);
+//
+//        cpMjData(model, dArray[0], mdata);
+//
+//        for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+//
+//            X_final[i] = modelTranslator->returnState(mdata);
+//            modelTranslator->setControls(mdata, U_new.at(i), grippersOpen_iLQR[i]);
+//            X_old.at(i) = modelTranslator->returnState(mdata);
+//
+//            modelTranslator->stepModel(mdata, 1);
+//            cpMjData(model, dArray[i + 1], mdata);
+//        }
+//
+//        cout << "best alpha was " << alpha << endl;
+//        cout << "cost improved in F.P - new cost: " << newCost << endl;
+//        m_state termStateBest = modelTranslator->returnState(dArray[MUJ_STEPS_HORIZON_LENGTH]);
+//        if(modelTranslator->taskNumber == 2){
+//            double cubeXDiff = termStateBest(7) - modelTranslator->X_desired(7);
+//            double cubeYDiff = termStateBest(8) - modelTranslator->X_desired(8);
+//            cout << "final cube pos, x: " << termStateBest(7) << ", y: " << termStateBest(8) << endl;
+//            cout << "final cube pos, x desired: " << modelTranslator->X_desired(7) << ", y: " << modelTranslator->X_desired(8) << endl;
+//            cout << "final cube pos, x diff: " << cubeXDiff << ", y: " << cubeYDiff << endl;
+//        }
+//        return newCost;
+//    }
+//
+//    return oldCost;
+//}
+
 float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
     float alpha = 1.0;
     float newCost = 0.0;
@@ -1457,6 +1556,11 @@ void iLQR::makeDataForOptimisation(){
     }
     dArray[MUJ_STEPS_HORIZON_LENGTH] = mj_makeData(model);
     cpMjData(model, dArray[MUJ_STEPS_HORIZON_LENGTH], mdata);
+
+    for(int i = 0; i < NUM_ALPHA; i++){
+        d_alpha[i] = mj_makeData(model);
+        d_alpha_last[i] = mj_makeData(model);
+    }
 
 }
 

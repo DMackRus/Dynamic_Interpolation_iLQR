@@ -9,9 +9,9 @@
 #include "../Utility/stdInclude/stdInclude.h"
 #include "../Utility/MujocoController/MujocoController.h"
 
-#define DOUBLE_PENDULUM 1
+//#define DOUBLE_PENDULUM 1
 //#define REACHING 1
-//#define OBJECT_PUSHING 1
+#define OBJECT_PUSHING 1
 //#define PUSHING_CLUTTER
 
 #define TORQUE_CONTROL 0

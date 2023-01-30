@@ -10,7 +10,7 @@
 // Different operating modes for my code
 #define RUN_ILQR                0       // RUN_ILQR - runs a simple iLQR optimisation for given task and renders on repeat
 #define RUN_STOMP               0       // RUN_STOMP - runs a simple stomp optimiser for given task and renders on repeat
-#define MPC_TESTING             1       // MPC_TESTING - Runs an MPC controller to achieve desired task and renders controls live
+#define MPC_TESTING             0       // MPC_TESTING - Runs an MPC controller to achieve desired task and renders controls live
 #define GENERATE_A_B            0       // GENERATE_A_B - runs initial trajectory and generates and saves A, B matrices over that trajectory for every timestep
 #define ILQR_DATA_COLLECTION    0       // ILQR_DATA_COLLECTION - runs iLQR for many trajectories and saves useful data to csv file
 #define MAKE_TESTING_DATA       0       // MAKE_TESTING_DATA - Creates a set number of valid starting and desired states for a certain task and saves them to a .csv file for later use.
@@ -44,7 +44,7 @@ int main() {
     modelTranslator = new taskTranslator();
     dataSaver = new saveData();
     const char *fileName;
-    int taskRow = 2;
+    int taskRow = 1;
 
     // Acrobot model
     if(modelTranslator->taskNumber == 0){
@@ -342,7 +342,7 @@ void MPCControl(int taskRow){
             replanNeeded = true;
             currentControlCounter = 0;
             cpMjData(model, d_init, mdata);
-            finalControls = optimiser->optimise(d_init, finalControls, 6);
+            finalControls = optimiser->optimise(d_init, finalControls, 4);
 
         }
 

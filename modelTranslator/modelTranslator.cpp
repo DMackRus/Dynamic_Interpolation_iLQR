@@ -212,6 +212,7 @@ taskTranslator::taskTranslator(){
     cout << "R: " << R.diagonal() << endl;
     cout << "Q: " << Q.diagonal() << endl;
 
+
 }
 
 void taskTranslator::init(mjModel *m){
