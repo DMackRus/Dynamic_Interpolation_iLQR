@@ -104,6 +104,8 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
             generateEvaluationWaypoints();
             getDerivativesDynamically();
             dynamicLinInterpolateDerivs();
+            cout << "f_x[t] " << f_x[2000] << endl;
+            cout << "l_xx[t] " << l_xx[2000] << endl;
             evaluationWaypoints.clear();
         }
 
@@ -448,15 +450,12 @@ void iLQR::getDerivativesStatically(){
 
     #pragma omp parallel for default(none)
     for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
-        m_ctrl lastControl;
         if(i == 0){
-            lastControl.setZero();
+            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[0]);
         }
         else{
-            lastControl = modelTranslator->returnControls(dArray[i - 1]);
+            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i - 1]);
         }
-
-        modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i - 1]);
     }
 
     m_ctrl lastControl;
@@ -688,8 +687,6 @@ bool iLQR::backwardsPass_Quu_reg(){
 
         Quu_pd_check_counter++;
 
-
-
         Q_u = l_u[t] + (f_u[t].transpose() * V_x);
 
         Q_x = l_x[t] + (f_x[t].transpose() * V_x);
@@ -710,12 +707,12 @@ bool iLQR::backwardsPass_Quu_reg(){
 
         if(Quu_pd_check_counter >= number_steps_between_pd_checks){
             if(!isMatrixPD(Q_uu_reg)){
-//                cout << "iteration " << t << endl;
-//                cout << "f_x[t - 3] " << f_x[t - 3] << endl;
-//                cout << "f_x[t - 2] " << f_x[t - 2] << endl;
-//                cout << "f_x[t - 1] " << f_x[t - 1] << endl;
-//                cout << "f_x[t] " << f_x[t] << endl;
-//                cout << "Q_uu_reg " << Q_uu_reg << endl;
+                cout << "iteration " << t << endl;
+                cout << "f_x[t - 3] " << f_x[t - 3] << endl;
+                cout << "f_x[t - 2] " << f_x[t - 2] << endl;
+                cout << "f_x[t - 1] " << f_x[t - 1] << endl;
+                cout << "f_x[t] " << f_x[t] << endl;
+                cout << "Q_uu_reg " << Q_uu_reg << endl;
                 return false;
             }
             Quu_pd_check_counter = 0;
@@ -866,9 +863,9 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
             }
 
 
-//                cout << "old control: " << endl << U_old[(t * num_mj_steps_per_control) + i] << endl;
-//                cout << "state feedback" << endl << stateFeedback << endl;
-//                cout << "new control: " << endl << U_new[(t * num_mj_steps_per_control) + i] << endl;
+//            cout << "old control: " << endl << U_old[t] << endl;
+////            cout << "state feedback" << endl << stateFeedback << endl;
+//            cout << "new control: " << endl << U_new[t] << endl;
 
             modelTranslator->setControls(mdata, U_new[t], grippersOpen_iLQR[t]);
 
@@ -877,22 +874,27 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
 
             newCost += (currentCost * MUJOCO_DT);
 
-//            if (VISUALISE_ROLLOUTS) {
-//                if (t % 40 == 0) {
-//                    mjrRect viewport = {0, 0, 0, 0};
-//                    glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
-//
-//                    // update scene and render
-//                    mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
-//                    mjr_render(viewport, &scn, &con);
-//
-//                    // swap OpenGL buffers (blocking call due to v-sync)
-//                    glfwSwapBuffers(window);
-//
-//                    // process pending GUI events, call GLFW callbacks
-//                    glfwPollEvents();
-//                }
-//            }
+            if (VISUALISE_ROLLOUTS) {
+                if (t % 40 == 0) {
+
+//                    cout << "old control: " << endl << _U << endl;
+//                    cout << "feedBackGain" << endl << feedBackGain << endl;
+//                    cout << "new control: " << endl << U_new[t] << endl;
+
+                    mjrRect viewport = {0, 0, 0, 0};
+                    glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+
+                    // update scene and render
+                    mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+                    mjr_render(viewport, &scn, &con);
+
+                    // swap OpenGL buffers (blocking call due to v-sync)
+                    glfwSwapBuffers(window);
+
+                    // process pending GUI events, call GLFW callbacks
+                    glfwPollEvents();
+                }
+            }
             cpMjData(model, d_old, mdata);
             modelTranslator->stepModel(mdata, 1);
         }
@@ -1557,10 +1559,10 @@ void iLQR::makeDataForOptimisation(){
     dArray[MUJ_STEPS_HORIZON_LENGTH] = mj_makeData(model);
     cpMjData(model, dArray[MUJ_STEPS_HORIZON_LENGTH], mdata);
 
-    for(int i = 0; i < NUM_ALPHA; i++){
-        d_alpha[i] = mj_makeData(model);
-        d_alpha_last[i] = mj_makeData(model);
-    }
+//    for(int i = 0; i < NUM_ALPHA; i++){
+//        d_alpha[i] = mj_makeData(model);
+//        d_alpha_last[i] = mj_makeData(model);
+//    }
 
 }
 
@@ -1582,21 +1584,3 @@ void iLQR::updateNumStepsPerDeriv(int stepPerDeriv){
 void iLQR::resetInitialStates(mjData *_d_init, m_state _X0){
 
 }
-
-//void iLQR::scaleLinearisation(Ref<m_state_state> A_scaled, Ref<m_state_ctrl> B_scaled, Ref<m_state_state> A, Ref<m_state_ctrl> B, int num_steps_per_dt){
-//
-//    // TODO look into ways of speeding up matrix to the power of calculation
-//    A_scaled = A.replicate(1, 1);
-//    B_scaled = B.replicate(1, 1);
-//    m_state_ctrl currentBTerm;
-//
-//    for(int i = 0; i < num_steps_per_dt - 1; i++){
-//        A_scaled *= A;
-//    }
-//
-//    currentBTerm = B.replicate(1, 1);
-//    for(int i = 0; i < num_steps_per_dt - 1; i++){
-//        currentBTerm = A * currentBTerm;
-//        B_scaled += currentBTerm;
-//    }
-//}

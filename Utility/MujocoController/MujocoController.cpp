@@ -294,10 +294,10 @@ m_point MujocoController::quat2Eul(m_quat quaternion){
     double x, y, z, w;
     double t0, t1, t2, t3, t4;
 
-    x = quaternion(0);
-    y = quaternion(1);
-    z = quaternion(2);
-    w = quaternion(3);
+    w = quaternion(0);
+    x = quaternion(1);
+    y = quaternion(2);
+    z = quaternion(3);
 
     t0 = 2.0 * (w * x + y * z);
     t1 = 1.0 - 2.0 * (x * x + y * y);
@@ -321,6 +321,25 @@ m_point MujocoController::quat2Eul(m_quat quaternion){
     eulAngles(2) = yaw;
 
     return eulAngles;
+}
+
+m_quat MujocoController::eul2Quat(m_point euler){
+    m_quat quat;
+
+    double c1 = cos(euler(1) / 2);
+    double c2 = cos(euler(2) / 2);
+    double c3 = cos(euler(0) / 2);
+
+    double s1 = sin(euler(1) / 2);
+    double s2 = sin(euler(2) / 2);
+    double s3 = sin(euler(0) / 2);
+
+    quat(0) = (c1 * c2 * c3) - (s1 * s2 * s3);
+    quat(1) = (s1 * s2 * c3) + (c1 * c2 * s3);
+    quat(2) = (s1 * c2 * c3) + (c1 * s2 * s3);
+    quat(3) = (c1 * s2 * c3) - (s1 * c2 * s3);
+
+    return quat;
 }
 
 m_quat MujocoController::invQuat(m_quat quat){
@@ -491,13 +510,8 @@ m_pose MujocoController::returnBodyPose(mjModel *m, mjData *d, int bodyId){
     m_quat bodyQuat = returnBodyQuat(m, d, bodyId);
     m_point bodyPoint = returnBodyPoint(m, d, bodyId);
     m_point bodyAxisAngles;
-    m_point eulAngles;
-    //cout << "body quat is: " << bodyQuat << endl;
 
-    eulAngles = quat2Eul(bodyQuat);
-    //cout << "body eul is: " << eulAngles << endl;
     bodyAxisAngles = quat2Axis(bodyQuat);
-    //cout << "bodyAxisAngles: " << bodyAxisAngles << endl;
 
     for(int i = 0; i < 3; i++){
         bodyPose(i) = bodyPoint(i);

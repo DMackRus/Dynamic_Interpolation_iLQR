@@ -11,7 +11,7 @@
 #define RUN_ILQR                0       // RUN_ILQR - runs a simple iLQR optimisation for given task and renders on repeat
 #define RUN_STOMP               0       // RUN_STOMP - runs a simple stomp optimiser for given task and renders on repeat
 #define MPC_TESTING             0       // MPC_TESTING - Runs an MPC controller to achieve desired task and renders controls live
-#define GENERATE_A_B            0       // GENERATE_A_B - runs initial trajectory and generates and saves A, B matrices over that trajectory for every timestep
+#define GENERATE_A_B            1       // GENERATE_A_B - runs initial trajectory and generates and saves A, B matrices over that trajectory for every timestep
 #define ILQR_DATA_COLLECTION    0       // ILQR_DATA_COLLECTION - runs iLQR for many trajectories and saves useful data to csv file
 #define MAKE_TESTING_DATA       0       // MAKE_TESTING_DATA - Creates a set number of valid starting and desired states for a certain task and saves them to a .csv file for later use.
 
@@ -44,7 +44,31 @@ int main() {
     modelTranslator = new taskTranslator();
     dataSaver = new saveData();
     const char *fileName;
-    int taskRow = 1;
+    int taskRow = 3;
+
+    //------------------------------------//
+    m_point eulerAngle;
+    eulerAngle << 0, 0, 0;
+
+    m_quat quat = globalMujocoController->eul2Quat(eulerAngle);
+    cout << "Quat: " << quat << endl;
+
+    eulerAngle << PI, 0, 0;
+
+    quat = globalMujocoController->eul2Quat(eulerAngle);
+    cout << "Quat: " << quat << endl;
+
+    eulerAngle << 0, PI, 0;
+
+    quat = globalMujocoController->eul2Quat(eulerAngle);
+    cout << "Quat: " << quat << endl;
+
+    eulerAngle << 0, 0, PI;
+
+    quat = globalMujocoController->eul2Quat(eulerAngle);
+    cout << "Quat: " << quat << endl;
+
+    //------------------------------------//
 
     // Acrobot model
     if(modelTranslator->taskNumber == 0){
@@ -87,7 +111,7 @@ int main() {
         X0 = modelTranslator->setupTask(d_init, false, taskRow);
         cout << "X desired: " << modelTranslator->X_desired << endl;
 
-        optimiser->updateNumStepsPerDeriv(1);
+        optimiser->updateNumStepsPerDeriv(5);
 
         initControls = modelTranslator->initControls(mdata, d_init, X0);
 
@@ -114,16 +138,15 @@ int main() {
     }
     else if(GENERATE_A_B){
         optimiser = new iLQR(model, mdata, modelTranslator);
-        optimiser->makeDataForOptimisation();
 
         int validTrajectories = 0;
 
-        while(validTrajectories < 1000){
+        while(validTrajectories < 1){
             initControls.clear();
             optimiser->updateNumStepsPerDeriv(1);
             // updates X0, X_desired and d_init_test
-            modelTranslator->X_desired = modelTranslator->setupTask(mdata, true, 0);
-            optimiser->resetInitialStates(d_init, X0);
+            X0 = modelTranslator->setupTask(d_init, false, taskRow);
+            cpMjData(model, optimiser->d_init, d_init);
             initControls = modelTranslator->initControls(mdata, d_init, X0);
             optimiser->setInitControls(initControls, grippersOpen);
 
@@ -273,7 +296,7 @@ int main() {
     else{
 
         optimiser = new iLQR(model, mdata, modelTranslator);
-        X0 = modelTranslator->setupTask(mdata, false, 0);
+        X0 = modelTranslator->setupTask(mdata, false, taskRow);
         cpMjData(model, d_init, mdata);
 
         simpleTest();

@@ -88,17 +88,10 @@ public:
     m_pose returnBodyAcceleration(int bodyId);
     m_pose returnBodyForces(int bodyId);
 
-//    void setRobotConfiguration(const Ref<const m_ctrl> configuration);
-//    m_ctrl returnRobotConfiguration();
-//    void setRobotVelocities(const Ref<const m_ctrl> jointVelocities);
-//    m_ctrl returnRobotVelocities();
-//    void setRobotAccelerations(const Ref<const m_ctrl> jointAccelerations);
-//    m_ctrl returnRobotAccelerations();
-
-
     m_quat axis2Quat(m_point axis);
     m_point quat2Axis(m_quat quaternion);
     m_point quat2Eul(m_quat quaternion);
+    m_quat eul2Quat(m_point euler);
     m_quat invQuat(m_quat quat);
     m_quat multQuat(m_quat quat_l, m_quat quat_r);
 

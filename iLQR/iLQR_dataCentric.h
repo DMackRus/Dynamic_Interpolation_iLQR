@@ -16,8 +16,8 @@
 
 // ------ These three methods of interpolation are implemented, ONLY activate 1 at a time, otherwise probably will crash ---------
 #define COPYING_DERIVS          0
-#define LINEAR_INTERP_DERIVS    0
-#define DYNAMIC_LINEAR_DERIVS   1
+#define LINEAR_INTERP_DERIVS    1
+#define DYNAMIC_LINEAR_DERIVS   0
 
 // ------- Unimplemented methods of inteprolating derivatives ------
 #define QUADRATIC_INTERP_DERIVS 0
@@ -33,9 +33,10 @@
 
 #define NUM_ALPHA                       5
 
-#define DQACCDQ_MAX                     250
+//#define DQACCDQ_MAX                     250
+#define DQACCDQ_MAX                     100000
 
-#define VISUALISE_ROLLOUTS              0
+#define VISUALISE_ROLLOUTS              1
 
 class iLQR
 {

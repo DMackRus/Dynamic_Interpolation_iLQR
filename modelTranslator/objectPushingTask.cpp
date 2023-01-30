@@ -16,7 +16,7 @@ extern GLFWwindow *window;
 
 void initControls_findMainWaypoints(mjData *d, mjModel *model, m_point desiredObjectEnd, m_point objectStart, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming);
 std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWayPoints, std::vector<int> wayPointsTiming);
-std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model,std::vector<m_point> initPath);
+std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model,std::vector<m_point> initPath, double angle_EE_push);
 
 double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls, mjData *d_last){
     double stateCost = 0;
@@ -302,6 +302,17 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
         //cout << "-------------- random desired state ----------------" << endl << X_desired << endl;
     }
 
+//    const std::string EE_Name = "franka_gripper";
+//    X0(5) += PI/4;
+//    setState(d, X0);
+//    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+//    m_quat quat = globalMujocoController->returnBodyQuat(model, d, EE_id);
+//    cout << "Quat: " << quat << endl;
+//
+//    m_point eul = globalMujocoController->quat2Eul(quat);
+//
+//    cout << "Eul: " << eul << endl;
+
     setState(d, X0);
 
     if(taskNumber == 2){
@@ -352,6 +363,8 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     objectStart(0) = X0(7);
     objectStart(1) = X0(8);
 
+    double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
+
     initControls_findMainWaypoints(d, model, desiredObjectEnd, objectStart, mainWayPoints, wayPoints_timings);
     for(int i = 0; i < mainWayPoints.size(); i++){
         cout << "main waypoint " << i << ": " << mainWayPoints[i] << endl;
@@ -359,16 +372,7 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     }
     std::vector<m_point> initPath = initControls_createAllWayPoints(mainWayPoints, wayPoints_timings);
 
-    cout << "created initPath, length: " << initPath.size() << endl;
-    cout << "init path points: " << initPath[498] << endl;
-    cout << "init path points: " << initPath[499] << endl;
-    cout << "init path points: " << initPath[500] << endl;
-    cout << "--------------------------------------------" << endl;
-    cout << "init path points: " << initPath[2996] << endl;
-    cout << "init path points: " << initPath[2997] << endl;
-    cout << "init path points: " << initPath[2998] << endl;
-
-    initControls = initControls_generateAllControls(d, model, initPath);
+    initControls = initControls_generateAllControls(d, model, initPath, angle_EE_push);
 
     cout << "created init controls;" << endl;
 
@@ -392,7 +396,8 @@ void initControls_findMainWaypoints(mjData *d, mjModel *model, m_point desiredOb
     wayPointsTiming.push_back(0);
 
     // TODO hard coded - get it programmatically? - also made it slightly bigger so trajectory has room to improve
-    float cylinder_radius = 0.08;
+//    float cylinder_radius = 0.08;
+    float cylinder_radius = 0;
     float x_cylinder0ffset = cylinder_radius * sin(PI/4);
     float y_cylinder0ffset = cylinder_radius * cos(PI/4);
 
@@ -425,10 +430,10 @@ void initControls_findMainWaypoints(mjData *d, mjModel *model, m_point desiredOb
     }
     else{
         if(endPointY > cylinderObjectY){
-            angle += 0.1;
+            angle += 0;
         }
         else{
-            angle -= 0.1;
+            angle -= 0;
         }
     }
 
@@ -491,6 +496,7 @@ std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWa
     std::vector<m_point> initPath;
 
     initPath.push_back(mainWayPoints[0]);
+    initPath[0](2) = 0.35f;
     wayPointsTiming[0]--;
 
     // should only be MUJ_STEPS_HORIZON_LENGTH number of controls
@@ -514,7 +520,7 @@ std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWa
     return initPath;
 }
 
-std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, std::vector<m_point> initPath){
+std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, std::vector<m_point> initPath, double angle_EE_push){
     std::vector<m_ctrl> initControls;
 
     const std::string EE_Name = "franka_gripper";
@@ -522,6 +528,24 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
     taskTranslator tempModelTranslator;
     tempModelTranslator.init(model);
     m_quat startQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
+    cout << "startQuat: " << startQuat << endl;
+    cout << "angle_EE_push: " << angle_EE_push << endl;
+
+    m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
+    m_point startEul = globalMujocoController->quat2Eul(startQuat);
+    cout << "startPose: " << startPose << endl;
+    m_point desired_EE_Eul;
+    desired_EE_Eul(0) = startEul(0);
+    desired_EE_Eul(1) = startEul(1);
+    desired_EE_Eul(2) = angle_EE_push + (PI / 4);
+
+    cout << "startEul: " << startEul << endl;
+    cout << "desired_EE_Eul: " << desired_EE_Eul << endl;
+
+    m_quat desiredQuat = globalMujocoController->eul2Quat(desired_EE_Eul);
+
+    cout << "desiredQuat: " << desiredQuat << endl;
+
 
     m_ctrl desiredControls;
 
