@@ -104,8 +104,6 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
             generateEvaluationWaypoints();
             getDerivativesDynamically();
             dynamicLinInterpolateDerivs();
-            cout << "f_x[t] " << f_x[2000] << endl;
-            cout << "l_xx[t] " << l_xx[2000] << endl;
             evaluationWaypoints.clear();
         }
 
@@ -129,6 +127,10 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
             std::cout << "error, no valid method for calculating intermediate derivatives" << std::endl;
         }
 
+//        for(int j = 0; j < 3000; j++){
+//                cout << "f_x[j] " << f_x[j] << endl;
+//        }
+
         stop = high_resolution_clock::now();
         linDuration = duration_cast<microseconds>(stop - start);
         linTimes.push_back(linDuration.count()/1000);
@@ -142,6 +144,7 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
             // STEP 2 - Backwards pass to compute optimal linear and feedback gain matrices k and K
             start = high_resolution_clock::now();
             validBackPass = backwardsPass_Quu_reg();
+            //validBackPass = backwardsPass_Vxx_reg();
             stop = high_resolution_clock::now();
             bpDuration = duration_cast<microseconds>(stop - start);
 
@@ -196,7 +199,7 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
     }
 
     cout << "-----------------------------------------------------------------------------------" << endl;
-    m_state terminalState = modelTranslator->returnState(mdata);
+    m_state terminalState = modelTranslator->returnState(dArray[MUJ_STEPS_HORIZON_LENGTH]);
     if(modelTranslator->taskNumber == 2){
         double cubeXDiff = terminalState(7) - modelTranslator->X_desired(7);
         double cubeYDiff = terminalState(8) - modelTranslator->X_desired(8);
@@ -414,7 +417,7 @@ void iLQR::getDerivativesDynamically(){
         m_ctrl lastControl;
         if(i == 0){
 //            lastControl.setZero();
-            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i]);
+            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[0]);
         }
         else{
 //            lastControl = modelTranslator->returnControls(dArray[i - 1]);
@@ -641,6 +644,9 @@ void iLQR::dynamicLinInterpolateDerivs() {
     f_x[MUJ_STEPS_HORIZON_LENGTH - 1] = f_x[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
     f_u[MUJ_STEPS_HORIZON_LENGTH - 1] = f_u[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
 
+    f_x[MUJ_STEPS_HORIZON_LENGTH] = f_x[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
+    f_u[MUJ_STEPS_HORIZON_LENGTH] = f_u[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
+
 //    l_x[MUJ_STEPS_HORIZON_LENGTH - 1] = l_x[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
 //    l_xx[MUJ_STEPS_HORIZON_LENGTH - 1] = l_xx[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
 //
@@ -731,12 +737,17 @@ bool iLQR::backwardsPass_Quu_reg(){
 
         V_xx = (V_xx + V_xx.transpose()) / 2;
 
+//        cout << "------------------ iteration " << t << " ------------------" << endl;
 //        cout << "l_x " << l_x[t] << endl;
 //        cout << "l_xx " << l_xx[t] << endl;
+//        cout << "l_u " << l_u[t] << endl;
+//        cout << "l_uu " << l_uu[t] << endl;
 //        cout << "Q_ux " << Q_ux << endl;
 //        cout << "f_u[t] " << f_u[t] << endl;
 //        cout << "Q_uu " << Q_uu << endl;
 //        cout << "Q_uu_inv " << Q_uu_inv << endl;
+//        cout << "Q_x " << Q_x << endl;
+//        cout << "Q_xx " << Q_xx << endl;
 //        cout << "V_xx " << V_xx << endl;
 //        cout << "V_x " << V_x << endl;
 //        cout << "K[t] " << K[t] << endl;
@@ -1255,7 +1266,6 @@ bool iLQR::checkForConvergence(float newCost, float oldCost, bool costReduced){
 
     // store new controls
     if(costReduced){
-        cout << "cost was reduced, copying contrls to U_old" << endl;
         for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
             U_old[i] = U_new[i].replicate(1, 1);
         }
@@ -1534,7 +1544,6 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
 
     //cout << "A matrix is: " << _A << endl;
 //    cout << " B Mtrix is: " << _B << endl;
-
 }
 
 void iLQR::setInitControls(std::vector<m_ctrl> _initControls, std::vector<bool> _grippersOpen){

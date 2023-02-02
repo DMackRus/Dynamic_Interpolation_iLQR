@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="Mujoco_Dynamic_iLQR"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\Libraries\;CMake Files\..\..\Libraries\eigen-3.4.0\;CMake Files\..\..\Libraries\eigen-3.4.0\cmake-build-debug\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/dave/projects/c++/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Mujoco_Dynamic_iLQR">
+				<Option output="/home/dave/projects/c++/Mujoco_Dynamic_iLQR" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/dave/projects/c++"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/dave/projects/c++/mujoco/include"/>
+					<Add directory="/home/dave/include/eigen3"/>
+					<Add directory="/home/dave/Libraries/eigen-3.4.0"/>
+					<Add directory="/usr/include/c++/11"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/11"/>
+					<Add directory="/usr/include/c++/11/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/11/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 Mujoco_Dynamic_iLQR"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Mujoco_Dynamic_iLQR/fast">
+				<Option output="/home/dave/projects/c++/Mujoco_Dynamic_iLQR" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/dave/projects/c++"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/dave/projects/c++/mujoco/include"/>
+					<Add directory="/home/dave/include/eigen3"/>
+					<Add directory="/home/dave/Libraries/eigen-3.4.0"/>
+					<Add directory="/usr/include/c++/11"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/11"/>
+					<Add directory="/usr/include/c++/11/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/11/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 Mujoco_Dynamic_iLQR/fast"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/dave/projects/c++/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/dave/projects/c++/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/dave/projects/c++/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/dave/projects/c++/STOMP/STOMP.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/STOMP/STOMP.h">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/Utility/MujocoController/MujocoController.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/Utility/MujocoController/MujocoController.h">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/Utility/MujocoController/MujocoUI.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/Utility/MujocoController/MujocoUI.h">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/Utility/savingData/saveData.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/Utility/savingData/saveData.h">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/iLQR/iLQR_dataCentric.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/iLQR/iLQR_dataCentric.h">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/main.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/modelTranslator/boxFlickTask.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/modelTranslator/doublePendulum.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/modelTranslator/modelTranslator.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/modelTranslator/modelTranslator.h">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/modelTranslator/objectPushingTask.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/modelTranslator/objectReachingTask.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/modelTranslator/reachingTask.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/../../Libraries/eigen-3.4.0/cmake-build-debug/Eigen3Config.cmake">
+			<Option virtualFolder="CMake Files\..\..\Libraries\eigen-3.4.0\cmake-build-debug\"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/../../Libraries/eigen-3.4.0/cmake-build-debug/Eigen3ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\Libraries\eigen-3.4.0\cmake-build-debug\"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/c++/../../Libraries/eigen-3.4.0/cmake-build-debug/Eigen3Targets.cmake">
+			<Option virtualFolder="CMake Files\..\..\Libraries\eigen-3.4.0\cmake-build-debug\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

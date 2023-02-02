@@ -85,7 +85,7 @@ taskTranslator::taskTranslator(){
 
     armControlCosts = 0;
     double armStateCosts = 0;
-    double armVelCosts = 0.5;
+    double armVelCosts = 0.1;
     if(OBJECT_PUSHING_TASK){
         if(TORQUE_CONTROL){
             jerkVals[0] = 0.0007;

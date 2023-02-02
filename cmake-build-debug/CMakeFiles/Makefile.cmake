@@ -53,5 +53,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/Mujoco_Acrobot_Control.dir/DependInfo.cmake"
+  "CMakeFiles/Mujoco_Dynamic_iLQR.dir/DependInfo.cmake"
   )

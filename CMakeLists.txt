@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(Mujoco_Acrobot_Control)
+project(Mujoco_Dynamic_iLQR)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")

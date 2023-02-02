@@ -117,24 +117,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named Mujoco_Acrobot_Control
+# Target rules for targets named Mujoco_Dynamic_iLQR
 
 # Build rule for target.
-Mujoco_Acrobot_Control: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Mujoco_Acrobot_Control
-.PHONY : Mujoco_Acrobot_Control
+Mujoco_Dynamic_iLQR: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Mujoco_Dynamic_iLQR
+.PHONY : Mujoco_Dynamic_iLQR
 
 # fast build rule for target.
-Mujoco_Acrobot_Control/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/build
-.PHONY : Mujoco_Acrobot_Control/fast
+Mujoco_Dynamic_iLQR/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/build
+.PHONY : Mujoco_Dynamic_iLQR/fast
 
 STOMP/STOMP.o: STOMP/STOMP.cpp.o
 .PHONY : STOMP/STOMP.o
 
 # target to build an object file
 STOMP/STOMP.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/STOMP/STOMP.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/STOMP/STOMP.cpp.o
 .PHONY : STOMP/STOMP.cpp.o
 
 STOMP/STOMP.i: STOMP/STOMP.cpp.i
@@ -142,7 +142,7 @@ STOMP/STOMP.i: STOMP/STOMP.cpp.i
 
 # target to preprocess a source file
 STOMP/STOMP.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/STOMP/STOMP.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/STOMP/STOMP.cpp.i
 .PHONY : STOMP/STOMP.cpp.i
 
 STOMP/STOMP.s: STOMP/STOMP.cpp.s
@@ -150,7 +150,7 @@ STOMP/STOMP.s: STOMP/STOMP.cpp.s
 
 # target to generate assembly for a file
 STOMP/STOMP.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/STOMP/STOMP.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/STOMP/STOMP.cpp.s
 .PHONY : STOMP/STOMP.cpp.s
 
 Utility/MujocoController/MujocoController.o: Utility/MujocoController/MujocoController.cpp.o
@@ -158,7 +158,7 @@ Utility/MujocoController/MujocoController.o: Utility/MujocoController/MujocoCont
 
 # target to build an object file
 Utility/MujocoController/MujocoController.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoController.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/MujocoController/MujocoController.cpp.o
 .PHONY : Utility/MujocoController/MujocoController.cpp.o
 
 Utility/MujocoController/MujocoController.i: Utility/MujocoController/MujocoController.cpp.i
@@ -166,7 +166,7 @@ Utility/MujocoController/MujocoController.i: Utility/MujocoController/MujocoCont
 
 # target to preprocess a source file
 Utility/MujocoController/MujocoController.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoController.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/MujocoController/MujocoController.cpp.i
 .PHONY : Utility/MujocoController/MujocoController.cpp.i
 
 Utility/MujocoController/MujocoController.s: Utility/MujocoController/MujocoController.cpp.s
@@ -174,7 +174,7 @@ Utility/MujocoController/MujocoController.s: Utility/MujocoController/MujocoCont
 
 # target to generate assembly for a file
 Utility/MujocoController/MujocoController.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoController.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/MujocoController/MujocoController.cpp.s
 .PHONY : Utility/MujocoController/MujocoController.cpp.s
 
 Utility/MujocoController/MujocoUI.o: Utility/MujocoController/MujocoUI.cpp.o
@@ -182,7 +182,7 @@ Utility/MujocoController/MujocoUI.o: Utility/MujocoController/MujocoUI.cpp.o
 
 # target to build an object file
 Utility/MujocoController/MujocoUI.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoUI.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/MujocoController/MujocoUI.cpp.o
 .PHONY : Utility/MujocoController/MujocoUI.cpp.o
 
 Utility/MujocoController/MujocoUI.i: Utility/MujocoController/MujocoUI.cpp.i
@@ -190,7 +190,7 @@ Utility/MujocoController/MujocoUI.i: Utility/MujocoController/MujocoUI.cpp.i
 
 # target to preprocess a source file
 Utility/MujocoController/MujocoUI.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoUI.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/MujocoController/MujocoUI.cpp.i
 .PHONY : Utility/MujocoController/MujocoUI.cpp.i
 
 Utility/MujocoController/MujocoUI.s: Utility/MujocoController/MujocoUI.cpp.s
@@ -198,7 +198,7 @@ Utility/MujocoController/MujocoUI.s: Utility/MujocoController/MujocoUI.cpp.s
 
 # target to generate assembly for a file
 Utility/MujocoController/MujocoUI.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/MujocoController/MujocoUI.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/MujocoController/MujocoUI.cpp.s
 .PHONY : Utility/MujocoController/MujocoUI.cpp.s
 
 Utility/savingData/saveData.o: Utility/savingData/saveData.cpp.o
@@ -206,7 +206,7 @@ Utility/savingData/saveData.o: Utility/savingData/saveData.cpp.o
 
 # target to build an object file
 Utility/savingData/saveData.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/savingData/saveData.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/savingData/saveData.cpp.o
 .PHONY : Utility/savingData/saveData.cpp.o
 
 Utility/savingData/saveData.i: Utility/savingData/saveData.cpp.i
@@ -214,7 +214,7 @@ Utility/savingData/saveData.i: Utility/savingData/saveData.cpp.i
 
 # target to preprocess a source file
 Utility/savingData/saveData.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/savingData/saveData.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/savingData/saveData.cpp.i
 .PHONY : Utility/savingData/saveData.cpp.i
 
 Utility/savingData/saveData.s: Utility/savingData/saveData.cpp.s
@@ -222,7 +222,7 @@ Utility/savingData/saveData.s: Utility/savingData/saveData.cpp.s
 
 # target to generate assembly for a file
 Utility/savingData/saveData.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/Utility/savingData/saveData.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/savingData/saveData.cpp.s
 .PHONY : Utility/savingData/saveData.cpp.s
 
 iLQR/iLQR_dataCentric.o: iLQR/iLQR_dataCentric.cpp.o
@@ -230,7 +230,7 @@ iLQR/iLQR_dataCentric.o: iLQR/iLQR_dataCentric.cpp.o
 
 # target to build an object file
 iLQR/iLQR_dataCentric.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/iLQR/iLQR_dataCentric.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/iLQR/iLQR_dataCentric.cpp.o
 .PHONY : iLQR/iLQR_dataCentric.cpp.o
 
 iLQR/iLQR_dataCentric.i: iLQR/iLQR_dataCentric.cpp.i
@@ -238,7 +238,7 @@ iLQR/iLQR_dataCentric.i: iLQR/iLQR_dataCentric.cpp.i
 
 # target to preprocess a source file
 iLQR/iLQR_dataCentric.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/iLQR/iLQR_dataCentric.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/iLQR/iLQR_dataCentric.cpp.i
 .PHONY : iLQR/iLQR_dataCentric.cpp.i
 
 iLQR/iLQR_dataCentric.s: iLQR/iLQR_dataCentric.cpp.s
@@ -246,7 +246,7 @@ iLQR/iLQR_dataCentric.s: iLQR/iLQR_dataCentric.cpp.s
 
 # target to generate assembly for a file
 iLQR/iLQR_dataCentric.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/iLQR/iLQR_dataCentric.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/iLQR/iLQR_dataCentric.cpp.s
 .PHONY : iLQR/iLQR_dataCentric.cpp.s
 
 main.o: main.cpp.o
@@ -254,7 +254,7 @@ main.o: main.cpp.o
 
 # target to build an object file
 main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/main.cpp.o
 .PHONY : main.cpp.o
 
 main.i: main.cpp.i
@@ -262,7 +262,7 @@ main.i: main.cpp.i
 
 # target to preprocess a source file
 main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/main.cpp.i
 .PHONY : main.cpp.i
 
 main.s: main.cpp.s
@@ -270,7 +270,7 @@ main.s: main.cpp.s
 
 # target to generate assembly for a file
 main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/main.cpp.s
 .PHONY : main.cpp.s
 
 modelTranslator/boxFlickTask.o: modelTranslator/boxFlickTask.cpp.o
@@ -278,7 +278,7 @@ modelTranslator/boxFlickTask.o: modelTranslator/boxFlickTask.cpp.o
 
 # target to build an object file
 modelTranslator/boxFlickTask.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/boxFlickTask.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/boxFlickTask.cpp.o
 .PHONY : modelTranslator/boxFlickTask.cpp.o
 
 modelTranslator/boxFlickTask.i: modelTranslator/boxFlickTask.cpp.i
@@ -286,7 +286,7 @@ modelTranslator/boxFlickTask.i: modelTranslator/boxFlickTask.cpp.i
 
 # target to preprocess a source file
 modelTranslator/boxFlickTask.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/boxFlickTask.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/boxFlickTask.cpp.i
 .PHONY : modelTranslator/boxFlickTask.cpp.i
 
 modelTranslator/boxFlickTask.s: modelTranslator/boxFlickTask.cpp.s
@@ -294,7 +294,7 @@ modelTranslator/boxFlickTask.s: modelTranslator/boxFlickTask.cpp.s
 
 # target to generate assembly for a file
 modelTranslator/boxFlickTask.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/boxFlickTask.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/boxFlickTask.cpp.s
 .PHONY : modelTranslator/boxFlickTask.cpp.s
 
 modelTranslator/doublePendulum.o: modelTranslator/doublePendulum.cpp.o
@@ -302,7 +302,7 @@ modelTranslator/doublePendulum.o: modelTranslator/doublePendulum.cpp.o
 
 # target to build an object file
 modelTranslator/doublePendulum.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/doublePendulum.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/doublePendulum.cpp.o
 .PHONY : modelTranslator/doublePendulum.cpp.o
 
 modelTranslator/doublePendulum.i: modelTranslator/doublePendulum.cpp.i
@@ -310,7 +310,7 @@ modelTranslator/doublePendulum.i: modelTranslator/doublePendulum.cpp.i
 
 # target to preprocess a source file
 modelTranslator/doublePendulum.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/doublePendulum.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/doublePendulum.cpp.i
 .PHONY : modelTranslator/doublePendulum.cpp.i
 
 modelTranslator/doublePendulum.s: modelTranslator/doublePendulum.cpp.s
@@ -318,7 +318,7 @@ modelTranslator/doublePendulum.s: modelTranslator/doublePendulum.cpp.s
 
 # target to generate assembly for a file
 modelTranslator/doublePendulum.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/doublePendulum.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/doublePendulum.cpp.s
 .PHONY : modelTranslator/doublePendulum.cpp.s
 
 modelTranslator/modelTranslator.o: modelTranslator/modelTranslator.cpp.o
@@ -326,7 +326,7 @@ modelTranslator/modelTranslator.o: modelTranslator/modelTranslator.cpp.o
 
 # target to build an object file
 modelTranslator/modelTranslator.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/modelTranslator.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/modelTranslator.cpp.o
 .PHONY : modelTranslator/modelTranslator.cpp.o
 
 modelTranslator/modelTranslator.i: modelTranslator/modelTranslator.cpp.i
@@ -334,7 +334,7 @@ modelTranslator/modelTranslator.i: modelTranslator/modelTranslator.cpp.i
 
 # target to preprocess a source file
 modelTranslator/modelTranslator.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/modelTranslator.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/modelTranslator.cpp.i
 .PHONY : modelTranslator/modelTranslator.cpp.i
 
 modelTranslator/modelTranslator.s: modelTranslator/modelTranslator.cpp.s
@@ -342,7 +342,7 @@ modelTranslator/modelTranslator.s: modelTranslator/modelTranslator.cpp.s
 
 # target to generate assembly for a file
 modelTranslator/modelTranslator.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/modelTranslator.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/modelTranslator.cpp.s
 .PHONY : modelTranslator/modelTranslator.cpp.s
 
 modelTranslator/objectPushingTask.o: modelTranslator/objectPushingTask.cpp.o
@@ -350,7 +350,7 @@ modelTranslator/objectPushingTask.o: modelTranslator/objectPushingTask.cpp.o
 
 # target to build an object file
 modelTranslator/objectPushingTask.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/objectPushingTask.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o
 .PHONY : modelTranslator/objectPushingTask.cpp.o
 
 modelTranslator/objectPushingTask.i: modelTranslator/objectPushingTask.cpp.i
@@ -358,7 +358,7 @@ modelTranslator/objectPushingTask.i: modelTranslator/objectPushingTask.cpp.i
 
 # target to preprocess a source file
 modelTranslator/objectPushingTask.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/objectPushingTask.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.i
 .PHONY : modelTranslator/objectPushingTask.cpp.i
 
 modelTranslator/objectPushingTask.s: modelTranslator/objectPushingTask.cpp.s
@@ -366,7 +366,7 @@ modelTranslator/objectPushingTask.s: modelTranslator/objectPushingTask.cpp.s
 
 # target to generate assembly for a file
 modelTranslator/objectPushingTask.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/objectPushingTask.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.s
 .PHONY : modelTranslator/objectPushingTask.cpp.s
 
 modelTranslator/objectReachingTask.o: modelTranslator/objectReachingTask.cpp.o
@@ -374,7 +374,7 @@ modelTranslator/objectReachingTask.o: modelTranslator/objectReachingTask.cpp.o
 
 # target to build an object file
 modelTranslator/objectReachingTask.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/objectReachingTask.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectReachingTask.cpp.o
 .PHONY : modelTranslator/objectReachingTask.cpp.o
 
 modelTranslator/objectReachingTask.i: modelTranslator/objectReachingTask.cpp.i
@@ -382,7 +382,7 @@ modelTranslator/objectReachingTask.i: modelTranslator/objectReachingTask.cpp.i
 
 # target to preprocess a source file
 modelTranslator/objectReachingTask.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/objectReachingTask.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectReachingTask.cpp.i
 .PHONY : modelTranslator/objectReachingTask.cpp.i
 
 modelTranslator/objectReachingTask.s: modelTranslator/objectReachingTask.cpp.s
@@ -390,7 +390,7 @@ modelTranslator/objectReachingTask.s: modelTranslator/objectReachingTask.cpp.s
 
 # target to generate assembly for a file
 modelTranslator/objectReachingTask.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/objectReachingTask.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectReachingTask.cpp.s
 .PHONY : modelTranslator/objectReachingTask.cpp.s
 
 modelTranslator/reachingTask.o: modelTranslator/reachingTask.cpp.o
@@ -398,7 +398,7 @@ modelTranslator/reachingTask.o: modelTranslator/reachingTask.cpp.o
 
 # target to build an object file
 modelTranslator/reachingTask.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/reachingTask.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.o
 .PHONY : modelTranslator/reachingTask.cpp.o
 
 modelTranslator/reachingTask.i: modelTranslator/reachingTask.cpp.i
@@ -406,7 +406,7 @@ modelTranslator/reachingTask.i: modelTranslator/reachingTask.cpp.i
 
 # target to preprocess a source file
 modelTranslator/reachingTask.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/reachingTask.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.i
 .PHONY : modelTranslator/reachingTask.cpp.i
 
 modelTranslator/reachingTask.s: modelTranslator/reachingTask.cpp.s
@@ -414,7 +414,7 @@ modelTranslator/reachingTask.s: modelTranslator/reachingTask.cpp.s
 
 # target to generate assembly for a file
 modelTranslator/reachingTask.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/modelTranslator/reachingTask.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.s
 .PHONY : modelTranslator/reachingTask.cpp.s
 
 # Help Target
@@ -425,7 +425,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... Mujoco_Acrobot_Control"
+	@echo "... Mujoco_Dynamic_iLQR"
 	@echo "... STOMP/STOMP.o"
 	@echo "... STOMP/STOMP.i"
 	@echo "... STOMP/STOMP.s"

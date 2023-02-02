@@ -20,6 +20,7 @@ std::vector<m_ctrl> MPCControls;
 std::vector<bool> grippersOpen;
 mjData* d_init;
 mjData* d_initMPC;
+mjData* d_init_master;
 m_point intermediatePoint;
 
 bool button_left = false;
@@ -174,6 +175,7 @@ void setupMujocoWorld(double timestep, const char* fileName){
     mdata = mj_makeData(model);         //mdata - main data, used for computaitons and displaying final trajectory
     d_init = mj_makeData(model);        //d_init saves the initial state of the starting data for a task
     d_initMPC = mj_makeData(model);
+    d_init_master = mj_makeData(model);
 
     // init GLFW, create window, make OpenGL context current, request v-sync
     // init GLFW
@@ -301,7 +303,7 @@ void render_simpleTest(){
     // run main loop, target real-time simulation and 60 fps rendering
     m_state currentState;
     int controlNum = 0;
-    cpMjData(model, mdata, d_init);
+    cpMjData(model, mdata, d_init_master);
     if(modelTranslator->taskNumber == 2){
         int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 
@@ -330,7 +332,7 @@ void render_simpleTest(){
 
             if (controlNum >= MUJ_STEPS_HORIZON_LENGTH) {
                 controlNum = 0;
-                cpMjData(model, mdata, d_init);
+                cpMjData(model, mdata, d_init_master);
                 simstart = mdata->time;
                 if (modelTranslator->taskNumber == 2) {
                     int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");

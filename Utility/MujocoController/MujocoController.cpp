@@ -627,7 +627,7 @@ Eigen::MatrixXd MujocoController::calculateJacobian(mjModel *m, mjData *d, int b
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 7; j++) {
-            kinematicJacobian(i + 3, j) = J_p(i, j);
+            kinematicJacobian(i + 3, j) = J_r(i, j);
         }
     }
 

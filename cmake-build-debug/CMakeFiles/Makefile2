@@ -63,7 +63,7 @@ CMAKE_BINARY_DIR = /home/dave/projects/c++/cmake-build-debug
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/Mujoco_Acrobot_Control.dir/all
+all: CMakeFiles/Mujoco_Dynamic_iLQR.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -71,34 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/Mujoco_Acrobot_Control.dir/clean
+clean: CMakeFiles/Mujoco_Dynamic_iLQR.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/Mujoco_Acrobot_Control.dir
+# Target rules for target CMakeFiles/Mujoco_Dynamic_iLQR.dir
 
 # All Build rule for target.
-CMakeFiles/Mujoco_Acrobot_Control.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dave/projects/c++/cmake-build-debug/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13 "Built target Mujoco_Acrobot_Control"
-.PHONY : CMakeFiles/Mujoco_Acrobot_Control.dir/all
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dave/projects/c++/cmake-build-debug/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13 "Built target Mujoco_Dynamic_iLQR"
+.PHONY : CMakeFiles/Mujoco_Dynamic_iLQR.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/Mujoco_Acrobot_Control.dir/rule: cmake_check_build_system
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/dave/projects/c++/cmake-build-debug/CMakeFiles 13
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/Mujoco_Acrobot_Control.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/Mujoco_Dynamic_iLQR.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/dave/projects/c++/cmake-build-debug/CMakeFiles 0
-.PHONY : CMakeFiles/Mujoco_Acrobot_Control.dir/rule
+.PHONY : CMakeFiles/Mujoco_Dynamic_iLQR.dir/rule
 
 # Convenience name for target.
-Mujoco_Acrobot_Control: CMakeFiles/Mujoco_Acrobot_Control.dir/rule
-.PHONY : Mujoco_Acrobot_Control
+Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/rule
+.PHONY : Mujoco_Dynamic_iLQR
 
 # clean rule for target.
-CMakeFiles/Mujoco_Acrobot_Control.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Acrobot_Control.dir/build.make CMakeFiles/Mujoco_Acrobot_Control.dir/clean
-.PHONY : CMakeFiles/Mujoco_Acrobot_Control.dir/clean
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/clean
+.PHONY : CMakeFiles/Mujoco_Dynamic_iLQR.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

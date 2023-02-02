@@ -14,7 +14,8 @@ extern GLFWwindow *window;
 
 #ifdef OBJECT_PUSHING
 
-void initControls_findMainWaypoints(mjData *d, mjModel *model, m_point desiredObjectEnd, m_point objectStart, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming);
+void initControls_MainWayPoints_Setup(mjData *d, mjModel *model, double angle_Push, m_point objectStart, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming);
+void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desiredObjectEnd, double angle_EE_push, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming);
 std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWayPoints, std::vector<int> wayPointsTiming);
 std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model,std::vector<m_point> initPath, double angle_EE_push);
 
@@ -127,6 +128,7 @@ void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_st
     l_xx = 2 * Q_scaled;
 
     l_u = (2 * R * U) + (2 * J * velDiff);
+    l_uu.setZero();
     for(int i = 0; i < NUM_CTRL; i++){
         l_uu(i, i) = (2 * R.diagonal()[i]) + (2 * J.diagonal()[i]);
     }
@@ -347,8 +349,77 @@ void taskTranslator::setX_Desired(m_state _X_desired, mjData *d){
     }
 }
 
-// Generate initial trajectory
-std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_state X0) {
+// Generate initial controls to set up Task
+std::vector<m_ctrl> taskTranslator::initSetupControls(mjData *d, mjData *d_init, m_state X0){
+    std::vector<m_ctrl> initControls;
+    cpMjData(model, d, d_init);
+
+    // Main waypoints to follow and how long to take to get there
+    std::vector<m_point> mainWayPoints;
+    std::vector<int> wayPoints_timings;
+
+    m_point desiredObjectEnd;
+    desiredObjectEnd(0) = X_desired(7);
+    desiredObjectEnd(1) = X_desired(8);
+    m_point objectStart;
+    objectStart(0) = X0(7);
+    objectStart(1) = X0(8);
+
+    double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
+
+    initControls_MainWayPoints_Setup(d, model, angle_EE_push, objectStart, mainWayPoints, wayPoints_timings);
+
+    std::vector<m_point> initPath = initControls_createAllWayPoints(mainWayPoints, wayPoints_timings);
+
+    initControls = initControls_generateAllControls(d, model, initPath, angle_EE_push);
+
+    return initControls;
+}
+
+void initControls_MainWayPoints_Setup(mjData *d, mjModel *model, double angle_Push, m_point objectStart, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming){
+    const std::string EE_Name = "franka_gripper";
+    const std::string goalName = "goal";
+
+    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+
+    m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
+
+    m_point mainWayPoint;
+    mainWayPoint << startPose(0), startPose(1), startPose(2);
+    mainWayPoints.push_back(mainWayPoint);
+    wayPointsTiming.push_back(0);
+
+    float cylinderObjectX = objectStart(0);
+    float cylinderObjectY = objectStart(1);
+
+    // TODO hard coded - get it programmatically? - also made it slightly bigger so trajectory has room to improve
+//    float cylinder_radius = 0.08;
+    float cylinder_radius = 0.1;
+
+    float intermediatePointX;
+    float intermediatePointY;
+
+    float h = 0.15;
+
+    float deltaX = h * cos(angle_Push);
+    float deltaY = h * sin(angle_Push);
+
+    intermediatePointY = cylinderObjectY - deltaY;
+    intermediatePointX = cylinderObjectX - deltaX;
+
+    // Setting this up so we can visualise where the intermediate point is located
+    intermediatePoint(0) = intermediatePointX;
+    intermediatePoint(1) = intermediatePointY;
+
+    mainWayPoint(0) = intermediatePoint(0);
+    mainWayPoint(1) = intermediatePoint(1);
+
+    mainWayPoints.push_back(mainWayPoint);
+    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH / 2);
+}
+
+// Generate initial controls to be optimised
+std::vector<m_ctrl> taskTranslator::initOptimisationControls(mjData *d, mjData *d_init, m_state X0) {
 
     std::vector<m_ctrl> initControls;
     cpMjData(model, d, d_init);
@@ -365,11 +436,11 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
 
     double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
 
-    initControls_findMainWaypoints(d, model, desiredObjectEnd, objectStart, mainWayPoints, wayPoints_timings);
-    for(int i = 0; i < mainWayPoints.size(); i++){
-        cout << "main waypoint " << i << ": " << mainWayPoints[i] << endl;
-        cout << "timing " << wayPoints_timings[i] << endl;
-    }
+    initControls_MainWayPoints_Optimise(d, model, desiredObjectEnd, angle_EE_push, mainWayPoints, wayPoints_timings);
+//    for(int i = 0; i < mainWayPoints.size(); i++){
+//        cout << "main waypoint " << i << ": " << mainWayPoints[i] << endl;
+//        cout << "timing " << wayPoints_timings[i] << endl;
+//    }
     std::vector<m_point> initPath = initControls_createAllWayPoints(mainWayPoints, wayPoints_timings);
 
     initControls = initControls_generateAllControls(d, model, initPath, angle_EE_push);
@@ -379,7 +450,7 @@ std::vector<m_ctrl> taskTranslator::initControls(mjData *d, mjData *d_init, m_st
     return initControls;
 }
 
-void initControls_findMainWaypoints(mjData *d, mjModel *model, m_point desiredObjectEnd, m_point objectStart, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming){
+void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desiredObjectEnd, double angle_EE_push, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming){
     const std::string EE_Name = "franka_gripper";
     const std::string goalName = "goal";
 
@@ -389,78 +460,34 @@ void initControls_findMainWaypoints(mjData *d, mjModel *model, m_point desiredOb
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
 
     m_point mainWayPoint;
-    mainWayPoint(0) = startPose(0);
-    mainWayPoint(1) = startPose(1);
-    mainWayPoint(2) = startPose(2);
+    mainWayPoint << startPose(0), startPose(1), startPose(2);
     mainWayPoints.push_back(mainWayPoint);
     wayPointsTiming.push_back(0);
 
     // TODO hard coded - get it programmatically? - also made it slightly bigger so trajectory has room to improve
 //    float cylinder_radius = 0.08;
-    float cylinder_radius = 0;
-    float x_cylinder0ffset = cylinder_radius * sin(PI/4);
-    float y_cylinder0ffset = cylinder_radius * cos(PI/4);
+    float cylinder_radius = 0.1;
+    float x_cylinder0ffset = cylinder_radius * cos(angle_EE_push);
+    float y_cylinder0ffset = cylinder_radius * sin(angle_EE_push);
 
     float desired_endPointX = desiredObjectEnd(0) - x_cylinder0ffset;
     float desired_endPointY;
 
     float endPointX;
     float endPointY;
-    if(desiredObjectEnd(1) - startPose(0) > 0){
-        desired_endPointY = desiredObjectEnd(1) - y_cylinder0ffset;
-    }
-    else{
+    if(desiredObjectEnd(1) - startPose(1) > 0){
         desired_endPointY = desiredObjectEnd(1) + y_cylinder0ffset;
     }
-
-    float cylinderObjectX = objectStart(0);
-    float cylinderObjectY = objectStart(1);
-    float intermediatePointX;
-    float intermediatePointY;
-
-    float angle = atan2(desired_endPointY - cylinderObjectY, desired_endPointX - cylinderObjectX);
-
-    if(TORQUE_CONTROL){
-        if(endPointY > cylinderObjectY){
-            angle += 0.4;
-        }
-        else{
-            angle -= 0.4;
-        }
-    }
     else{
-        if(endPointY > cylinderObjectY){
-            angle += 0;
-        }
-        else{
-            angle -= 0;
-        }
+        desired_endPointY = desiredObjectEnd(1) - y_cylinder0ffset;
     }
 
-    float h = 0.15;
-
-    float deltaX = h * cos(angle);
-    float deltaY = h * sin(angle);
-
-    // Calculate intermediate waypoint to position end effector behind cube such that it can be pushed to desired goal position
-//    if(X_desired(8) - startPose(0) > 0){
-//        intermediatePointY = cylinderObjectY + deltaY;
-//    }
-//    else{
-//        intermediatePointY = cylinderObjectY - deltaY;
-//    }
-    intermediatePointY = cylinderObjectY - deltaY;
-    intermediatePointX = cylinderObjectX - deltaX;
+    float intermediatePointY = startPose(1);
+    float intermediatePointX = startPose(0);
 
     // Setting this up so we can visualise where the intermediate point is located
     intermediatePoint(0) = intermediatePointX;
     intermediatePoint(1) = intermediatePointY;
-
-    mainWayPoint(0) = intermediatePoint(0);
-    mainWayPoint(1) = intermediatePoint(1);
-
-    mainWayPoints.push_back(mainWayPoint);
-    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH / 6.0f);
 
     float maxDistTravelled = 0.05 * ((5.0f/6.0f) * MUJ_STEPS_HORIZON_LENGTH * MUJOCO_DT);
     cout << "max EE travel dist: " << maxDistTravelled << endl;
@@ -487,7 +514,7 @@ void initControls_findMainWaypoints(mjData *d, mjModel *model, m_point desiredOb
     mainWayPoint(1) = endPointY;
 
     mainWayPoints.push_back(mainWayPoint);
-    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH - 1 - wayPointsTiming[1]);
+    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH/2);
 
 }
 
@@ -537,7 +564,7 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
     m_point desired_EE_Eul;
     desired_EE_Eul(0) = startEul(0);
     desired_EE_Eul(1) = startEul(1);
-    desired_EE_Eul(2) = angle_EE_push + (PI / 4);
+    desired_EE_Eul(2) = angle_EE_push - (PI / 4);
 
     cout << "startEul: " << startEul << endl;
     cout << "desired_EE_Eul: " << desired_EE_Eul << endl;
@@ -556,18 +583,18 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
         }
     }
 
-    for (int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++) {
+    for (int i = 0; i < initPath.size(); i++) {
 
         m_pose currentEEPose = globalMujocoController->returnBodyPose(model, d, EE_id);
         m_quat currentQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
 
         m_quat invQuat = globalMujocoController->invQuat(currentQuat);
-        m_quat quatDiff = globalMujocoController->multQuat(startQuat, invQuat);
+        m_quat quatDiff = globalMujocoController->multQuat(desiredQuat, invQuat);
 
         m_point axisDiff = globalMujocoController->quat2Axis(quatDiff);
 
         m_pose differenceFromPath;
-        float gains[6] = {10000, 10000, 10000, 10, 10, 10};
+        float gains[6] = {10000, 10000, 10000, 1000, 1000, 1000};
         for (int j = 0; j < 3; j++) {
             differenceFromPath(j) = initPath[i](j) - currentEEPose(j);
             differenceFromPath(j + 3) = axisDiff(j);
@@ -579,11 +606,9 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
 
         // Calculate jacobian inverse
         MatrixXd Jac = globalMujocoController->calculateJacobian(model, d, EE_id);
-        MatrixXd Jac_t = Jac.transpose();
         MatrixXd Jac_inv = Jac.completeOrthogonalDecomposition().pseudoInverse();
 
         m_pose desiredEEForce;
-
 
         if(TORQUE_CONTROL){
             for (int j = 0; j < 6; j++) {
@@ -679,41 +704,52 @@ bool taskTranslator::predictiveStateMismatch(mjData *d, m_state predictedState){
 }
 
 // Be careful with the math in this function, kind of changed x and Y around due to mujoco x being forwards from robot perspective
-bool taskTranslator::newControlInitialisationNeeded(mjData *d){
+bool taskTranslator::newControlInitialisationNeeded(mjData *d, int counterSinceLastControlInitialisation){
 
     // Get End effector position
-    const std::string EE_Name = "franka_gripper";
-    const std::string goalName = "goal";
 
-    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
-    int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
+    if(counterSinceLastControlInitialisation > 1000){
+        const std::string EE_Name = "franka_gripper";
+        const std::string goalName = "goal";
 
-    m_pose EE_Pose = globalMujocoController->returnBodyPose(model, d, EE_id);
-    // Get object position
-    m_point objectPos;
-    m_state currentState = returnState(d);
-    objectPos(0) = currentState(7);
-    objectPos(1) = currentState(8);
+        int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+        int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
 
-    // calculate angle between goal and EE
-    float angle_goal_EE = atan2(X_desired(7) - EE_Pose(0), X_desired(8) - EE_Pose(1));
+        m_pose EE_Pose = globalMujocoController->returnBodyPose(model, d, EE_id);
+        // Get object position
+        m_point objectPos;
+        m_state currentState = returnState(d);
+        objectPos(0) = currentState(7);
+        objectPos(1) = currentState(8);
 
-    // calculate angle between goal and object
-    float angle_goal_object = atan2(X_desired(7) - objectPos(0), X_desired(8) - objectPos(1));
+        // calculate angle between goal and EE
+        float angle_goal_EE = atan2(X_desired(7) - EE_Pose(0), X_desired(8) - EE_Pose(1));
 
-    float angleDiff;
-    angleDiff = angle_goal_object - angle_goal_EE;
-    cout << "angle diff " << angleDiff << "\n";
-    if(X_desired(8) < objectPos(1)){
-        if(angleDiff > (PI / 10)){
+        // calculate angle between goal and object
+        float angle_goal_object = atan2(X_desired(7) - objectPos(0), X_desired(8) - objectPos(1));
+
+        float angleDiff;
+        angleDiff = angle_goal_object - angle_goal_EE;
+        cout << "angle diff " << angleDiff << "\n";
+        if(angleDiff > 0.1){
             return true;
         }
+        if(angleDiff < -0.1){
+            return true;
+        }
+//        if(X_desired(8) < objectPos(1)){
+//
+//        }
+//        else{
+//            if(angleDiff < -0.1){
+//                return true;
+//            }
+//        }
     }
     else{
-        if(angleDiff < -(PI / 10)){
-            return true;
-        }
+        return false;
     }
+
 
     // compare this angle and if greater than some threshold, return true
 
