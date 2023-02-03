@@ -129,10 +129,6 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
             std::cout << "error, no valid method for calculating intermediate derivatives" << std::endl;
         }
 
-//        for(int j = 0; j < 3000; j++){
-//                cout << "f_x[j] " << f_x[j] << endl;
-//        }
-
         stop = high_resolution_clock::now();
         linDuration = duration_cast<microseconds>(stop - start);
         linTimes.push_back(linDuration.count()/1000);
@@ -149,7 +145,6 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
             //validBackPass = backwardsPass_Vxx_reg();
             stop = high_resolution_clock::now();
             bpDuration = duration_cast<microseconds>(stop - start);
-
 
             if (!validBackPass) {
                 if (lamda < maxLamda) {
@@ -216,7 +211,11 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
     cout << "Optimisation took: " << optduration.count()/1000 << " milliseconds" << endl;
     cout << "////////////////////////////////////////////////////////////////////////////////////" << endl;
 
-    return U_old;
+    std::vector<m_ctrl> returnControls;
+    for(int i = 0; i < ilqr_horizon_length; i++){
+        returnControls.push_back(U_old[i]);
+    }
+    return returnControls;
 }
 
 float iLQR::rollOutTrajectory(){

@@ -257,7 +257,7 @@ void render(){
 
             controlNum++;
 
-            if(controlNum >= MUJ_STEPS_HORIZON_LENGTH){
+            if(controlNum >= finalControls.size()){
                 controlNum = 0;
                 cpMjData(model, mdata, d_init_master);
                 simstart = mdata->time;
@@ -373,14 +373,12 @@ void render_simpleTest(){
 }
 
 void renderMPCAfter(){
-    // TODO - want some logic in here that when a callback keyboard is pressed, it resets simulation to
     // start and replays the list of stored MPC controls
 
     while (!glfwWindowShouldClose(window)){
         if(MPCReplay){
             mjtNum simstart = mdata->time;
             while (mdata->time - simstart < 1.0 / 60.0) {
-
 
                 modelTranslator->setControls(mdata, MPCControls[MPCControlCounter], false);
 

@@ -97,13 +97,20 @@ taskTranslator::taskTranslator(){
             jerkVals[6] = 0.0007;
         }
         else{
-            jerkVals[0] = 0.5;
-            jerkVals[1] = 1.0;
-            jerkVals[2] = 0.5;
-            jerkVals[3] = 1.0;
-            jerkVals[4] = 0.5;
-            jerkVals[5] = 0.5;
-            jerkVals[6] = 0.5;
+//            jerkVals[0] = 0.5;
+//            jerkVals[1] = 1.0;
+//            jerkVals[2] = 0.5;
+//            jerkVals[3] = 1.0;
+//            jerkVals[4] = 0.5;
+//            jerkVals[5] = 0.5;
+//            jerkVals[6] = 0.5;
+            jerkVals[0] = 1.0;
+            jerkVals[1] = 1.5;
+            jerkVals[2] = 1.0;
+            jerkVals[3] = 1.5;
+            jerkVals[4] = 1.0;
+            jerkVals[5] = 1.0;
+            jerkVals[6] = 1.0;
         }
     }
     else{

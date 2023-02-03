@@ -418,9 +418,10 @@ void initControls_MainWayPoints_Setup(mjData *d, mjModel *model, double angle_Pu
 
     mainWayPoint(0) = intermediatePoint(0);
     mainWayPoint(1) = intermediatePoint(1);
+    mainWayPoint(2) = 0.3f;
 
     mainWayPoints.push_back(mainWayPoint);
-    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH / 4);
+    wayPointsTiming.push_back(750);
 }
 
 // Generate initial controls to be optimised
@@ -522,9 +523,10 @@ void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desi
 
     mainWayPoint(0) = endPointX;
     mainWayPoint(1) = endPointY;
+    mainWayPoint(2) = 0.3f;
 
     mainWayPoints.push_back(mainWayPoint);
-    wayPointsTiming.push_back(3 * (MUJ_STEPS_HORIZON_LENGTH/4));
+    wayPointsTiming.push_back(1250);
 
 }
 
@@ -533,7 +535,6 @@ std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWa
     std::vector<m_point> initPath;
 
     initPath.push_back(mainWayPoints[0]);
-    initPath[0](2) = 0.3f;
     wayPointsTiming[0]--;
 
     // should only be MUJ_STEPS_HORIZON_LENGTH number of controls
@@ -541,11 +542,12 @@ std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWa
     for(int i = 0; i < numMainWayPoints - 1; i++){
         float x_diff = mainWayPoints[i + 1](0) - mainWayPoints[i](0);
         float y_diff = mainWayPoints[i + 1](1) - mainWayPoints[i](1);
+        float z_diff = mainWayPoints[i + 1](2) - mainWayPoints[i](2);
         for(int j = 0; j < wayPointsTiming[i + 1]; j++){
             initPath.push_back(m_point());
             initPath[counter](0) = initPath[counter - 1](0) + (x_diff / wayPointsTiming[i + 1]);
             initPath[counter](1) = initPath[counter - 1](1) + (y_diff / wayPointsTiming[i + 1]);
-            initPath[counter](2) = initPath[0](2);
+            initPath[counter](2) = initPath[counter - 1](2) + (z_diff / wayPointsTiming[i + 1]);
 
             counter++;
             if(counter > MUJ_STEPS_HORIZON_LENGTH){
@@ -739,7 +741,6 @@ bool taskTranslator::newControlInitialisationNeeded(mjData *d, int counterSinceL
 
         float angleDiff;
         angleDiff = angle_goal_object - angle_goal_EE;
-        cout << "angle diff " << angleDiff << "\n";
         if(angleDiff > 0.1){
             return true;
         }
