@@ -66,12 +66,14 @@ iLQR::iLQR(mjModel* m, mjData* d, taskTranslator* _modelTranslator){
 
 }
 
-std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations){
+std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations, int horizonLength, int stepsPerDeriv){
     // Setup Initial variables
     bool optimisationFinished = false;
     float newCost = 0;
     float oldCost;
     lamda = 0.1;
+    ilqr_horizon_length = horizonLength;
+    updateNumStepsPerDeriv(stepsPerDeriv);
     // time how long it took to compute optimal controls
     auto optstart = high_resolution_clock::now();
     cpMjData(model, d_init, _d_init);
@@ -199,7 +201,7 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
     }
 
     cout << "-----------------------------------------------------------------------------------" << endl;
-    m_state terminalState = modelTranslator->returnState(dArray[MUJ_STEPS_HORIZON_LENGTH]);
+    m_state terminalState = modelTranslator->returnState(dArray[ilqr_horizon_length]);
     if(modelTranslator->taskNumber == 2){
         double cubeXDiff = terminalState(7) - modelTranslator->X_desired(7);
         double cubeYDiff = terminalState(8) - modelTranslator->X_desired(8);
@@ -225,14 +227,14 @@ float iLQR::rollOutTrajectory(){
     cpMjData(model, dArray[0], mdata);
     int stepsCounter = num_mj_steps_per_control;
 
-    for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+    for(int i = 0; i < ilqr_horizon_length; i++){
         modelTranslator->setControls(mdata, U_old[i], grippersOpen_iLQR[i]);
         float stateCost;
         if(i == 0){
-            stateCost = modelTranslator->costFunction(mdata, i, MUJ_STEPS_HORIZON_LENGTH, d_init);
+            stateCost = modelTranslator->costFunction(mdata, i, ilqr_horizon_length, d_init);
         }
         else{
-            stateCost = modelTranslator->costFunction(mdata, i, MUJ_STEPS_HORIZON_LENGTH, dArray[i - 1]);
+            stateCost = modelTranslator->costFunction(mdata, i, ilqr_horizon_length, dArray[i - 1]);
         }
 
         cost += (stateCost * MUJOCO_DT);
@@ -304,7 +306,7 @@ void iLQR::generateEvaluationWaypoints(){
     m_dof lastVelGrads;
     evaluationWaypoints.push_back(0);
 
-    for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+    for(int i = 0; i < ilqr_horizon_length; i++){
 
         m_state currState = X_old[i].replicate(1,1);
         m_state lastState = X_old[i-1].replicate(1,1);
@@ -339,7 +341,7 @@ void iLQR::generateEvaluationWaypoints(){
         counterSinceLastEval++;
     }
 
-    evaluationWaypoints.push_back(MUJ_STEPS_HORIZON_LENGTH - 1);
+    evaluationWaypoints.push_back(ilqr_horizon_length - 1);
 
 
     cout << "num evaluation points: " << evaluationWaypoints.size() << endl;
@@ -412,27 +414,23 @@ void iLQR::getDerivativesDynamically(){
     model->opt.iterations = save_iterations;
     model->opt.tolerance = save_tolerance;
 
-    //#pragma omp parallel for default(none)
-    for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+    #pragma omp parallel for default(none)
+    for(int i = 0; i < ilqr_horizon_length; i++){
         m_ctrl lastControl;
         if(i == 0){
 //            lastControl.setZero();
-            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[0]);
+            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[0]);
         }
         else{
 //            lastControl = modelTranslator->returnControls(dArray[i - 1]);
-            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i-1]);
+            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[i-1]);
         }
 
-//        modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i-1]);
     }
 
-    m_ctrl lastControl;
-    lastControl = modelTranslator->returnControls(dArray[MUJ_STEPS_HORIZON_LENGTH - 1]);
-    modelTranslator->costDerivatives(dArray[MUJ_STEPS_HORIZON_LENGTH], l_x[MUJ_STEPS_HORIZON_LENGTH], l_xx[MUJ_STEPS_HORIZON_LENGTH], l_u[MUJ_STEPS_HORIZON_LENGTH - 1], l_uu[MUJ_STEPS_HORIZON_LENGTH - 1], MUJ_STEPS_HORIZON_LENGTH - 1, MUJ_STEPS_HORIZON_LENGTH, dArray[MUJ_STEPS_HORIZON_LENGTH-1]);
+    modelTranslator->costDerivatives(dArray[ilqr_horizon_length], l_x[ilqr_horizon_length], l_xx[ilqr_horizon_length], l_u[ilqr_horizon_length - 1], l_uu[ilqr_horizon_length - 1], ilqr_horizon_length - 1, ilqr_horizon_length, dArray[ilqr_horizon_length-1]);
 
-//    l_xx[MUJ_STEPS_HORIZON_LENGTH] = l_xx[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
-//    l_x[MUJ_STEPS_HORIZON_LENGTH] = l_x[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
+
 }
 
 void iLQR::getDerivativesStatically(){
@@ -445,25 +443,22 @@ void iLQR::getDerivativesStatically(){
 
     // Linearise the dynamics along the trajectory
     #pragma omp parallel for default(none)
-    for(int t = 0; t < ilqr_horizon_length; t++){
+    for(int t = 0; t < numCalcedDerivs; t++){
 
         lineariseDynamics(A[t], B[t], dArray[t * num_mj_steps_per_control]);
-
     }
 
     #pragma omp parallel for default(none)
-    for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+    for(int i = 0; i < ilqr_horizon_length; i++){
         if(i == 0){
-            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[0]);
+            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[0]);
         }
         else{
-            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, dArray[i - 1]);
+            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[i - 1]);
         }
     }
 
-    m_ctrl lastControl;
-    lastControl = modelTranslator->returnControls(dArray[MUJ_STEPS_HORIZON_LENGTH - 1]);
-    modelTranslator->costDerivatives(dArray[MUJ_STEPS_HORIZON_LENGTH], l_x[MUJ_STEPS_HORIZON_LENGTH], l_xx[MUJ_STEPS_HORIZON_LENGTH], l_u[MUJ_STEPS_HORIZON_LENGTH - 1], l_uu[MUJ_STEPS_HORIZON_LENGTH - 1], MUJ_STEPS_HORIZON_LENGTH - 1, MUJ_STEPS_HORIZON_LENGTH, dArray[MUJ_STEPS_HORIZON_LENGTH - 1]);
+    modelTranslator->costDerivatives(dArray[ilqr_horizon_length], l_x[ilqr_horizon_length], l_xx[ilqr_horizon_length], l_u[ilqr_horizon_length - 1], l_uu[ilqr_horizon_length - 1], ilqr_horizon_length - 1, ilqr_horizon_length, dArray[ilqr_horizon_length - 1]);
 
     model->opt.iterations = save_iterations;
     model->opt.tolerance = save_tolerance;
@@ -491,25 +486,25 @@ void iLQR::smoothAMatrices(){
             double sum = 0;
 
             // calculate the mean
-            for(int k = 0; k < ilqr_horizon_length; k++){
+            for(int k = 0; k < numCalcedDerivs; k++){
                 sum += A[k](i + DOF, j);
             }
 
-            double mean = sum / ilqr_horizon_length;
+            double mean = sum / numCalcedDerivs;
             double sumStdDev;
 
             // calcuilate the standard deviation
-            for(int k = 0; k < ilqr_horizon_length; k++){
+            for(int k = 0; k < numCalcedDerivs; k++){
                 sumStdDev += pow(A[k](i + DOF, j) - mean, 2);
             }
 
-            double stdDev = sqrt(sumStdDev / ilqr_horizon_length);
+            double stdDev = sqrt(sumStdDev / numCalcedDerivs);
 
             //cout << "mean is: " << mean << endl;
             //cout << "std dev is: " << stdDev << endl;
 
             // any values outside 2 standard deviations, set them to the mean
-            for(int k = 0; k < ilqr_horizon_length; k++){
+            for(int k = 0; k < numCalcedDerivs; k++){
                 if(A[k](i + DOF, j) - mean > (0.5 * stdDev)){
                     //cout << "val outside 2 standard deviations: " << A[k](i + DOF, j) << endl;
                     A[k](i + DOF, j) = mean;
@@ -529,43 +524,21 @@ void iLQR::smoothAMatrices(){
 
 void iLQR::copyDerivatives(){
 
-    for(int t = 0; t < ilqr_horizon_length; t++){
+    for(int t = 0; t < numCalcedDerivs; t++){
         for(int i = 0; i < num_mj_steps_per_control; i++){
             f_x[(t * num_mj_steps_per_control) + i] = A[t].replicate(1,1);
             f_u[(t * num_mj_steps_per_control) + i] = B[t].replicate(1,1);
         }
     }
-
-//    for(int t = 0; t < ilqr_horizon_length; t++){
-//        for(int i = 0; i < num_mj_steps_per_control; i++){
-//            l_x.at((t * num_mj_steps_per_control) + i)  = l_x_o[t].replicate(1,1) * MUJOCO_DT;
-//            l_xx.at((t * num_mj_steps_per_control) + i) = l_xx_o[t].replicate(1,1) * MUJOCO_DT;
-//            l_u.at((t * num_mj_steps_per_control) + i)  = l_u_o[t].replicate(1,1) * MUJOCO_DT;
-//            l_uu.at((t * num_mj_steps_per_control) + i) = l_uu_o[t].replicate(1,1) * MUJOCO_DT;
-//        }
-//    }
-//
-//    for(int i = 0; i < num_mj_steps_per_control; i++){
-//        l_x[(ilqr_horizon_length * num_mj_steps_per_control) + i]  = l_x_o[ilqr_horizon_length] * MUJOCO_DT;
-//        l_xx[(ilqr_horizon_length * num_mj_steps_per_control)  + i] = l_xx_o[ilqr_horizon_length] * MUJOCO_DT;
-//    }
-
-//        cout << "l_x end: " << l_x[MUJ_STEPS_HORIZON_LENGTH] << endl;
-//        cout << "l_xx end: " << l_xx[MUJ_STEPS_HORIZON_LENGTH] << endl;
-//        cout << "l_u end: " << l_u[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
-//        cout << "l_uu end: " << l_uu[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
-//
-//        cout << "f_u end: " << f_u[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
-//        cout << "f_x end: " << f_x[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
 }
 
 void iLQR::linearInterpolateDerivs(){
-    for(int t = 0; t < ilqr_horizon_length; t++){
+    for(int t = 0; t < numCalcedDerivs; t++){
 
         m_state_state addA;
         m_state_ctrl addB;
 
-        if(t != ilqr_horizon_length - 1){
+        if(t != numCalcedDerivs - 1){
             m_state_state startA = A[t].replicate(1, 1);
             m_state_state endA = A[t + 1].replicate(1, 1);
             m_state_state diffA = endA - startA;
@@ -641,50 +614,23 @@ void iLQR::dynamicLinInterpolateDerivs() {
 //            cout << "add A " << endl << add << endl;
     }
 
-    f_x[MUJ_STEPS_HORIZON_LENGTH - 1] = f_x[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
-    f_u[MUJ_STEPS_HORIZON_LENGTH - 1] = f_u[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
+    f_x[ilqr_horizon_length - 1] = f_x[ilqr_horizon_length - 2].replicate(1,1);
+    f_u[ilqr_horizon_length - 1] = f_u[ilqr_horizon_length - 2].replicate(1,1);
 
-    f_x[MUJ_STEPS_HORIZON_LENGTH] = f_x[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
-    f_u[MUJ_STEPS_HORIZON_LENGTH] = f_u[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
-
-//    l_x[MUJ_STEPS_HORIZON_LENGTH - 1] = l_x[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
-//    l_xx[MUJ_STEPS_HORIZON_LENGTH - 1] = l_xx[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
-//
-//    l_u[MUJ_STEPS_HORIZON_LENGTH - 1] = l_u[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
-//    l_uu[MUJ_STEPS_HORIZON_LENGTH - 1] = l_uu[MUJ_STEPS_HORIZON_LENGTH - 2].replicate(1,1);
-//
-//    l_x[MUJ_STEPS_HORIZON_LENGTH]  = l_x[MUJ_STEPS_HORIZON_LENGTH - 1];
-//    l_xx[MUJ_STEPS_HORIZON_LENGTH]  = l_xx[MUJ_STEPS_HORIZON_LENGTH - 1];
-
-//    cout << "f_x end " << f_x[MUJ_STEPS_HORIZON_LENGTH - 2] << endl;
-//    cout << "f_u end " << f_u[MUJ_STEPS_HORIZON_LENGTH - 2] << endl;
-//    cout << "l_x end " << l_x[MUJ_STEPS_HORIZON_LENGTH - 2] << endl;
-//    cout << "l_u end " << l_u[MUJ_STEPS_HORIZON_LENGTH - 2] << endl;
-//
-//    cout << "l_xx end " << l_xx[MUJ_STEPS_HORIZON_LENGTH - 2] << endl;
-//    cout << "l_uu end " << l_uu[MUJ_STEPS_HORIZON_LENGTH - 2] << endl;
-//
-//    cout << "-------------------------------------------------" << endl;
-//
-//    cout << "f_x end " << f_x[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
-//    cout << "f_u end " << f_u[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
-//    cout << "l_x end " << l_x[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
-//    cout << "l_u end " << l_u[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
-//
-//    cout << "l_xx end " << l_xx[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
-//    cout << "l_uu end " << l_uu[MUJ_STEPS_HORIZON_LENGTH - 1] << endl;
+    f_x[ilqr_horizon_length] = f_x[ilqr_horizon_length - 1].replicate(1,1);
+    f_u[ilqr_horizon_length] = f_u[ilqr_horizon_length - 1].replicate(1,1);
 }
 
 bool iLQR::backwardsPass_Quu_reg(){
     m_state V_x;
-    V_x = l_x[MUJ_STEPS_HORIZON_LENGTH];
+    V_x = l_x[ilqr_horizon_length];
     m_state_state V_xx;
-    V_xx = l_xx[MUJ_STEPS_HORIZON_LENGTH];
+    V_xx = l_xx[ilqr_horizon_length];
     int Quu_pd_check_counter = 0;
     int number_steps_between_pd_checks = 100;
     float time = 0.0f;
 
-    for(int t = MUJ_STEPS_HORIZON_LENGTH - 1; t > -1; t--){
+    for(int t = ilqr_horizon_length - 1; t > -1; t--){
         m_state Q_x;
         m_ctrl Q_u;
         m_state_state Q_xx;
@@ -758,11 +704,11 @@ bool iLQR::backwardsPass_Quu_reg(){
 
 bool iLQR::backwardsPass_Vxx_reg(){
     m_state V_x;
-    V_x = l_x[MUJ_STEPS_HORIZON_LENGTH];
+    V_x = l_x[ilqr_horizon_length];
     m_state_state V_xx;
-    V_xx = l_xx[MUJ_STEPS_HORIZON_LENGTH];
+    V_xx = l_xx[ilqr_horizon_length];
 
-    for(int t = MUJ_STEPS_HORIZON_LENGTH - 1; t > -1; t--){
+    for(int t = ilqr_horizon_length - 1; t > -1; t--){
         m_state Q_x;
         m_ctrl Q_u;
         m_state_state Q_xx;
@@ -850,7 +796,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
         m_state X_new;
         m_ctrl _U;
 
-        for(int t = 0; t < MUJ_STEPS_HORIZON_LENGTH; t++) {
+        for(int t = 0; t < ilqr_horizon_length; t++) {
             // Step 1 - get old state and old control that were linearised around
             _X = modelTranslator->returnState(dArray[t]);
             _U = modelTranslator->returnControls(dArray[t]);
@@ -881,7 +827,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
             modelTranslator->setControls(mdata, U_new[t], grippersOpen_iLQR[t]);
 
             float currentCost;
-            currentCost = modelTranslator->costFunction(mdata, t, MUJ_STEPS_HORIZON_LENGTH, d_old);
+            currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, d_old);
 
             newCost += (currentCost * MUJOCO_DT);
 
@@ -940,7 +886,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
 
         cpMjData(model, dArray[0], mdata);
 
-        for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+        for(int i = 0; i < ilqr_horizon_length; i++){
 
             X_final[i] = modelTranslator->returnState(mdata);
             modelTranslator->setControls(mdata, U_new.at(i), grippersOpen_iLQR[i]);
@@ -952,7 +898,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
 
         cout << "best alpha was " << alpha << endl;
         cout << "cost improved in F.P - new cost: " << newCost << endl;
-        m_state termStateBest = modelTranslator->returnState(dArray[MUJ_STEPS_HORIZON_LENGTH]);
+        m_state termStateBest = modelTranslator->returnState(dArray[ilqr_horizon_length]);
         if(modelTranslator->taskNumber == 2){
             double cubeXDiff = termStateBest(7) - modelTranslator->X_desired(7);
             double cubeYDiff = termStateBest(8) - modelTranslator->X_desired(8);
@@ -986,7 +932,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
 //        m_state X_new;
 //        m_ctrl _U;
 //
-//        for(int t = 0; t < MUJ_STEPS_HORIZON_LENGTH; t++) {
+//        for(int t = 0; t < ilqr_horizon_length; t++) {
 //            // Step 1 - get old state and old control that were linearised around
 //            _X = modelTranslator->returnState(dArray[t]);
 //            _U = modelTranslator->returnControls(dArray[t]);
@@ -1012,7 +958,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
 //            modelTranslator->setControls(mdata, U_new[t], grippersOpen_iLQR[t]);
 //
 //            float currentCost;
-//            currentCost = modelTranslator->costFunction(mdata, t, MUJ_STEPS_HORIZON_LENGTH, d_alpha_last[i]);
+//            currentCost = modelTranslator->costFunction(mdata, t, ilqr_horizon_length, d_alpha_last[i]);
 //
 //            newCost[i] += (currentCost * MUJOCO_DT);
 //
@@ -1039,7 +985,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
 //
 //        cpMjData(model, dArray[0], mdata);
 //
-//        for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+//        for(int i = 0; i < ilqr_horizon_length; i++){
 //
 //            X_final[i] = modelTranslator->returnState(mdata);
 //            modelTranslator->setControls(mdata, U_new.at(i), grippersOpen_iLQR[i]);
@@ -1051,7 +997,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
 //
 //        cout << "best alpha was " << alpha << endl;
 //        cout << "cost improved in F.P - new cost: " << newCost << endl;
-//        m_state termStateBest = modelTranslator->returnState(dArray[MUJ_STEPS_HORIZON_LENGTH]);
+//        m_state termStateBest = modelTranslator->returnState(dArray[ilqr_horizon_length]);
 //        if(modelTranslator->taskNumber == 2){
 //            double cubeXDiff = termStateBest(7) - modelTranslator->X_desired(7);
 //            double cubeYDiff = termStateBest(8) - modelTranslator->X_desired(8);
@@ -1083,7 +1029,7 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
         m_state X_new;
         m_ctrl _U;
 
-        for(int t = 0; t < ilqr_horizon_length; t++){
+        for(int t = 0; t < numCalcedDerivs; t++){
             // Step 1 - get old state and old control that were linearised around
 
             if(COPYING_DERIVS){
@@ -1131,16 +1077,14 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
                     cout << "new U " << (t * num_mj_steps_per_control) + i << ": " << U_new[(t * num_mj_steps_per_control) + i] << endl;
                 }
 
-
-
                 modelTranslator->setControls(mdata, U_new[(t * num_mj_steps_per_control) + i], grippersOpen_iLQR[(t * num_mj_steps_per_control) + i]);
 
                 float currentCost;
                 if(t == 0){
-                    currentCost = modelTranslator->costFunction(mdata, (t * num_mj_steps_per_control) + i, MUJ_STEPS_HORIZON_LENGTH, d_old);
+                    currentCost = modelTranslator->costFunction(mdata, (t * num_mj_steps_per_control) + i, ilqr_horizon_length, d_old);
                 }
                 else{
-                    currentCost = modelTranslator->costFunction(mdata, (t * num_mj_steps_per_control) + i, MUJ_STEPS_HORIZON_LENGTH, d_old);
+                    currentCost = modelTranslator->costFunction(mdata, (t * num_mj_steps_per_control) + i, ilqr_horizon_length, d_old);
                 }
 
                 newCost += (currentCost * MUJOCO_DT);
@@ -1194,7 +1138,7 @@ float iLQR::forwardsPassStatic(float oldCost, bool &costReduced){
 
         cpMjData(model, dArray[0], mdata);
 
-        for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+        for(int i = 0; i < ilqr_horizon_length; i++){
 
             X_final[i] = modelTranslator->returnState(mdata);
             modelTranslator->setControls(mdata, U_new.at(i), grippersOpen_iLQR[i]);
@@ -1266,7 +1210,7 @@ bool iLQR::checkForConvergence(float newCost, float oldCost, bool costReduced){
 
     // store new controls
     if(costReduced){
-        for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+        for(int i = 0; i < ilqr_horizon_length; i++){
             U_old[i] = U_new[i].replicate(1, 1);
         }
     }
@@ -1548,7 +1492,7 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
 
 void iLQR::setInitControls(std::vector<m_ctrl> _initControls, std::vector<bool> _grippersOpen){
 
-    for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
+    for(int i = 0; i < ilqr_horizon_length; i++){
         initControls[i] = _initControls[i].replicate(1,1);
         U_old[i] = _initControls[i].replicate(1,1);
         U_new[i] = _initControls[i].replicate(1,1);
@@ -1563,8 +1507,8 @@ void iLQR::makeDataForOptimisation(){
     for(int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++){
         // populate dArray with mujoco data objects from start of trajec until end
         dArray[i] = mj_makeData(model);
-
     }
+
     dArray[MUJ_STEPS_HORIZON_LENGTH] = mj_makeData(model);
     cpMjData(model, dArray[MUJ_STEPS_HORIZON_LENGTH], mdata);
 
@@ -1583,13 +1527,9 @@ void iLQR::deleteMujocoData(){
 
 void iLQR::updateNumStepsPerDeriv(int stepPerDeriv){
     num_mj_steps_per_control = stepPerDeriv;
-    ilqr_horizon_length = MUJ_STEPS_HORIZON_LENGTH / num_mj_steps_per_control;
+    numCalcedDerivs = ilqr_horizon_length / num_mj_steps_per_control;
     numIterations = 0;
     linTimes.clear();
     numEvals.clear();
-
-}
-
-void iLQR::resetInitialStates(mjData *_d_init, m_state _X0){
 
 }

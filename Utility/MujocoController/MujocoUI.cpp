@@ -19,7 +19,6 @@ std::vector<m_ctrl> finalControls;
 std::vector<m_ctrl> MPCControls;
 std::vector<bool> grippersOpen;
 mjData* d_init;
-mjData* d_initMPC;
 mjData* d_init_master;
 m_point intermediatePoint;
 
@@ -38,7 +37,7 @@ void keyboard(GLFWwindow* window, int key, int scancode, int act, int mods){
     if (act == GLFW_PRESS && key == GLFW_KEY_BACKSPACE)
     {
         cout << "reset MPC sim" << endl;
-        cpMjData(model, mdata, d_initMPC);
+        cpMjData(model, mdata, d_init_master);
         MPCReplay = true;
         MPCControlCounter = 0;
     }
@@ -161,8 +160,9 @@ void windowCloseCallback(GLFWwindow * /*window*/) {
 void setupMujocoWorld(double timestep, const char* fileName){
     char error[1000];
 
-
+    cout << "befroe load model" << endl;
     model = mj_loadXML(fileName, NULL, error, 1000);
+    cout << "after load model " << endl;
 
     model->opt.timestep = timestep;
 
@@ -174,16 +174,18 @@ void setupMujocoWorld(double timestep, const char* fileName){
     // make data corresponding to model
     mdata = mj_makeData(model);         //mdata - main data, used for computaitons and displaying final trajectory
     d_init = mj_makeData(model);        //d_init saves the initial state of the starting data for a task
-    d_initMPC = mj_makeData(model);
     d_init_master = mj_makeData(model);
 
     // init GLFW, create window, make OpenGL context current, request v-sync
     // init GLFW
+    cout << "before glfw " << endl;
     if (!glfwInit())
         mju_error("Could not initialize GLFW");
     window = glfwCreateWindow(1200, 900, "iLQR_Testing", NULL, NULL);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+
+    cout << "after glfw " << endl;
 
     // initialize visualization data structures
     mjv_defaultCamera(&cam);
@@ -205,6 +207,8 @@ void setupMujocoWorld(double timestep, const char* fileName){
     mjv_makeScene(model, &scn, 2000);
     mjr_makeContext(model, &con, mjFONTSCALE_150);
 
+    cout << "before callbacks \n";
+
     // install GLFW mouse and keyboard callbacks
     glfwSetKeyCallback(window, keyboard);
     glfwSetCursorPosCallback(window, mouse_move);
@@ -221,7 +225,7 @@ void render(){
     int controlNum = 0;
     bool showFinalControls = true;
     m_ctrl nextControl;
-    cpMjData(model, mdata, d_init);
+    cpMjData(model, mdata, d_init_master);
 
     if(modelTranslator->taskNumber == 2){
         int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
@@ -255,7 +259,7 @@ void render(){
 
             if(controlNum >= MUJ_STEPS_HORIZON_LENGTH){
                 controlNum = 0;
-                cpMjData(model, mdata, d_init);
+                cpMjData(model, mdata, d_init_master);
                 simstart = mdata->time;
                 showFinalControls = 1 - showFinalControls;
 

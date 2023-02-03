@@ -75,6 +75,7 @@ class iLQR
     int scalingLevel[NUM_SCALING_LEVELS] = {1};
     int num_mj_steps_per_control;
     int ilqr_horizon_length;
+    int numCalcedDerivs;
 
     float avgLinTime;
     float avgNumEvals;
@@ -121,7 +122,7 @@ class iLQR
     int numIterations = 0;
     bool trajecCollisionFree = true;
 
-    std::vector<m_ctrl> optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations);
+    std::vector<m_ctrl> optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations, int horizonLength, int stepsPerDeriv);
     float rollOutTrajectory();
 
     void generateEvaluationWaypoints();
@@ -153,7 +154,6 @@ class iLQR
     void makeDataForOptimisation();
     void deleteMujocoData();
     void updateNumStepsPerDeriv(int stepPerDeriv);
-    void resetInitialStates(mjData *_d_init, m_state _X0);
 
     double calcVariance(std::vector<int> data);
 

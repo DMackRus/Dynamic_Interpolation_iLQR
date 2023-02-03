@@ -323,21 +323,22 @@ m_point MujocoController::quat2Eul(m_quat quaternion){
     return eulAngles;
 }
 
+// Assume XYZ convention (roll pitch yaw)
 m_quat MujocoController::eul2Quat(m_point euler){
     m_quat quat;
 
-    double c1 = cos(euler(1) / 2);
-    double c2 = cos(euler(2) / 2);
-    double c3 = cos(euler(0) / 2);
+    double cr = cos(euler(0) / 2);
+    double cp = cos(euler(1) / 2);
+    double cy = cos(euler(2) / 2);
 
-    double s1 = sin(euler(1) / 2);
-    double s2 = sin(euler(2) / 2);
-    double s3 = sin(euler(0) / 2);
+    double sr = sin(euler(0) / 2);
+    double sp = sin(euler(1) / 2);
+    double sy = sin(euler(2) / 2);
 
-    quat(0) = (c1 * c2 * c3) - (s1 * s2 * s3);
-    quat(1) = (s1 * s2 * c3) + (c1 * c2 * s3);
-    quat(2) = (s1 * c2 * c3) + (c1 * s2 * s3);
-    quat(3) = (c1 * s2 * c3) - (s1 * c2 * s3);
+    quat(0) = (cr * cp * cy) + (sr * sp * sy);
+    quat(1) = (sr * cp * cy) - (cr * sp * sy);
+    quat(2) = (cr * sp * cy) + (sr * cp * sy);
+    quat(3) = (cr * cp * sy) - (sr * sp * cy);
 
     return quat;
 }

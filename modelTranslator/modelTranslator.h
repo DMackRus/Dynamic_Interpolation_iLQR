@@ -153,8 +153,8 @@ public:
     m_state setupTask(mjData *d, bool randomTask, int taskRow);
     void setX_Desired(m_state _X_desired, mjData *d);
 
-    std::vector<m_ctrl> initSetupControls(mjData *d, mjData *d_init, m_state X0);
-    std::vector<m_ctrl> initOptimisationControls(mjData *d, mjData *d_init, m_state X0);
+    std::vector<m_ctrl> initSetupControls(mjData *d, mjData *d_init);
+    std::vector<m_ctrl> initOptimisationControls(mjData *d, mjData *d_init);
 
     // Given a set of mujoco data, is the task completed?
     bool taskCompleted(mjData *d);

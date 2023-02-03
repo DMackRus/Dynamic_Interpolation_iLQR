@@ -304,7 +304,6 @@ int main() {
         cpMjData(model, d_init, d_init_master);
 
         simpleTest();
-        optimiser->resetInitialStates(d_init, X0);
 
         render_simpleTest();
     }
@@ -340,7 +339,6 @@ void MPCControl(int taskRow){
         else{
 
         }
-
 
         m_ctrl nextControl = finalControls.at(0);
         // Delete control we have applied

@@ -350,13 +350,15 @@ void taskTranslator::setX_Desired(m_state _X_desired, mjData *d){
 }
 
 // Generate initial controls to set up Task
-std::vector<m_ctrl> taskTranslator::initSetupControls(mjData *d, mjData *d_init, m_state X0){
+std::vector<m_ctrl> taskTranslator::initSetupControls(mjData *d, mjData *d_init){
     std::vector<m_ctrl> initControls;
     cpMjData(model, d, d_init);
 
     // Main waypoints to follow and how long to take to get there
     std::vector<m_point> mainWayPoints;
     std::vector<int> wayPoints_timings;
+
+    m_state X0 = returnState(d_init);
 
     m_point desiredObjectEnd;
     desiredObjectEnd(0) = X_desired(7);
@@ -366,6 +368,9 @@ std::vector<m_ctrl> taskTranslator::initSetupControls(mjData *d, mjData *d_init,
     objectStart(1) = X0(8);
 
     double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
+    cout << "objectStart: " << objectStart << endl;
+    cout << "desiredObjectEnd: " << desiredObjectEnd << endl;
+    cout << "angle_EE_push: " << angle_EE_push << endl;
 
     initControls_MainWayPoints_Setup(d, model, angle_EE_push, objectStart, mainWayPoints, wayPoints_timings);
 
@@ -415,17 +420,19 @@ void initControls_MainWayPoints_Setup(mjData *d, mjModel *model, double angle_Pu
     mainWayPoint(1) = intermediatePoint(1);
 
     mainWayPoints.push_back(mainWayPoint);
-    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH / 2);
+    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH / 4);
 }
 
 // Generate initial controls to be optimised
-std::vector<m_ctrl> taskTranslator::initOptimisationControls(mjData *d, mjData *d_init, m_state X0) {
+std::vector<m_ctrl> taskTranslator::initOptimisationControls(mjData *d, mjData *d_init) {
 
     std::vector<m_ctrl> initControls;
     cpMjData(model, d, d_init);
 
     std::vector<m_point> mainWayPoints;
     std::vector<int> wayPoints_timings;
+
+    m_state X0 = returnState(d_init);
 
     m_point desiredObjectEnd;
     desiredObjectEnd(0) = X_desired(7);
@@ -435,6 +442,9 @@ std::vector<m_ctrl> taskTranslator::initOptimisationControls(mjData *d, mjData *
     objectStart(1) = X0(8);
 
     double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
+    cout << "objectStart: " << objectStart << endl;
+    cout << "desiredObjectEnd: " << desiredObjectEnd << endl;
+    cout << "angle_EE_push: " << angle_EE_push << endl;
 
     initControls_MainWayPoints_Optimise(d, model, desiredObjectEnd, angle_EE_push, mainWayPoints, wayPoints_timings);
 //    for(int i = 0; i < mainWayPoints.size(); i++){
@@ -514,7 +524,7 @@ void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desi
     mainWayPoint(1) = endPointY;
 
     mainWayPoints.push_back(mainWayPoint);
-    wayPointsTiming.push_back(MUJ_STEPS_HORIZON_LENGTH/2);
+    wayPointsTiming.push_back(3 * (MUJ_STEPS_HORIZON_LENGTH/4));
 
 }
 
@@ -523,7 +533,7 @@ std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWa
     std::vector<m_point> initPath;
 
     initPath.push_back(mainWayPoints[0]);
-    initPath[0](2) = 0.35f;
+    initPath[0](2) = 0.3f;
     wayPointsTiming[0]--;
 
     // should only be MUJ_STEPS_HORIZON_LENGTH number of controls
@@ -555,27 +565,21 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
     taskTranslator tempModelTranslator;
     tempModelTranslator.init(model);
     m_quat startQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
-    cout << "startQuat: " << startQuat << endl;
-    cout << "angle_EE_push: " << angle_EE_push << endl;
 
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
-    m_point startEul = globalMujocoController->quat2Eul(startQuat);
-    cout << "startPose: " << startPose << endl;
-    m_point desired_EE_Eul;
-    desired_EE_Eul(0) = startEul(0);
-    desired_EE_Eul(1) = startEul(1);
-    desired_EE_Eul(2) = angle_EE_push - (PI / 4);
 
-    cout << "startEul: " << startEul << endl;
-    cout << "desired_EE_Eul: " << desired_EE_Eul << endl;
+    // Get starting axis and put angle of push into it.
+    m_point startAxis;
+    startAxis(0) = startPose(3);
+    startAxis(1) = angle_EE_push - (PI / 4);
+    startAxis(2) = startPose(5);
 
-    m_quat desiredQuat = globalMujocoController->eul2Quat(desired_EE_Eul);
-
-    cout << "desiredQuat: " << desiredQuat << endl;
-
+    // calculate the desired quaternion of the push
+    m_quat desiredQuat = globalMujocoController->axis2Quat(startAxis);
 
     m_ctrl desiredControls;
 
+    // Calculate the initial position control to be the starting position
     if(!TORQUE_CONTROL){
         m_state startState = tempModelTranslator.returnState(d);
         for(int i = 0; i < NUM_CTRL; i++){
@@ -587,6 +591,11 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
 
         m_pose currentEEPose = globalMujocoController->returnBodyPose(model, d, EE_id);
         m_quat currentQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
+        if(i == 0){
+            cout << "current quat: " << currentQuat << endl;
+        }
+//        cout << "current quat: " << currentQuat << endl;
+//        cout << "desired quat: " << desiredQuat << endl;
 
         m_quat invQuat = globalMujocoController->invQuat(currentQuat);
         m_quat quatDiff = globalMujocoController->multQuat(desiredQuat, invQuat);
@@ -641,7 +650,7 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
 
         tempModelTranslator.stepModel(d, 1);
 
-//        if (i % 40 == 0) {
+//        if (i % 10 == 0) {
 //            mjrRect viewport = {0, 0, 0, 0};
 //            glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
 //
