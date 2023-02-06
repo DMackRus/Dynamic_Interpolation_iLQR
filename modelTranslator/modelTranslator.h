@@ -95,6 +95,7 @@ public:
     double alphay = 0.02;
 
     std::vector<std::string> stateNames;
+    std::string EE_name = "franka_gripper";
 
     float torqueLims[7] = {87, 87, 87, 87, 12, 12, 12};
     float jointLimsMax[7] = {2.97, 1.83, 2.97, 0, 2.97, 2.18, 2.97};
@@ -163,7 +164,7 @@ public:
     bool taskFailed(mjData *d);
 
     // Returns true if the predicted state and real state are too different
-    bool predictiveStateMismatch(mjData *d, m_state predictedState);
+    bool predictiveStateMismatch(mjData *d_predicted, mjData *d_real);
 
     bool newControlInitialisationNeeded(mjData *d, int counterSinceLastControlInitialisation);
 

@@ -73,7 +73,6 @@ taskTranslator::taskTranslator(){
     stateNames[4] = "panda0_link5";
     stateNames[5] = "panda0_link6";
     stateNames[6] = "panda0_link7";
-    stateNames[7] = "goal";
 //    stateNames[0] = "link1";
 //    stateNames[1] = "link2";
 //    stateNames[2] = "link3";
@@ -81,7 +80,8 @@ taskTranslator::taskTranslator(){
 //    stateNames[4] = "link5";
 //    stateNames[5] = "link6";
 //    stateNames[6] = "link7";
-//    stateNames[7] = "tin";
+
+    stateNames[7] = "goal";
 
     armControlCosts = 0;
     double armStateCosts = 0;
@@ -215,9 +215,6 @@ taskTranslator::taskTranslator(){
     stateIndexToFreeJntIndex[16] = 1;
 
 #endif
-
-    cout << "R: " << R.diagonal() << endl;
-    cout << "Q: " << Q.diagonal() << endl;
 
 
 }

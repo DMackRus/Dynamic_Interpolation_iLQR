@@ -368,9 +368,6 @@ std::vector<m_ctrl> taskTranslator::initSetupControls(mjData *d, mjData *d_init)
     objectStart(1) = X0(8);
 
     double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
-    cout << "objectStart: " << objectStart << endl;
-    cout << "desiredObjectEnd: " << desiredObjectEnd << endl;
-    cout << "angle_EE_push: " << angle_EE_push << endl;
 
     initControls_MainWayPoints_Setup(d, model, angle_EE_push, objectStart, mainWayPoints, wayPoints_timings);
 
@@ -382,10 +379,10 @@ std::vector<m_ctrl> taskTranslator::initSetupControls(mjData *d, mjData *d_init)
 }
 
 void initControls_MainWayPoints_Setup(mjData *d, mjModel *model, double angle_Push, m_point objectStart, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming){
-    const std::string EE_Name = "franka_gripper";
     const std::string goalName = "goal";
 
-    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+    const std::string EE_name = "franka_gripper";
+    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_name.c_str());
 
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
 
@@ -418,7 +415,7 @@ void initControls_MainWayPoints_Setup(mjData *d, mjModel *model, double angle_Pu
 
     mainWayPoint(0) = intermediatePoint(0);
     mainWayPoint(1) = intermediatePoint(1);
-    mainWayPoint(2) = 0.3f;
+    mainWayPoint(2) = 0.28f;
 
     mainWayPoints.push_back(mainWayPoint);
     wayPointsTiming.push_back(750);
@@ -443,29 +440,21 @@ std::vector<m_ctrl> taskTranslator::initOptimisationControls(mjData *d, mjData *
     objectStart(1) = X0(8);
 
     double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
-    cout << "objectStart: " << objectStart << endl;
-    cout << "desiredObjectEnd: " << desiredObjectEnd << endl;
-    cout << "angle_EE_push: " << angle_EE_push << endl;
 
     initControls_MainWayPoints_Optimise(d, model, desiredObjectEnd, angle_EE_push, mainWayPoints, wayPoints_timings);
-//    for(int i = 0; i < mainWayPoints.size(); i++){
-//        cout << "main waypoint " << i << ": " << mainWayPoints[i] << endl;
-//        cout << "timing " << wayPoints_timings[i] << endl;
-//    }
     std::vector<m_point> initPath = initControls_createAllWayPoints(mainWayPoints, wayPoints_timings);
 
     initControls = initControls_generateAllControls(d, model, initPath, angle_EE_push);
-
-    cout << "created init controls;" << endl;
 
     return initControls;
 }
 
 void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desiredObjectEnd, double angle_EE_push, std::vector<m_point>& mainWayPoints, std::vector<int>& wayPointsTiming){
-    const std::string EE_Name = "franka_gripper";
     const std::string goalName = "goal";
 
-    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+    const std::string EE_name = "franka_gripper";
+
+    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_name.c_str());
     int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
 
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
@@ -501,10 +490,10 @@ void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desi
     intermediatePoint(1) = intermediatePointY;
 
     float maxDistTravelled = 0.05 * ((5.0f/6.0f) * MUJ_STEPS_HORIZON_LENGTH * MUJOCO_DT);
-    cout << "max EE travel dist: " << maxDistTravelled << endl;
+//    cout << "max EE travel dist: " << maxDistTravelled << endl;
     float desiredDistTravelled = sqrt(pow((desired_endPointX - intermediatePointX),2) + pow((desired_endPointY - intermediatePointY),2));
     float proportionOfDistTravelled = maxDistTravelled / desiredDistTravelled;
-    cout << "proportion" << proportionOfDistTravelled << endl;
+//    cout << "proportion" << proportionOfDistTravelled << endl;
     if(proportionOfDistTravelled > 1){
         endPointX = desired_endPointX;
         endPointY = desired_endPointY;
@@ -514,16 +503,9 @@ void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desi
         endPointY = intermediatePointY + ((desired_endPointY - intermediatePointY) * proportionOfDistTravelled);
     }
 
-    cout << "desired X: " << desired_endPointX << endl;
-    cout << "desired Y: " << desired_endPointY << endl;
-    cout << "actual X: " << endPointX << endl;
-    cout << "actual Y: " << endPointY << endl;
-    cout << "inter X: " << intermediatePointX << endl;
-    cout << "inter Y: " << intermediatePointY << endl;
-
     mainWayPoint(0) = endPointX;
     mainWayPoint(1) = endPointY;
-    mainWayPoint(2) = 0.3f;
+    mainWayPoint(2) = 0.28f;
 
     mainWayPoints.push_back(mainWayPoint);
     wayPointsTiming.push_back(1250);
@@ -562,19 +544,20 @@ std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWa
 std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, std::vector<m_point> initPath, double angle_EE_push){
     std::vector<m_ctrl> initControls;
 
-    const std::string EE_Name = "franka_gripper";
-    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+
     taskTranslator tempModelTranslator;
     tempModelTranslator.init(model);
+    int EE_id = mj_name2id(model, mjOBJ_BODY, tempModelTranslator.EE_name.c_str());
     m_quat startQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
 
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
+    cout << "startPose: " << startPose << endl;
 
     // Get starting axis and put angle of push into it.
     m_point startAxis;
-    startAxis(0) = startPose(3);
+    startAxis(0) = 2.958;
     startAxis(1) = angle_EE_push - (PI / 4);
-    startAxis(2) = startPose(5);
+    startAxis(2) = -0.436;
 
     // calculate the desired quaternion of the push
     m_quat desiredQuat = globalMujocoController->axis2Quat(startAxis);
@@ -593,27 +576,17 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
 
         m_pose currentEEPose = globalMujocoController->returnBodyPose(model, d, EE_id);
         m_quat currentQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
-        if(i == 0){
-            cout << "current quat: " << currentQuat << endl;
-        }
-//        cout << "current quat: " << currentQuat << endl;
-//        cout << "desired quat: " << desiredQuat << endl;
-
         m_quat invQuat = globalMujocoController->invQuat(currentQuat);
         m_quat quatDiff = globalMujocoController->multQuat(desiredQuat, invQuat);
 
         m_point axisDiff = globalMujocoController->quat2Axis(quatDiff);
 
         m_pose differenceFromPath;
-        float gains[6] = {10000, 10000, 10000, 1000, 1000, 1000};
+        float gains[6] = {100000, 100000, 20000, 5000, 5000, 5000};
         for (int j = 0; j < 3; j++) {
             differenceFromPath(j) = initPath[i](j) - currentEEPose(j);
             differenceFromPath(j + 3) = axisDiff(j);
         }
-//
-//        cout << "current path point: " << initPath[i] << endl;
-//        cout << "currentEE Pose: " << currentEEPose << endl;
-//        cout << "diff from path: " << differenceFromPath << endl;
 
         // Calculate jacobian inverse
         MatrixXd Jac = globalMujocoController->calculateJacobian(model, d, EE_id);
@@ -696,19 +669,34 @@ bool taskTranslator::taskFailed(mjData *d){
     return taskFailed;
 }
 
-bool taskTranslator::predictiveStateMismatch(mjData *d, m_state predictedState){
+bool taskTranslator::predictiveStateMismatch(mjData *d_predicted, mjData *d_real){
     bool stateMismatch = false;
 
     double cumError = 0.0f;
-    m_state actualState = returnState(d);
+    m_state actualState = returnState(d_real);
+    m_state predictedState = returnState(d_predicted);
+    double errorGains[DOF] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 1};
+    double errors[DOF];
+
+//    for(int i = 0; i < 2; i++){
+//        cumError += abs(actualState(i + NUM_CTRL) - predictedState(i + NUM_CTRL));
+//    }
 
     for(int i = 0; i < DOF; i++){
-        cumError += abs(actualState(i) - predictedState(i));
+        errors[i] = errorGains[i] * (abs(actualState(i) - predictedState(i)));
+        cumError += errors[i];
     }
 
     // if cumulative error is greater than some threshold
-    if(cumError > 0.1){
+    if(cumError > 0.3){
         stateMismatch = true;
+
+        cout << "errors: " << errors[0] << ", " << errors[1] << ", " << errors[2] << ", " << errors[3] << ", " << errors[4] << ", " << errors[5] << ", " << errors[6] << ", " << errors[7] << ", " << errors[8] << endl;
+
+        cout << "cube x predicted: " << predictedState(7) << endl;
+        cout << "cube x real: " << actualState(7) << endl;
+        cout << "cube y predicted: " << predictedState(8) << endl;
+        cout << "cube y real: " << actualState(8) << endl;
     }
 
     return stateMismatch;
@@ -719,11 +707,10 @@ bool taskTranslator::newControlInitialisationNeeded(mjData *d, int counterSinceL
 
     // Get End effector position
 
-    if(counterSinceLastControlInitialisation > 1000){
-        const std::string EE_Name = "franka_gripper";
+    if(counterSinceLastControlInitialisation > 100){
         const std::string goalName = "goal";
 
-        int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+        int EE_id = mj_name2id(model, mjOBJ_BODY, EE_name.c_str());
         int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
 
         m_pose EE_Pose = globalMujocoController->returnBodyPose(model, d, EE_id);
@@ -741,10 +728,10 @@ bool taskTranslator::newControlInitialisationNeeded(mjData *d, int counterSinceL
 
         float angleDiff;
         angleDiff = angle_goal_object - angle_goal_EE;
-        if(angleDiff > 0.1){
+        if(angleDiff > 0.5){
             return true;
         }
-        if(angleDiff < -0.1){
+        if(angleDiff < -0.5){
             return true;
         }
 //        if(X_desired(8) < objectPos(1)){

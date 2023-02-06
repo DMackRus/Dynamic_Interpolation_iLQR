@@ -17,7 +17,40 @@
             <joint limited="false" damping="1000" armature="1" frictionloss="10"/>
             <geom contype="0" conaffinity="0" group="2" type="mesh" rgba=".42 0.42 0.42 .5"/>
         </default>
+
+        <default class="panda_n">
+            <material specular="0.5" shininess="0.25"/>
+            <joint armature="0.1" damping="1" axis="0 0 1" range="-2.8973 2.8973"/>
+            <general dyntype="none" biastype="affine" ctrlrange="-2.8973 2.8973" forcerange="-87 87"/>
+            <default class="finger">
+                <joint axis="0 1 0" type="slide" range="0 0.04"/>
+            </default>
+
+            <default class="visual">
+                <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+            </default>
+            <default class="collision">
+                <geom type="mesh" group="3"/>
+                <default class="fingertip_pad_collision_1">
+                    <geom type="box" size="0.0085 0.004 0.0085" pos="0 0.0055 0.0445"/>
+                </default>
+                <default class="fingertip_pad_collision_2">
+                    <geom type="box" size="0.003 0.002 0.003" pos="0.0055 0.002 0.05"/>
+                </default>
+                <default class="fingertip_pad_collision_3">
+                    <geom type="box" size="0.003 0.002 0.003" pos="-0.0055 0.002 0.05"/>
+                </default>
+                <default class="fingertip_pad_collision_4">
+                    <geom type="box" size="0.003 0.002 0.0035" pos="0.0055 0.002 0.0395"/>
+                </default>
+                <default class="fingertip_pad_collision_5">
+                    <geom type="box" size="0.003 0.002 0.0035" pos="-0.0055 0.002 0.0395"/>
+                </default>
+            </default>
+        </default>
+
     </default>
+
 
     <sensor>
         <jointpos name="fr_fin_jp1" joint="panda0_finger_joint1"/>
