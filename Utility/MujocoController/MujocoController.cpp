@@ -286,6 +286,43 @@ m_point MujocoController::quat2Axis(m_quat quaternion){
     return axisAngles;
 }
 
+Eigen::Matrix3d MujocoController::quat2RotMat(m_quat quat){
+    Eigen::Quaterniond q;
+    q.x() = quat(1);
+    q.y() = quat(2);
+    q.z() = quat(3);
+    q.w() = quat(0);
+
+    Eigen::Matrix3d R = q.normalized().toRotationMatrix();
+
+    cout << "Rotation matrix:" << endl << R << endl;
+
+    return R;
+}
+
+m_quat MujocoController::rotMat2Quat(Eigen::Matrix3d rotMat){
+    m_quat quat;
+
+    Eigen::Quaterniond q(rotMat);
+
+    quat(0) = q.w();
+    quat(1) = q.x();
+    quat(2) = q.y();
+    quat(3) = q.z();
+
+    return quat;
+}
+
+m_point MujocoController::crossProduct(m_point vec1, m_point vec2){
+    m_point crossProduct;
+
+    crossProduct(0) = (vec1(1) * vec2(2)) - (vec1(2) * vec2(1));
+    crossProduct(1) = (vec1(2) * vec2(0)) - (vec1(0) * vec2(2));
+    crossProduct(2) = (vec1(0) * vec2(1)) - (vec1(1) * vec2(0));
+
+    return crossProduct;
+}
+
 // Returns euler angles in ZYX convention (from online calculator) (yaw pitch roll)
 m_point MujocoController::quat2Eul(m_quat quaternion){
     m_point eulAngles;

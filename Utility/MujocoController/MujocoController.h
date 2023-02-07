@@ -95,6 +95,10 @@ public:
     m_quat invQuat(m_quat quat);
     m_quat multQuat(m_quat quat_l, m_quat quat_r);
 
+    Eigen::Matrix3d quat2RotMat(m_quat quat);
+    m_quat rotMat2Quat(Eigen::Matrix3d rotMat);
+    m_point crossProduct(m_point vec1, m_point vec2);
+
     void set_qPosVal(mjModel *m, mjData *d, int bodyId, bool freeJoint, int freeJntAxis, double val);
     void set_qVelVal(mjModel *m, mjData *d, int bodyId, bool freeJoint, int freeJntAxis, double val);
     double return_qPosVal(mjModel *m, mjData *d, int bodyId, bool freeJoint, int freeJntAxis);
