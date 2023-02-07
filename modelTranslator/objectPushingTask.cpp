@@ -367,6 +367,9 @@ std::vector<m_ctrl> taskTranslator::initSetupControls(mjData *d, mjData *d_init)
     objectStart(0) = X0(7);
     objectStart(1) = X0(8);
 
+    cout << "desiredObjectEnd: " << desiredObjectEnd << endl;
+    cout << "objectStart: " << objectStart << endl;
+
     double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
 
     initControls_MainWayPoints_Setup(d, model, angle_EE_push, objectStart, mainWayPoints, wayPoints_timings);
@@ -551,42 +554,37 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
     m_quat startQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
 
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
-    cout << "startPose: " << startPose << endl;
-
-    cout << "starting quat is: " << startQuat << endl;
     globalMujocoController->quat2RotMat(startQuat);
+    cout << "angle EE push is: " << angle_EE_push << endl;
 
-    double convertedAngle = angle_EE_push - (PI / 4);
-    cout << "converted angle is: " << convertedAngle << endl;
-    if(convertedAngle < (PI/2)){
-        convertedAngle = convertedAngle + (1 * PI);
-        cout << "converted angle is: " << convertedAngle << endl;
+
+//    cout << "converted angle is: " << convertedAngle << endl;
+    if(angle_EE_push < 0){
+        angle_EE_push = angle_EE_push + (2*PI);
+//        cout << "converted angle is: " << convertedAngle << endl;
     }
+
+    double convertedAngle = angle_EE_push - (PI/4);
+
+    cout << "x contribution:" << cos(convertedAngle) << "y contribution: " << sin(convertedAngle) << endl;
 
     m_point xAxis, yAxis, zAxis;
     xAxis << cos(convertedAngle), sin(convertedAngle), 0;
     zAxis << 0, 0, -1;
     yAxis = globalMujocoController->crossProduct(zAxis, xAxis);
 
+    cout << "yAxis: " << yAxis << endl;
+
     Eigen::Matrix3d rotMat;
     rotMat << xAxis(0), yAxis(0), zAxis(0),
             xAxis(1), yAxis(1), zAxis(1),
             xAxis(2), yAxis(2), zAxis(2);
 
-    // Get starting axis and put angle of push into it.
-    m_point startAxis;
-//    startAxis(0) = 2.958;
-//    startAxis(1) = angle_EE_push - (PI / 4);
-//    startAxis(2) = -0.436;
-
-    startAxis(0) = 2.958;
-    startAxis(1) = startPose(4);
-    startAxis(2) = angle_EE_push;
-
     // calculate the desired quaternion of the push
 //    m_quat desiredQuat = globalMujocoController->axis2Quat(startAxis);
 
     m_quat desiredQuat = globalMujocoController->rotMat2Quat(rotMat);
+    cout << "desired quat: " << desiredQuat << endl;
 
     m_ctrl desiredControls;
 
@@ -608,7 +606,7 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
         m_point axisDiff = globalMujocoController->quat2Axis(quatDiff);
 
         m_pose differenceFromPath;
-        float gains[6] = {100000, 100000, 20000, 5000, 5000, 5000};
+        float gains[6] = {10000, 10000, 20000, 5000, 5000, 5000};
         for (int j = 0; j < 3; j++) {
             differenceFromPath(j) = initPath[i](j) - currentEEPose(j);
             differenceFromPath(j + 3) = axisDiff(j);
@@ -682,7 +680,7 @@ bool taskTranslator::taskCompleted(mjData *d){
     float dist = sqrt(pow(diffX, 2) + pow(diffY, 2));
 
     // if object distance to goal is below some threshold, then task complete
-    if(dist < 0.05){
+    if(dist < 0.02){
         taskComplete = true;
     }
 
@@ -755,9 +753,11 @@ bool taskTranslator::newControlInitialisationNeeded(mjData *d, int counterSinceL
         float angleDiff;
         angleDiff = angle_goal_object - angle_goal_EE;
         if(angleDiff > 0.5){
+            cout << "reinitialise needed, angle diff: " << angleDiff << "\n";
             return true;
         }
         if(angleDiff < -0.5){
+            cout << "reinitialise needed, angle diff: " << angleDiff << "\n";
             return true;
         }
 //        if(X_desired(8) < objectPos(1)){

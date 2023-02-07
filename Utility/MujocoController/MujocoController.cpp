@@ -295,8 +295,6 @@ Eigen::Matrix3d MujocoController::quat2RotMat(m_quat quat){
 
     Eigen::Matrix3d R = q.normalized().toRotationMatrix();
 
-    cout << "Rotation matrix:" << endl << R << endl;
-
     return R;
 }
 
