@@ -367,8 +367,8 @@ std::vector<m_ctrl> taskTranslator::initSetupControls(mjData *d, mjData *d_init)
     objectStart(0) = X0(7);
     objectStart(1) = X0(8);
 
-    cout << "desiredObjectEnd: " << desiredObjectEnd << endl;
-    cout << "objectStart: " << objectStart << endl;
+//    cout << "desiredObjectEnd: " << desiredObjectEnd << endl;
+//    cout << "objectStart: " << objectStart << endl;
 
     double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
 
@@ -418,7 +418,7 @@ void initControls_MainWayPoints_Setup(mjData *d, mjModel *model, double angle_Pu
 
     mainWayPoint(0) = intermediatePoint(0);
     mainWayPoint(1) = intermediatePoint(1);
-    mainWayPoint(2) = 0.28f;
+    mainWayPoint(2) = 0.27f;
 
     mainWayPoints.push_back(mainWayPoint);
     wayPointsTiming.push_back(750);
@@ -508,7 +508,7 @@ void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desi
 
     mainWayPoint(0) = endPointX;
     mainWayPoint(1) = endPointY;
-    mainWayPoint(2) = 0.28f;
+    mainWayPoint(2) = 0.27f;
 
     mainWayPoints.push_back(mainWayPoint);
     wayPointsTiming.push_back(1250);
@@ -547,7 +547,6 @@ std::vector<m_point> initControls_createAllWayPoints(std::vector<m_point> mainWa
 std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, std::vector<m_point> initPath, double angle_EE_push){
     std::vector<m_ctrl> initControls;
 
-
     taskTranslator tempModelTranslator;
     tempModelTranslator.init(model);
     int EE_id = mj_name2id(model, mjOBJ_BODY, tempModelTranslator.EE_name.c_str());
@@ -555,7 +554,6 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
 
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
     globalMujocoController->quat2RotMat(startQuat);
-    cout << "angle EE push is: " << angle_EE_push << endl;
 
 
 //    cout << "converted angle is: " << convertedAngle << endl;
@@ -566,25 +564,25 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
 
     double convertedAngle = angle_EE_push - (PI/4);
 
-    cout << "x contribution:" << cos(convertedAngle) << "y contribution: " << sin(convertedAngle) << endl;
 
     m_point xAxis, yAxis, zAxis;
     xAxis << cos(convertedAngle), sin(convertedAngle), 0;
     zAxis << 0, 0, -1;
     yAxis = globalMujocoController->crossProduct(zAxis, xAxis);
 
-    cout << "yAxis: " << yAxis << endl;
+
 
     Eigen::Matrix3d rotMat;
     rotMat << xAxis(0), yAxis(0), zAxis(0),
             xAxis(1), yAxis(1), zAxis(1),
             xAxis(2), yAxis(2), zAxis(2);
 
-    // calculate the desired quaternion of the push
-//    m_quat desiredQuat = globalMujocoController->axis2Quat(startAxis);
-
     m_quat desiredQuat = globalMujocoController->rotMat2Quat(rotMat);
-    cout << "desired quat: " << desiredQuat << endl;
+    //cout << "angle EE push is: " << angle_EE_push << endl;
+    //cout << "x contribution:" << cos(convertedAngle) << "y contribution: " << sin(convertedAngle) << endl;
+    //cout << "yAxis: " << yAxis << endl;
+
+    //cout << "desired quat: " << desiredQuat << endl;
 
     m_ctrl desiredControls;
 
@@ -606,7 +604,7 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
         m_point axisDiff = globalMujocoController->quat2Axis(quatDiff);
 
         m_pose differenceFromPath;
-        float gains[6] = {10000, 10000, 20000, 5000, 5000, 5000};
+        float gains[6] = {10000, 10000, 30000, 5000, 5000, 5000};
         for (int j = 0; j < 3; j++) {
             differenceFromPath(j) = initPath[i](j) - currentEEPose(j);
             differenceFromPath(j + 3) = axisDiff(j);
@@ -680,7 +678,7 @@ bool taskTranslator::taskCompleted(mjData *d){
     float dist = sqrt(pow(diffX, 2) + pow(diffY, 2));
 
     // if object distance to goal is below some threshold, then task complete
-    if(dist < 0.02){
+    if(dist < 0.03){
         taskComplete = true;
     }
 
@@ -760,6 +758,13 @@ bool taskTranslator::newControlInitialisationNeeded(mjData *d, int counterSinceL
             cout << "reinitialise needed, angle diff: " << angleDiff << "\n";
             return true;
         }
+
+
+        // if the end effector has gotten to high
+        if(EE_Pose(2) > 0.4){
+            cout << "reinitialise needed, EE too high \n";
+            return true;
+        }
 //        if(X_desired(8) < objectPos(1)){
 //
 //        }
@@ -770,7 +775,12 @@ bool taskTranslator::newControlInitialisationNeeded(mjData *d, int counterSinceL
 //        }
     }
     else{
-        return false;
+        if(counterSinceLastControlInitialisation > 1000){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
 

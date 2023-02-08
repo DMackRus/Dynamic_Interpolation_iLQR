@@ -66,7 +66,7 @@ iLQR::iLQR(mjModel* m, mjData* d, taskTranslator* _modelTranslator){
 
 }
 
-std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations, int horizonLength, int stepsPerDeriv){
+std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations, int horizonLength, int stepsPerDeriv, std::vector<m_state>& predictedStates, std::vector<m_ctrl_state>& _K){
     // Setup Initial variables
     bool optimisationFinished = false;
     float newCost = 0;
@@ -212,8 +212,12 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
     cout << "////////////////////////////////////////////////////////////////////////////////////" << endl;
 
     std::vector<m_ctrl> returnControls;
+    _K.clear();
+    predictedStates.clear();
     for(int i = 0; i < ilqr_horizon_length; i++){
         returnControls.push_back(U_old[i]);
+        _K.push_back(K[i]);
+        predictedStates.push_back(X_old[i]);
     }
     return returnControls;
 }
@@ -895,16 +899,16 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
             cpMjData(model, dArray[i + 1], mdata);
         }
 
-        cout << "best alpha was " << alpha << endl;
-        cout << "cost improved in F.P - new cost: " << newCost << endl;
+        //cout << "best alpha was " << alpha << endl;
+        //cout << "cost improved in F.P - new cost: " << newCost << endl;
         m_state termStateBest = modelTranslator->returnState(dArray[ilqr_horizon_length]);
-        if(modelTranslator->taskNumber == 2){
-            double cubeXDiff = termStateBest(7) - modelTranslator->X_desired(7);
-            double cubeYDiff = termStateBest(8) - modelTranslator->X_desired(8);
-            cout << "final cube pos, x: " << termStateBest(7) << ", y: " << termStateBest(8) << endl;
-            cout << "final cube pos, x desired: " << modelTranslator->X_desired(7) << ", y: " << modelTranslator->X_desired(8) << endl;
-            cout << "final cube pos, x diff: " << cubeXDiff << ", y: " << cubeYDiff << endl;
-        }
+//        if(modelTranslator->taskNumber == 2){
+//            double cubeXDiff = termStateBest(7) - modelTranslator->X_desired(7);
+//            double cubeYDiff = termStateBest(8) - modelTranslator->X_desired(8);
+//            cout << "final cube pos, x: " << termStateBest(7) << ", y: " << termStateBest(8) << endl;
+//            cout << "final cube pos, x desired: " << modelTranslator->X_desired(7) << ", y: " << modelTranslator->X_desired(8) << endl;
+//            cout << "final cube pos, x diff: " << cubeXDiff << ", y: " << cubeYDiff << endl;
+//        }
         return newCost;
     }
 

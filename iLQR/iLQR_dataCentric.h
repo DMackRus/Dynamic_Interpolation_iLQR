@@ -122,7 +122,7 @@ class iLQR
     int numIterations = 0;
     bool trajecCollisionFree = true;
 
-    std::vector<m_ctrl> optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations, int horizonLength, int stepsPerDeriv);
+    std::vector<m_ctrl> optimise(mjData *_d_init, std::vector<m_ctrl> initControls, int maxIterations, int horizonLength, int stepsPerDeriv, std::vector<m_state>& predictedStates, std::vector<m_ctrl_state>& _K);
     float rollOutTrajectory();
 
     void generateEvaluationWaypoints();
