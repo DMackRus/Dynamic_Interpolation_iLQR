@@ -443,6 +443,7 @@ std::vector<m_ctrl> taskTranslator::initOptimisationControls(mjData *d, mjData *
     objectStart(1) = X0(8);
 
     double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
+    cout << "angle_EE_push: " << angle_EE_push << endl;
 
     initControls_MainWayPoints_Optimise(d, model, desiredObjectEnd, angle_EE_push, mainWayPoints, wayPoints_timings);
     std::vector<m_point> initPath = initControls_createAllWayPoints(mainWayPoints, wayPoints_timings);

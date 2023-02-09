@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/dave/projects/c++/Mujoco_Dynamic_iLQR"
-  "/home/dave/projects/c++/Mujoco_Dynamic_iLQR.pdb"
+  "/home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR"
+  "/home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR.pdb"
   "CMakeFiles/Mujoco_Dynamic_iLQR.dir/STOMP/STOMP.cpp.o"
   "CMakeFiles/Mujoco_Dynamic_iLQR.dir/STOMP/STOMP.cpp.o.d"
   "CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/MujocoController/MujocoController.cpp.o"
