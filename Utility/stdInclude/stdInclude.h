@@ -24,10 +24,14 @@ using namespace std::chrono;
 #define MUJ_STEPS_HORIZON_LENGTH 2000
 #define MUJOCO_DT 0.004
 
+#define X_INDEX 0
+#define Y_INDEX 1
+#define Z_INDEX 2
+
 enum VecPos{
-    x,
-    y,
-    z
+    x = 0,
+    y = 1,
+    z = 2
 };
 
 typedef Matrix<double, 3, 1> m_point;

@@ -15,9 +15,10 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/dave/projects/dynamic_iLQR/iLQR/iLQR_dataCentric.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/iLQR/iLQR_dataCentric.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/iLQR/iLQR_dataCentric.cpp.o.d"
   "/home/dave/projects/dynamic_iLQR/main.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/main.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/main.cpp.o.d"
   "/home/dave/projects/dynamic_iLQR/modelTranslator/boxFlickTask.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/boxFlickTask.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/boxFlickTask.cpp.o.d"
+  "/home/dave/projects/dynamic_iLQR/modelTranslator/cheezitPushingTask.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o.d"
+  "/home/dave/projects/dynamic_iLQR/modelTranslator/cylinderPushingTask.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o.d"
   "/home/dave/projects/dynamic_iLQR/modelTranslator/doublePendulum.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/doublePendulum.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/doublePendulum.cpp.o.d"
   "/home/dave/projects/dynamic_iLQR/modelTranslator/modelTranslator.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/modelTranslator.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/modelTranslator.cpp.o.d"
-  "/home/dave/projects/dynamic_iLQR/modelTranslator/objectPushingTask.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o.d"
   "/home/dave/projects/dynamic_iLQR/modelTranslator/objectReachingTask.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectReachingTask.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectReachingTask.cpp.o.d"
   "/home/dave/projects/dynamic_iLQR/modelTranslator/reachingTask.cpp" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.o" "gcc" "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.o.d"
   )

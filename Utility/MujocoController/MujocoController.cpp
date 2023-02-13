@@ -325,35 +325,17 @@ m_point MujocoController::crossProduct(m_point vec1, m_point vec2){
 m_point MujocoController::quat2Eul(m_quat quaternion){
     m_point eulAngles;
 
-    double roll, pitch, yaw;
-    double x, y, z, w;
-    double t0, t1, t2, t3, t4;
+    Quaternionf q;
+    q.x() = quaternion(1);
+    q.y() = quaternion(2);
+    q.z() = quaternion(3);
+    q.w() = quaternion(0);
 
-    w = quaternion(0);
-    x = quaternion(1);
-    y = quaternion(2);
-    z = quaternion(3);
+    auto euler = q.toRotationMatrix().eulerAngles(0, 1, 2);
 
-    t0 = 2.0 * (w * x + y * z);
-    t1 = 1.0 - 2.0 * (x * x + y * y);
-    roll = atan2(t0, t1);
-
-    t2 = 2.0 * (w * y - z * x);
-    if(t2 > 1){
-        t2 = 1.0;
-    }
-    if(t2 < -1){
-        t2 = -1.0;
-    }
-    pitch = asin(t2);
-
-    t3 = 2.0 * (w * z + x * y);
-    t4 = 1 - 2 * (y * y + z * z);
-    yaw = atan2(t3, t4);
-
-    eulAngles(0) = roll;
-    eulAngles(1) = pitch;
-    eulAngles(2) = yaw;
+    eulAngles(0) = euler(0);
+    eulAngles(1) = euler(1);
+    eulAngles(2) = euler(2);
 
     return eulAngles;
 }
@@ -362,18 +344,15 @@ m_point MujocoController::quat2Eul(m_quat quaternion){
 m_quat MujocoController::eul2Quat(m_point euler){
     m_quat quat;
 
-    double cr = cos(euler(0) / 2);
-    double cp = cos(euler(1) / 2);
-    double cy = cos(euler(2) / 2);
+    Quaternionf q;
+    q = AngleAxisf(euler(0), Vector3f::UnitX())
+        * AngleAxisf(euler(1), Vector3f::UnitY())
+        * AngleAxisf(euler(2), Vector3f::UnitZ());
 
-    double sr = sin(euler(0) / 2);
-    double sp = sin(euler(1) / 2);
-    double sy = sin(euler(2) / 2);
-
-    quat(0) = (cr * cp * cy) + (sr * sp * sy);
-    quat(1) = (sr * cp * cy) - (cr * sp * sy);
-    quat(2) = (cr * sp * cy) + (sr * cp * sy);
-    quat(3) = (cr * cp * sy) - (sr * sp * cy);
+    quat(0) = q.w();
+    quat(1) = q.x();
+    quat(2) = q.y();
+    quat(3) = q.z();
 
     return quat;
 }

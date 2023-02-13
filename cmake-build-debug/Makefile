@@ -48,10 +48,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /snap/clion/219/bin/cmake/linux/bin/cmake
+CMAKE_COMMAND = /snap/clion/222/bin/cmake/linux/x64/bin/cmake
 
 # The command to remove a file.
-RM = /snap/clion/219/bin/cmake/linux/bin/cmake -E rm -f
+RM = /snap/clion/222/bin/cmake/linux/x64/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -68,7 +68,7 @@ CMAKE_BINARY_DIR = /home/dave/projects/dynamic_iLQR/cmake-build-debug
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/snap/clion/219/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	/snap/clion/222/bin/cmake/linux/x64/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -78,7 +78,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/snap/clion/219/bin/cmake/linux/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/snap/clion/222/bin/cmake/linux/x64/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -297,6 +297,54 @@ modelTranslator/boxFlickTask.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/boxFlickTask.cpp.s
 .PHONY : modelTranslator/boxFlickTask.cpp.s
 
+modelTranslator/cheezitPushingTask.o: modelTranslator/cheezitPushingTask.cpp.o
+.PHONY : modelTranslator/cheezitPushingTask.o
+
+# target to build an object file
+modelTranslator/cheezitPushingTask.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o
+.PHONY : modelTranslator/cheezitPushingTask.cpp.o
+
+modelTranslator/cheezitPushingTask.i: modelTranslator/cheezitPushingTask.cpp.i
+.PHONY : modelTranslator/cheezitPushingTask.i
+
+# target to preprocess a source file
+modelTranslator/cheezitPushingTask.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.i
+.PHONY : modelTranslator/cheezitPushingTask.cpp.i
+
+modelTranslator/cheezitPushingTask.s: modelTranslator/cheezitPushingTask.cpp.s
+.PHONY : modelTranslator/cheezitPushingTask.s
+
+# target to generate assembly for a file
+modelTranslator/cheezitPushingTask.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.s
+.PHONY : modelTranslator/cheezitPushingTask.cpp.s
+
+modelTranslator/cylinderPushingTask.o: modelTranslator/cylinderPushingTask.cpp.o
+.PHONY : modelTranslator/cylinderPushingTask.o
+
+# target to build an object file
+modelTranslator/cylinderPushingTask.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o
+.PHONY : modelTranslator/cylinderPushingTask.cpp.o
+
+modelTranslator/cylinderPushingTask.i: modelTranslator/cylinderPushingTask.cpp.i
+.PHONY : modelTranslator/cylinderPushingTask.i
+
+# target to preprocess a source file
+modelTranslator/cylinderPushingTask.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.i
+.PHONY : modelTranslator/cylinderPushingTask.cpp.i
+
+modelTranslator/cylinderPushingTask.s: modelTranslator/cylinderPushingTask.cpp.s
+.PHONY : modelTranslator/cylinderPushingTask.s
+
+# target to generate assembly for a file
+modelTranslator/cylinderPushingTask.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.s
+.PHONY : modelTranslator/cylinderPushingTask.cpp.s
+
 modelTranslator/doublePendulum.o: modelTranslator/doublePendulum.cpp.o
 .PHONY : modelTranslator/doublePendulum.o
 
@@ -344,30 +392,6 @@ modelTranslator/modelTranslator.s: modelTranslator/modelTranslator.cpp.s
 modelTranslator/modelTranslator.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/modelTranslator.cpp.s
 .PHONY : modelTranslator/modelTranslator.cpp.s
-
-modelTranslator/objectPushingTask.o: modelTranslator/objectPushingTask.cpp.o
-.PHONY : modelTranslator/objectPushingTask.o
-
-# target to build an object file
-modelTranslator/objectPushingTask.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o
-.PHONY : modelTranslator/objectPushingTask.cpp.o
-
-modelTranslator/objectPushingTask.i: modelTranslator/objectPushingTask.cpp.i
-.PHONY : modelTranslator/objectPushingTask.i
-
-# target to preprocess a source file
-modelTranslator/objectPushingTask.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.i
-.PHONY : modelTranslator/objectPushingTask.cpp.i
-
-modelTranslator/objectPushingTask.s: modelTranslator/objectPushingTask.cpp.s
-.PHONY : modelTranslator/objectPushingTask.s
-
-# target to generate assembly for a file
-modelTranslator/objectPushingTask.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.s
-.PHONY : modelTranslator/objectPushingTask.cpp.s
 
 modelTranslator/objectReachingTask.o: modelTranslator/objectReachingTask.cpp.o
 .PHONY : modelTranslator/objectReachingTask.o
@@ -447,15 +471,18 @@ help:
 	@echo "... modelTranslator/boxFlickTask.o"
 	@echo "... modelTranslator/boxFlickTask.i"
 	@echo "... modelTranslator/boxFlickTask.s"
+	@echo "... modelTranslator/cheezitPushingTask.o"
+	@echo "... modelTranslator/cheezitPushingTask.i"
+	@echo "... modelTranslator/cheezitPushingTask.s"
+	@echo "... modelTranslator/cylinderPushingTask.o"
+	@echo "... modelTranslator/cylinderPushingTask.i"
+	@echo "... modelTranslator/cylinderPushingTask.s"
 	@echo "... modelTranslator/doublePendulum.o"
 	@echo "... modelTranslator/doublePendulum.i"
 	@echo "... modelTranslator/doublePendulum.s"
 	@echo "... modelTranslator/modelTranslator.o"
 	@echo "... modelTranslator/modelTranslator.i"
 	@echo "... modelTranslator/modelTranslator.s"
-	@echo "... modelTranslator/objectPushingTask.o"
-	@echo "... modelTranslator/objectPushingTask.i"
-	@echo "... modelTranslator/objectPushingTask.s"
 	@echo "... modelTranslator/objectReachingTask.o"
 	@echo "... modelTranslator/objectReachingTask.i"
 	@echo "... modelTranslator/objectReachingTask.s"

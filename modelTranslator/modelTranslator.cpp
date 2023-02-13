@@ -63,7 +63,7 @@ taskTranslator::taskTranslator(){
 
 #endif
 
-#ifdef OBJECT_PUSHING_TASK
+#ifdef CYLINDER_PUSHING_TASK
     taskNumber = 2;
     stateNames.push_back(std::string());
     stateNames[0] = "panda0_link1";
@@ -86,7 +86,7 @@ taskTranslator::taskTranslator(){
     armControlCosts = 0;
     double armStateCosts = 0;
     double armVelCosts = 0.1;
-    if(OBJECT_PUSHING_TASK){
+    if(CYLINDER_PUSHING_TASK){
         if(TORQUE_CONTROL){
             jerkVals[0] = 0.0007;
             jerkVals[1] = 0.0007;
@@ -138,17 +138,80 @@ taskTranslator::taskTranslator(){
         Q.diagonal()[i + DOF] = armVelCosts;
     }
 
-    Q.diagonal()[7] = cubeXPosCost;
-    Q.diagonal()[8] = cubeYPosCost;
+    Q.diagonal()[7] = cylinderXPosCost;
+    Q.diagonal()[8] = cylinderYPosCost;
     stateIndexToStateName[7] = 7;
     stateIndexToStateName[8] = 7;
     stateIndexToFreeJntIndex[7] = 0;
     stateIndexToFreeJntIndex[8] = 1;
 
-    Q.diagonal()[7 + DOF] = cubeVelCosts;
-    Q.diagonal()[8 + DOF] = cubeVelCosts;
+    Q.diagonal()[7 + DOF] = cylinderVelCosts;
+    Q.diagonal()[8 + DOF] = cylinderVelCosts;
 
 
+#endif
+
+#ifdef CHEEZIT_PUSHING_TASK
+    taskNumber = 3;
+    stateNames.push_back(std::string());
+    stateNames[0] = "panda0_link1";
+    stateNames[1] = "panda0_link2";
+    stateNames[2] = "panda0_link3";
+    stateNames[3] = "panda0_link4";
+    stateNames[4] = "panda0_link5";
+    stateNames[5] = "panda0_link6";
+    stateNames[6] = "panda0_link7";
+    stateNames[7] = "goal";
+
+    armControlCosts = 0;
+    double armStateCosts = 0;
+    double armVelCosts = 0.1;
+    if(TORQUE_CONTROL){
+        jerkVals[0] = 0.0007;
+        jerkVals[1] = 0.0007;
+        jerkVals[2] = 0.0007;
+        jerkVals[3] = 0.0007;
+        jerkVals[4] = 0.0007;
+        jerkVals[5] = 0.0007;
+        jerkVals[6] = 0.0007;
+    }
+    else{
+        jerkVals[0] = 1.0;
+        jerkVals[1] = 1.5;
+        jerkVals[2] = 1.0;
+        jerkVals[3] = 1.5;
+        jerkVals[4] = 1.0;
+        jerkVals[5] = 1.0;
+        jerkVals[6] = 1.0;
+    }
+
+    for(int i = 0; i < NUM_CTRL; i++){
+        R.diagonal()[i] = armControlCosts;
+        if(TORQUE_CONTROL){
+            J.diagonal()[i] = jerkVals[i];
+        }
+        else{
+            J.diagonal()[i] = jerkVals[i];
+        }
+
+        stateIndexToStateName[i] = i;
+        stateIndexToFreeJntIndex[i] = 0;
+    }
+
+    for(int i = 0; i < NUM_CTRL; i++){
+        Q.diagonal()[i] = armStateCosts;
+        Q.diagonal()[i + DOF] = armVelCosts;
+    }
+
+    Q.diagonal()[7] = cheezitXPosCost;
+    Q.diagonal()[8] = cheezitYPosCost;
+    stateIndexToStateName[7] = 7;
+    stateIndexToStateName[8] = 7;
+    stateIndexToFreeJntIndex[7] = 0;
+    stateIndexToFreeJntIndex[8] = 1;
+
+    Q.diagonal()[7 + DOF] = cheezitVelCosts;
+    Q.diagonal()[8 + DOF] = cheezitVelCosts;
 #endif
 
 #ifdef REACHING_CLUTTER_TASK

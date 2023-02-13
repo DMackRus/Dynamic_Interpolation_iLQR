@@ -200,7 +200,7 @@ void setupMujocoWorld(double timestep, const char* fileName){
     cam.lookat[1] = -0.0179;
     cam.lookat[2] = 0.258;
 
-    //model->opt.gravity[2] = 0;
+    model->opt.gravity[2] = 0;
     //model->opt.integrator = mjINT_EULER;
 
     // create scene and context
@@ -319,6 +319,8 @@ void render_simpleTest(){
         globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
     }
 
+    m_point currEuler;
+
     while (!glfwWindowShouldClose(window))
     {
         // advance interactive simulation for 1/60 sec
@@ -328,7 +330,18 @@ void render_simpleTest(){
         mjtNum simstart = mdata->time;
         while (mdata->time - simstart < 1.0 / 60.0) {
 
-            modelTranslator->setControls(mdata, initControls[controlNum], false);
+            int bodyId = mj_name2id(model, mjOBJ_BODY, "goal");
+            m_quat currentQuat = globalMujocoController->returnBodyQuat(model, mdata, bodyId);
+            currEuler = globalMujocoController->quat2Eul(currentQuat);
+            currEuler(2) += 0.01;
+            m_quat newQuat = globalMujocoController->eul2Quat(currEuler);
+            globalMujocoController->setBodyQuat(model, mdata, bodyId, newQuat);
+
+            m_ctrl temp;
+            temp << 0, -0.183, 0, -3.1, 0, 1.34, 0;
+
+//            modelTranslator->setControls(mdata, initControls[controlNum], false);
+            modelTranslator->setControls(mdata, temp, false);
 
             modelTranslator->stepModel(mdata, 1);
 

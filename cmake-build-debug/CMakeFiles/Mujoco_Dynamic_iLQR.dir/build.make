@@ -44,10 +44,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /snap/clion/219/bin/cmake/linux/bin/cmake
+CMAKE_COMMAND = /snap/clion/222/bin/cmake/linux/x64/bin/cmake
 
 # The command to remove a file.
-RM = /snap/clion/219/bin/cmake/linux/bin/cmake -E rm -f
+RM = /snap/clion/222/bin/cmake/linux/x64/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -167,19 +167,19 @@ CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.s: cmake_for
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dave/projects/dynamic_iLQR/modelTranslator/reachingTask.cpp -o CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.s
 
-CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o: CMakeFiles/Mujoco_Dynamic_iLQR.dir/flags.make
-CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o: /home/dave/projects/dynamic_iLQR/modelTranslator/objectPushingTask.cpp
-CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o: CMakeFiles/Mujoco_Dynamic_iLQR.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dave/projects/dynamic_iLQR/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o -MF CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o.d -o CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o -c /home/dave/projects/dynamic_iLQR/modelTranslator/objectPushingTask.cpp
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o: CMakeFiles/Mujoco_Dynamic_iLQR.dir/flags.make
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o: /home/dave/projects/dynamic_iLQR/modelTranslator/cylinderPushingTask.cpp
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o: CMakeFiles/Mujoco_Dynamic_iLQR.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dave/projects/dynamic_iLQR/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o -MF CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o.d -o CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o -c /home/dave/projects/dynamic_iLQR/modelTranslator/cylinderPushingTask.cpp
 
-CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dave/projects/dynamic_iLQR/modelTranslator/objectPushingTask.cpp > CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.i
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dave/projects/dynamic_iLQR/modelTranslator/cylinderPushingTask.cpp > CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.i
 
-CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dave/projects/dynamic_iLQR/modelTranslator/objectPushingTask.cpp -o CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.s
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dave/projects/dynamic_iLQR/modelTranslator/cylinderPushingTask.cpp -o CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.s
 
 CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectReachingTask.cpp.o: CMakeFiles/Mujoco_Dynamic_iLQR.dir/flags.make
 CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectReachingTask.cpp.o: /home/dave/projects/dynamic_iLQR/modelTranslator/objectReachingTask.cpp
@@ -237,6 +237,20 @@ CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/savingData/saveData.cpp.s: cmake_forc
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/savingData/saveData.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dave/projects/dynamic_iLQR/Utility/savingData/saveData.cpp -o CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/savingData/saveData.cpp.s
 
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o: CMakeFiles/Mujoco_Dynamic_iLQR.dir/flags.make
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o: /home/dave/projects/dynamic_iLQR/modelTranslator/cheezitPushingTask.cpp
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o: CMakeFiles/Mujoco_Dynamic_iLQR.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dave/projects/dynamic_iLQR/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o -MF CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o.d -o CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o -c /home/dave/projects/dynamic_iLQR/modelTranslator/cheezitPushingTask.cpp
+
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dave/projects/dynamic_iLQR/modelTranslator/cheezitPushingTask.cpp > CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.i
+
+CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dave/projects/dynamic_iLQR/modelTranslator/cheezitPushingTask.cpp -o CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.s
+
 # Object files for target Mujoco_Dynamic_iLQR
 Mujoco_Dynamic_iLQR_OBJECTS = \
 "CMakeFiles/Mujoco_Dynamic_iLQR.dir/main.cpp.o" \
@@ -246,11 +260,12 @@ Mujoco_Dynamic_iLQR_OBJECTS = \
 "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/modelTranslator.cpp.o" \
 "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/doublePendulum.cpp.o" \
 "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.o" \
-"CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o" \
+"CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o" \
 "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectReachingTask.cpp.o" \
 "CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/boxFlickTask.cpp.o" \
 "CMakeFiles/Mujoco_Dynamic_iLQR.dir/STOMP/STOMP.cpp.o" \
-"CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/savingData/saveData.cpp.o"
+"CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/savingData/saveData.cpp.o" \
+"CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o"
 
 # External object files for target Mujoco_Dynamic_iLQR
 Mujoco_Dynamic_iLQR_EXTERNAL_OBJECTS =
@@ -262,16 +277,17 @@ Mujoco_Dynamic_iLQR_EXTERNAL_OBJECTS =
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/modelTranslator.cpp.o
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/doublePendulum.cpp.o
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/reachingTask.cpp.o
-/home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectPushingTask.cpp.o
+/home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cylinderPushingTask.cpp.o
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/objectReachingTask.cpp.o
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/boxFlickTask.cpp.o
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/STOMP/STOMP.cpp.o
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/Utility/savingData/saveData.cpp.o
+/home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/modelTranslator/cheezitPushingTask.cpp.o
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/build.make
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: /home/dave/projects/dynamic_iLQR/mujoco/include/libmujoco.so
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: /home/dave/projects/dynamic_iLQR/mujoco/include/libglfw.so.3
 /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR: CMakeFiles/Mujoco_Dynamic_iLQR.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/dave/projects/dynamic_iLQR/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking CXX executable /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/dave/projects/dynamic_iLQR/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable /home/dave/projects/dynamic_iLQR/Mujoco_Dynamic_iLQR"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Mujoco_Dynamic_iLQR.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

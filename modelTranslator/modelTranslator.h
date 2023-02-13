@@ -11,8 +11,9 @@
 
 //#define DOUBLE_PENDULUM 1
 //#define REACHING 1
-#define OBJECT_PUSHING 1
-//#define PUSHING_CLUTTER
+//#define CYLINDER_PUSHING 1
+#define CHEEZIT_PUSHING 1
+//#define PUSHING_CLUTTER 1
 
 #define TORQUE_CONTROL 0
 
@@ -28,10 +29,16 @@
 #define REACHING_TASK 1
 #endif
 
-#ifdef OBJECT_PUSHING
+#ifdef CYLINDER_PUSHING
 #define DOF 9
 #define NUM_CTRL 7
-#define OBJECT_PUSHING_TASK 1
+#define CYLINDER_PUSHING_TASK 1
+#endif
+
+#ifdef CHEEZIT_PUSHING
+#define DOF 11
+#define NUM_CTRL 7
+#define CHEEZIT_PUSHING_TASK 1
 #endif
 
 #ifdef PUSHING_CLUTTER
@@ -78,10 +85,17 @@ public:
 
     double jerkVals[NUM_CTRL];
 
-#ifdef OBJECT_PUSHING_TASK
-    double cubeXPosCost = 1;
-    double cubeYPosCost = 1;
-    double cubeVelCosts = 2;
+#ifdef CYLINDER_PUSHING_TASK
+    double cylinderXPosCost = 1;
+    double cylinderYPosCost = 1;
+    double cylinderVelCosts = 2;
+#endif
+
+#ifdef CHEEZIT_PUSHING_TASK
+    double cheezitXPosCost = 1;
+    double cheezitYPosCost = 1;
+    double cheezitAngleCost = 1;
+    double cheezitVelCosts = 2;
 #endif
 
     // State vector is: 7 joint angles, two cube pos (X and Y), cube rot, 7 joint velocities, two cube velocities (X and Y)

@@ -21,7 +21,7 @@ extern MujocoController *globalMujocoController;
 extern mjModel* model;						// MuJoCo model
 extern mjData* mdata;						// MuJoCo data
 //mjData *opt_mdata;                        // Optimisation data
-extern mjData* d_initMPC;
+extern mjData* d_init_master;				// Initial data
 
 extern iLQR* optimiser;
 extern STOMP* optimiser_stomp;
@@ -29,6 +29,8 @@ extern taskTranslator* modelTranslator;
 saveData* dataSaver;
 
 m_state X0;
+std::vector<m_state> predicted_States;
+std::vector<m_ctrl_state> K_feedback;
 
 extern std::vector<m_ctrl> initControls;
 extern std::vector<m_ctrl> finalControls;
@@ -47,60 +49,39 @@ int main() {
     const char *fileName;
     int taskRow = 5;        // done testing with taskRow = 3
 
-    //------------------------------------//
-    m_point eulerAngle;
-    eulerAngle << 0, 0, 0;
-
-    m_quat quat = globalMujocoController->eul2Quat(eulerAngle);
-    cout << "Quat: " << quat << endl;
-
-    eulerAngle << PI, 0, 0;
-
-    quat = globalMujocoController->eul2Quat(eulerAngle);
-    cout << "Quat: " << quat << endl;
-
-    eulerAngle << 0, PI, 0;
-
-    quat = globalMujocoController->eul2Quat(eulerAngle);
-    cout << "Quat: " << quat << endl;
-
-    eulerAngle << 0, 0, PI;
-
-    quat = globalMujocoController->eul2Quat(eulerAngle);
-    cout << "Quat: " << quat << endl;
-
-    //------------------------------------//
-
+    // All these model paths are set up to a cloned folder not present in this repo,
+    // clone https://github.com/DMackRus/Franka-emika-panda-arm into the root of this project
     // Acrobot model
     if(modelTranslator->taskNumber == 0){
-        fileName = "franka_emika/Acrobot.xml";
+        fileName = "Franka-emika-panda-arm/Acrobot.xml";
     }
     // General franka_emika arm reaching model
     else if(modelTranslator->taskNumber == 1){
-        fileName = "franka_emika/reaching.xml";
+        fileName = "Franka-emika-panda-arm/V1/reaching_scene.xml";
     }
-    // Franka arm plus a cylinder to push along ground
+    // Franka arm pushing a cylinder object along the floor - does not care about orientation of cylinder
     else if(modelTranslator->taskNumber == 2){
-        fileName = "franka_emika/object_pushing.xml";
-        //"/home/davidrussell/catkin_ws/src/realRobotExperiments_TrajOpt/Dynamic_Interpolation_iLQR/franka_emika/object_pushing.xml"
+        fileName = "Franka-emika-panda-arm/V1/cylinder_pushing.xml";
+        //fileName = "Franka-emika-panda-arm/V1/cheezit_pushing.xml";
+    }
+    // Franka arm pushing a cheezit's box along the floor, orientation does matter, task either tries to keep box upright or push it over
+    else if(modelTranslator->taskNumber == 3){
+        fileName = "Franka-emika-panda-arm/V1/cheezit_pushing.xml";
     }
     // Franka arm reaches through mild clutter to goal object
-    else if(modelTranslator->taskNumber == 3){
-        const char *fileName = "franka_emika/reaching_through_clutter.xml";
+    else if(modelTranslator->taskNumber == 4){
+        fileName = "Franka-emika-panda-arm/V1/reaching_scene.xml";
+        return 1;
     }
     else{
         std::cout << "Valid task number not supplied, program, exiting" << std::endl;
+        return 1;
     }
 
     initMujoco(0.004, fileName);
-
     // cant be done in modelTranslator constructor as model is not initialised yet
     modelTranslator->init(model);
 
-//    for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
-//        initControls.push_back(m_ctrl());
-//        finalControls.push_back(m_ctrl());
-//    }
 
     if(RUN_ILQR){
 
@@ -111,14 +92,11 @@ int main() {
         X0 = modelTranslator->setupTask(d_init, false, taskRow);
         cout << "X desired: " << modelTranslator->X_desired << endl;
 
-        // Set up number of steps per derivative
-        optimiser->updateNumStepsPerDeriv(5);
-
         // Set up initial controls
-        initControls = modelTranslator->initOptimisationControls(mdata, d_init, X0);
+        initControls = modelTranslator->initOptimisationControls(mdata, d_init);
 
         // Optimise controls
-        finalControls = optimiser->optimise(d_init, initControls, 10);
+        finalControls = optimiser->optimise(d_init, initControls, 10, MUJ_STEPS_HORIZON_LENGTH, 5, predicted_States, K_feedback);
 
         render();
     }
@@ -129,7 +107,7 @@ int main() {
         X0 = modelTranslator->setupTask(d_init, false, taskRow);
         cout << "X desired: " << modelTranslator->X_desired << endl;
 
-        initControls = modelTranslator->initOptimisationControls(mdata, d_init, X0);
+        initControls = modelTranslator->initOptimisationControls(mdata, d_init);
 
         optimiser_stomp->initialise(d_init);
         finalControls = optimiser_stomp->optimise(initControls);
@@ -150,7 +128,7 @@ int main() {
             // updates X0, X_desired and d_init_test
             X0 = modelTranslator->setupTask(d_init, false, taskRow);
             cpMjData(model, optimiser->d_init, d_init);
-            initControls = modelTranslator->initOptimisationControls(mdata, d_init, X0);
+            initControls = modelTranslator->initOptimisationControls(mdata, d_init);
             optimiser->setInitControls(initControls, grippersOpen);
 
             optimiser->rollOutTrajectory();
@@ -194,7 +172,7 @@ int main() {
                 // randomly generate start and goal state, reinitialise initial state data object
                 initControls.clear();
                 modelTranslator->X_desired = modelTranslator->setupTask(mdata, false, i);
-                initControls = modelTranslator->initOptimisationControls(mdata, d_init, X0);
+                initControls = modelTranslator->initOptimisationControls(mdata, d_init);
 
                 std::vector<float> _initCosts;
                 std::vector<float> _finalsCosts;
@@ -206,10 +184,9 @@ int main() {
                 for(int j = 0; j < NUM_TESTS_EXTRAPOLATION; j++){
                     auto iLQRStart = high_resolution_clock::now();
                     optimiser->updateNumStepsPerDeriv(dataSaver->scalingLevels[j]);
-                    optimiser->resetInitialStates(d_init, X0);
                     optimiser->setInitControls(initControls, grippersOpen);
 
-                    finalControls = optimiser->optimise(d_init, initControls, 10);
+                    finalControls = optimiser->optimise(d_init, initControls, 10, MUJ_STEPS_HORIZON_LENGTH, 5, predicted_States, K_feedback);
 
                     auto iLQRStop = high_resolution_clock::now();
                     auto iLQRDur = duration_cast<microseconds>(iLQRStop - iLQRStart);
@@ -239,7 +216,7 @@ int main() {
                 // randomly generate start and goal state, reinitialise initial state data object
                 initControls.clear();
                 modelTranslator->X_desired = modelTranslator->setupTask(mdata, false, i);
-                initControls = modelTranslator->initOptimisationControls(mdata, d_init, X0);
+                initControls = modelTranslator->initOptimisationControls(mdata, d_init);
 
                 std::vector<float> _initCosts;
                 std::vector<float> _finalsCosts;
@@ -251,10 +228,9 @@ int main() {
 
                 auto iLQRStart = high_resolution_clock::now();
                 optimiser->updateNumStepsPerDeriv(5);
-                optimiser->resetInitialStates(d_init, X0);
                 optimiser->setInitControls(initControls, grippersOpen);
 
-                finalControls = optimiser->optimise(d_init, initControls, 10);
+                finalControls = optimiser->optimise(d_init, initControls, 10, MUJ_STEPS_HORIZON_LENGTH, 5, predicted_States, K_feedback);
 
                 auto iLQRStop = high_resolution_clock::now();
                 auto iLQRDur = duration_cast<microseconds>(iLQRStop - iLQRStart);
@@ -299,7 +275,13 @@ int main() {
     else{
 
         optimiser = new iLQR(model, mdata, modelTranslator);
-        X0 = modelTranslator->setupTask(mdata, false, taskRow);
+
+        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
+                0.5, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0;
+        modelTranslator->setState(mdata, X0);
+        //X0 = modelTranslator->setupTask(mdata, false, taskRow);
         cpMjData(model, d_init_master, mdata);
         cpMjData(model, d_init, d_init_master);
 
@@ -317,8 +299,8 @@ void MPCControl(int taskRow){
     X0 = modelTranslator->setupTask(d_init_master, false, taskRow);
     cout << "X desired: " << modelTranslator->X_desired << endl;
     optimiser->updateNumStepsPerDeriv(5);
-    initControls = modelTranslator->initSetupControls(mdata, d_init, X0);
-    finalControls = optimiser->optimise(d_init, initControls, 2);
+    initControls = modelTranslator->initSetupControls(mdata, d_init);
+    finalControls = optimiser->optimise(d_init, initControls, 2, MUJ_STEPS_HORIZON_LENGTH, 5, predicted_States, K_feedback);
     bool taskComplete = false;
     int currentControlCounter = 0;
     int visualCounter = 0;
@@ -327,7 +309,7 @@ void MPCControl(int taskRow){
     bool movingToStart = true;
 
     cpMjData(model, mdata, d_init);
-    cpMjData(model, d_initMPC, d_init);
+    cpMjData(model, d_init_master, d_init);
 
     auto MPCStart = high_resolution_clock::now();
 
@@ -370,7 +352,8 @@ void MPCControl(int taskRow){
         m_state predictedState = modelTranslator->returnState(mdata);
         //Check states mismatched
         bool replanNeeded = false;
-        if(modelTranslator->predictiveStateMismatch(mdata, predictedState)){
+        // todo - fix this!!!!!!!!!!!!!!!!!
+        if(modelTranslator->predictiveStateMismatch(mdata, mdata)){
             replanNeeded = true;
         }
 
@@ -385,11 +368,11 @@ void MPCControl(int taskRow){
             if(modelTranslator->newControlInitialisationNeeded(d_init, reInitialiseCounter)){
                 cout << "re initialise needed" << endl;
                 reInitialiseCounter = 0;
-                initControls = modelTranslator->initOptimisationControls(mdata, d_init, X0);
-                finalControls = optimiser->optimise(d_init, initControls, 2);
+                initControls = modelTranslator->initOptimisationControls(mdata, d_init);
+                finalControls = optimiser->optimise(d_init, initControls, 2, MUJ_STEPS_HORIZON_LENGTH, 5, predicted_States, K_feedback);
             }
             else{
-                finalControls = optimiser->optimise(d_init, finalControls, 2);
+                finalControls = optimiser->optimise(d_init, finalControls, 2, MUJ_STEPS_HORIZON_LENGTH, 5, predicted_States, K_feedback);
             }
         }
 
@@ -409,9 +392,9 @@ void MPCControl(int taskRow){
 }
 
 void simpleTest(){
-    std::vector<m_ctrl> initControlsSetup = modelTranslator->initSetupControls(mdata, d_init, X0);
+    std::vector<m_ctrl> initControlsSetup = modelTranslator->initSetupControls(mdata, d_init);
     cpMjData(model, d_init, mdata);
-    std::vector<m_ctrl> initControlsOptimise = modelTranslator->initOptimisationControls(mdata, d_init, X0);
+    std::vector<m_ctrl> initControlsOptimise = modelTranslator->initOptimisationControls(mdata, d_init);
     cout << "initControlSetup " << initControlsSetup.size() << endl;
     initControls.insert(initControls.end(), initControlsSetup.begin(), initControlsSetup.end());
     initControls.insert(initControls.end(), initControlsOptimise.begin(), initControlsOptimise.end());

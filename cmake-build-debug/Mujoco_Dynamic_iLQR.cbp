@@ -124,6 +124,12 @@
 		<Unit filename="/home/dave/projects/dynamic_iLQR/modelTranslator/boxFlickTask.cpp">
 			<Option target="Mujoco_Dynamic_iLQR"/>
 		</Unit>
+		<Unit filename="/home/dave/projects/dynamic_iLQR/modelTranslator/cheezitPushingTask.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
+		<Unit filename="/home/dave/projects/dynamic_iLQR/modelTranslator/cylinderPushingTask.cpp">
+			<Option target="Mujoco_Dynamic_iLQR"/>
+		</Unit>
 		<Unit filename="/home/dave/projects/dynamic_iLQR/modelTranslator/doublePendulum.cpp">
 			<Option target="Mujoco_Dynamic_iLQR"/>
 		</Unit>
@@ -131,9 +137,6 @@
 			<Option target="Mujoco_Dynamic_iLQR"/>
 		</Unit>
 		<Unit filename="/home/dave/projects/dynamic_iLQR/modelTranslator/modelTranslator.h">
-			<Option target="Mujoco_Dynamic_iLQR"/>
-		</Unit>
-		<Unit filename="/home/dave/projects/dynamic_iLQR/modelTranslator/objectPushingTask.cpp">
 			<Option target="Mujoco_Dynamic_iLQR"/>
 		</Unit>
 		<Unit filename="/home/dave/projects/dynamic_iLQR/modelTranslator/objectReachingTask.cpp">
