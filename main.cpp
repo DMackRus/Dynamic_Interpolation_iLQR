@@ -89,14 +89,33 @@ int main() {
         optimiser = new iLQR(model, mdata, modelTranslator);
 
         // Setup task - sets up desired state and initial state
-        X0 = modelTranslator->setupTask(d_init, false, taskRow);
-        cout << "X desired: " << modelTranslator->X_desired << endl;
+        X0 = modelTranslator->setupTask(d_init_master, true, taskRow);
+        cpMjData(model, d_init, d_init_master);
+
+        std::vector<m_ctrl> initControlsSetup = modelTranslator->initSetupControls(mdata, d_init);
+        std::vector<m_ctrl> initControlsOptimise;
+        std::vector<m_ctrl> finalControlsOptimise;
+
+        cpMjData(model, d_init, mdata);
 
         // Set up initial controls
-        initControls = modelTranslator->initOptimisationControls(mdata, d_init);
-
+        initControlsOptimise = modelTranslator->initOptimisationControls(mdata, d_init);
         // Optimise controls
-        finalControls = optimiser->optimise(d_init, initControls, 10, MUJ_STEPS_HORIZON_LENGTH, 5, predicted_States, K_feedback);
+        cout << "optimisation begins" << endl;
+        finalControlsOptimise = optimiser->optimise(d_init, initControlsOptimise, 10, initControlsOptimise.size(), 5, predicted_States, K_feedback);
+
+        // attach init controls to displayed init controls
+        initControls.insert(initControls.end(), initControlsSetup.begin(), initControlsSetup.end());
+        initControls.insert(initControls.end(), initControlsOptimise.begin(), initControlsOptimise.end());
+
+        cout << "initControls.size(): " << initControls.size() << endl;
+
+        // attach init controls setup and final controls to final controls display
+        finalControls.insert(finalControls.end(), initControlsSetup.begin(), initControlsSetup.end());
+        finalControls.insert(finalControls.end(), finalControlsOptimise.begin(), finalControlsOptimise.end());
+
+        cout << "finalControls.size(): " << finalControls.size() << endl;
+
 
         render();
     }
@@ -276,12 +295,12 @@ int main() {
 
         optimiser = new iLQR(model, mdata, modelTranslator);
 
-        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
-                0.5, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0;
-        modelTranslator->setState(mdata, X0);
-        //X0 = modelTranslator->setupTask(mdata, false, taskRow);
+//        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
+//                0.5, 0, 0.1055, 0, 0, PI/2,
+//                0, 0, 0, 0, 0, 0, 0,
+//                0, 0, 0, 0, 0, 0;
+//        modelTranslator->setState(mdata, X0);
+        X0 = modelTranslator->setupTask(mdata, true, taskRow);
         cpMjData(model, d_init_master, mdata);
         cpMjData(model, d_init, d_init_master);
 
@@ -399,7 +418,6 @@ void simpleTest(){
     initControls.insert(initControls.end(), initControlsSetup.begin(), initControlsSetup.end());
     initControls.insert(initControls.end(), initControlsOptimise.begin(), initControlsOptimise.end());
     cout << "initControl " << initControls.size() << endl;
-    cout << "test" << endl;
 }
 
 #ifdef REACHING_CLUTTER

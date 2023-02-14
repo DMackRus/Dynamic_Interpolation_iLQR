@@ -207,7 +207,6 @@ void setupMujocoWorld(double timestep, const char* fileName){
     mjv_makeScene(model, &scn, 2000);
     mjr_makeContext(model, &con, mjFONTSCALE_150);
 
-    cout << "before callbacks \n";
 
     // install GLFW mouse and keyboard callbacks
     glfwSetKeyCallback(window, keyboard);
@@ -319,8 +318,6 @@ void render_simpleTest(){
         globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
     }
 
-    m_point currEuler;
-
     while (!glfwWindowShouldClose(window))
     {
         // advance interactive simulation for 1/60 sec
@@ -331,27 +328,26 @@ void render_simpleTest(){
         while (mdata->time - simstart < 1.0 / 60.0) {
 
             int bodyId = mj_name2id(model, mjOBJ_BODY, "goal");
-            m_quat currentQuat = globalMujocoController->returnBodyQuat(model, mdata, bodyId);
-            currEuler = globalMujocoController->quat2Eul(currentQuat);
-            currEuler(2) += 0.01;
-            m_quat newQuat = globalMujocoController->eul2Quat(currEuler);
-            globalMujocoController->setBodyQuat(model, mdata, bodyId, newQuat);
+//            m_quat currentQuat = globalMujocoController->returnBodyQuat(model, mdata, bodyId);
+//            currEuler = globalMujocoController->quat2Eul(currentQuat);
+//            currEuler(2) += 0.01;
+//            m_quat newQuat = globalMujocoController->eul2Quat(currEuler);
+//            globalMujocoController->setBodyQuat(model, mdata, bodyId, newQuat);
 
-            m_ctrl temp;
-            temp << 0, -0.183, 0, -3.1, 0, 1.34, 0;
-
-//            modelTranslator->setControls(mdata, initControls[controlNum], false);
-            modelTranslator->setControls(mdata, temp, false);
+            //modelTranslator->setControls(mdata, initControls[controlNum], false);
+            m_state currState = modelTranslator->returnState(mdata);
+            currState(11) += 0.01;
+            modelTranslator->setState(mdata, currState);
 
             modelTranslator->stepModel(mdata, 1);
 
             controlNum++;
 
-            if (controlNum >= MUJ_STEPS_HORIZON_LENGTH) {
+            if (controlNum >= initControls.size()) {
                 controlNum = 0;
                 cpMjData(model, mdata, d_init_master);
                 simstart = mdata->time;
-                if (modelTranslator->taskNumber == 2) {
+                if (modelTranslator->taskNumber == 2 or modelTranslator->taskNumber == 3) {
                     int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 
                     m_pose interPose;

@@ -66,6 +66,18 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
     //m_ctrl controlDiff = U - lastControl;
     m_ctrl velDiff = armVels_now - armVels_last;
 
+//    cout << "X_diff: " << X_diff.transpose() << endl;
+//    cout << "Q_scaled: " << Q_scaled.diagonal() << endl;
+
+//    VectorXd gah(1);
+//    gah = X_diff.transpose() * Q_scaled * X_diff;
+//    cout << "pos difference cost: " << gah << endl;
+//    if(gah(0) > 1){
+//        cout << "X_diff: " << X_diff.transpose() << endl;
+//        cout << "Q_scaled: " << Q_scaled.diagonal() << endl;
+//        cout << "wut" << endl;
+//    }
+
     temp = ((X_diff.transpose() * Q_scaled * X_diff)) + (U.transpose() * R * U) + (velDiff.transpose() * J * velDiff);
 
     stateCost = temp(0);
@@ -149,22 +161,30 @@ void taskTranslator::setState(mjData *d, m_state X){
     // set item positions
     globalMujocoController->set_qPosVal(model, d, goalBoxId, true, X_INDEX, X(7));
     globalMujocoController->set_qPosVal(model, d, goalBoxId, true, Y_INDEX, X(8));
+    globalMujocoController->set_qPosVal(model, d, goalBoxId, true, Z_INDEX, X(9));
 
     // set item velocities
     globalMujocoController->set_qVelVal(model, d, goalBoxId, true, X_INDEX, X(7 + DOF));
     globalMujocoController->set_qVelVal(model, d, goalBoxId, true, Y_INDEX, X(8 + DOF));
+    globalMujocoController->set_qVelVal(model, d, goalBoxId, true, Z_INDEX, X(9 + DOF));
 
     // Get current euler angles
     m_quat currentQuat = globalMujocoController->returnBodyQuat(model, d, goalBoxId);
-    m_point currentEuler = globalMujocoController->quat2Eul(currentQuat);
+    m_point currentEuler = globalMujocoController->quat2Axis(currentQuat);
 
     m_point setEuler;
     setEuler = currentEuler.replicate(1,1);
-    setEuler(0) = X(9);
-    setEuler(2) = X(10);
+    setEuler(0) = X(10);
+    setEuler(1) = X(11);
+    setEuler(2) = X(12);
 
-    m_quat desiredQuat = globalMujocoController->eul2Quat(setEuler);
+    m_quat desiredQuat = globalMujocoController->axis2Quat(setEuler);
     globalMujocoController->setBodyQuat(model, d, goalBoxId, desiredQuat);
+
+    // Set the angular velocities of the box
+    globalMujocoController->set_qVelVal(model, d, goalBoxId, true, 3, X(10 + DOF));
+    globalMujocoController->set_qVelVal(model, d, goalBoxId, true, 4, X(11 + DOF));
+    globalMujocoController->set_qVelVal(model, d, goalBoxId, true, 5, X(12 + DOF));
 
 }
 
@@ -182,11 +202,29 @@ m_state taskTranslator::returnState(mjData *d){
     // Get Mujoco Id's for items in the scene
     int goalBoxId = mj_name2id(model, mjOBJ_BODY, stateNames[7].c_str());
 
-    state(7) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, 0);
-    state(8) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, 1);
+    // Get box positions
+    state(7) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, X_INDEX);
+    state(8) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, Y_INDEX);
+    state(9) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, Z_INDEX);
 
-    state(7 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 0);
-    state(8 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 1);
+    // Get box velocities
+    state(7 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, X_INDEX);
+    state(8 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, Y_INDEX);
+    state(9 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, Z_INDEX);
+
+    // Get current euler angles
+    m_quat currentQuat = globalMujocoController->returnBodyQuat(model, d, goalBoxId);
+    m_point currentEuler = globalMujocoController->quat2Axis(currentQuat);
+
+    // Set Euler angles of box into state vector
+    state(10) = currentEuler(0);
+    state(11) = currentEuler(1);
+    state(12) = currentEuler(2);
+
+    // Get box angular velocities
+    state(10 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 3);
+    state(11 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 4);
+    state(12 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 5);
 
     return state;
 }
@@ -201,8 +239,12 @@ m_dof taskTranslator::returnVelocities(mjData *d){
 
     int goalBoxId = mj_name2id(model, mjOBJ_BODY, stateNames[7].c_str());
 
-    velocities(NUM_CTRL) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 0);
-    velocities(NUM_CTRL + 1) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 1);
+    velocities(NUM_CTRL) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, X_INDEX);
+    velocities(NUM_CTRL + 1) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, Y_INDEX);
+    velocities(NUM_CTRL + 2) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, Z_INDEX);
+    velocities(NUM_CTRL + 3) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 3);
+    velocities(NUM_CTRL + 4) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 4);
+    velocities(NUM_CTRL + 5) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 5);
 
     return velocities;
 }
@@ -217,8 +259,12 @@ m_dof taskTranslator::returnAccelerations(mjData *d){
 
     int goalBoxId = mj_name2id(model, mjOBJ_BODY, stateNames[7].c_str());
 
-    accelerations(NUM_CTRL) = globalMujocoController->return_qAccVal(model, d, goalBoxId, true, 0);
-    accelerations(NUM_CTRL + 1) = globalMujocoController->return_qAccVal(model, d, goalBoxId, true, 1);
+    accelerations(NUM_CTRL) = globalMujocoController->return_qAccVal(model, d, goalBoxId, true, X_INDEX);
+    accelerations(NUM_CTRL + 1) = globalMujocoController->return_qAccVal(model, d, goalBoxId, true, Y_INDEX);
+    accelerations(NUM_CTRL + 2) = globalMujocoController->return_qAccVal(model, d, goalBoxId, true, Z_INDEX);
+    accelerations(NUM_CTRL + 3) = globalMujocoController->return_qAccVal(model, d, goalBoxId, true, 3);
+    accelerations(NUM_CTRL + 4) = globalMujocoController->return_qAccVal(model, d, goalBoxId, true, 4);
+    accelerations(NUM_CTRL + 5) = globalMujocoController->return_qAccVal(model, d, goalBoxId, true, 5);
 
     return accelerations;
 }
@@ -232,9 +278,9 @@ m_state taskTranslator::generateRandomStartState(mjData *d){
 //    cubeX = 0.5;
 //    cubeY = 0;
     randState <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
-            cubeX, cubeY,
+            cubeX, cubeY, 0, 0,
             0, 0, 0, 0, 0, 0, 0,
-            0, 0;
+            0, 0, 0, 0;
 
     return randState;
 }
@@ -248,9 +294,9 @@ m_state taskTranslator::generateRandomGoalState(m_state startState, mjData *d){
 //    desiredCubeX = 0.7;
 //    desiredCubeY = 0.1;
     randState << 0, 0, 0, 0, 0, 0, 0,
-            desiredCubeX, desiredCubeY,
+            desiredCubeX, desiredCubeY, 0, 0,
             0, 0, 0, 0, 0, 0, 0,
-            0, 0;
+            0, 0, 0, 0;
 
     int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_goal");
 
@@ -309,35 +355,43 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
     }
     else{
         // Generate start and desired state randomly
-        X0 = generateRandomStartState(d);
-        //cout << "-------------- random init state ----------------" << endl << X0 << endl;
-        //X_desired = generateRandomGoalState(X0, mdata);
-        //cout << "-------------- random desired state ----------------" << endl << X_desired << endl;
-    }
+        //X0 = generateRandomStartState(d);
 
-//    const std::string EE_Name = "franka_gripper";
-//    X0(5) += PI/4;
-//    setState(d, X0);
-//    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
-//    m_quat quat = globalMujocoController->returnBodyQuat(model, d, EE_id);
-//    cout << "Quat: " << quat << endl;
-//
-//    m_point eul = globalMujocoController->quat2Eul(quat);
-//
-//    cout << "Eul: " << eul << endl;
+//        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
+//                0.5, 0, 0.1055, 0, 0, PI/2,
+//                0, 0, 0, 0, 0, 0, 0,
+//                0, 0, 0, 0, 0, 0;
+        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
+                0.8, 0, 0.3, 0, 0, PI/2,
+                0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0;
+
+        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
+                        0.7, 0, 0.1055, 0, 0, PI/2,
+                        0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0;
+    }
 
     setState(d, X0);
 
-    if(taskNumber == 2){
-        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_goal");
+    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_goal");
 
-        m_pose goalPose;
-        goalPose.setZero();
-        goalPose(0) = X_desired(7);
-        goalPose(1) = X_desired(8);
+    m_pose goalPose;
+    goalPose.setZero();
+    goalPose(0) = X_desired(7);
+    goalPose(1) = X_desired(8);
+//
+//    m_point desiredGoalEul;
+//    desiredGoalEul(0) = X_desired(10);
+//    desiredGoalEul(1) = X_desired(11);
+//    desiredGoalEul(2) = X_desired(12);
+//    m_quat desiredQuat = globalMujocoController->eul2Quat(desiredGoalEul);
+//
+    cout << "Goal pose: " << goalPose(0) << ", " << goalPose(1) << endl;
 
-        globalMujocoController->setBodyPose(model, d, visualGoalId, goalPose);
-    }
+    globalMujocoController->setBodyPose(model, d, visualGoalId, goalPose);
+//    globalMujocoController->setBodyQuat(model, d, visualGoalId, desiredQuat);
+
 
     // smooth any random pertubations for starting data
     stepModel(d, 2);
@@ -348,16 +402,15 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
 void taskTranslator::setX_Desired(m_state _X_desired, mjData *d){
     X_desired = _X_desired.replicate(1, 1);
 
-    if(taskNumber == 2){
-        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_goal");
+    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_goal");
 
-        m_pose goalPose;
-        goalPose.setZero();
-        goalPose(0) = X_desired(7);
-        goalPose(1) = X_desired(8);
+    m_pose goalPose;
+    goalPose.setZero();
+    goalPose(0) = X_desired(7);
+    goalPose(1) = X_desired(8);
 
-        globalMujocoController->setBodyPose(model, d, visualGoalId, goalPose);
-    }
+    globalMujocoController->setBodyPose(model, d, visualGoalId, goalPose);
+
 }
 
 // Generate initial controls to set up Task
@@ -576,13 +629,10 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
 
     double convertedAngle = angle_EE_push - (PI/4);
 
-
     m_point xAxis, yAxis, zAxis;
     xAxis << cos(convertedAngle), sin(convertedAngle), 0;
     zAxis << 0, 0, -1;
     yAxis = globalMujocoController->crossProduct(zAxis, xAxis);
-
-
 
     Eigen::Matrix3d rotMat;
     rotMat << xAxis(0), yAxis(0), zAxis(0),

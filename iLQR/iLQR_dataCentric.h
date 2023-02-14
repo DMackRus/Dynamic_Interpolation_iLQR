@@ -36,7 +36,7 @@
 //#define DQACCDQ_MAX                     250
 #define DQACCDQ_MAX                     10
 
-#define VISUALISE_ROLLOUTS              0
+#define VISUALISE_ROLLOUTS              1
 
 class iLQR
 {

@@ -109,6 +109,9 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
             evaluationWaypoints.clear();
         }
 
+        cout << "f_x[1000]: " << endl << f_x[1000] << endl;
+        cout << "f_u[1000]: " << endl << f_u[1000] << endl;
+
         if(COPYING_DERIVS){
             copyDerivatives();
         }
@@ -409,7 +412,6 @@ void iLQR::getDerivativesDynamically(){
     for(int t = 0; t < evaluationWaypoints.size(); t++){
 
         int index = evaluationWaypoints[t];
-
         lineariseDynamics(A[t], B[t], dArray[index]);
 
     }

@@ -176,13 +176,20 @@ taskTranslator::taskTranslator(){
         jerkVals[6] = 0.0007;
     }
     else{
-        jerkVals[0] = 1.0;
-        jerkVals[1] = 1.5;
-        jerkVals[2] = 1.0;
-        jerkVals[3] = 1.5;
-        jerkVals[4] = 1.0;
-        jerkVals[5] = 1.0;
-        jerkVals[6] = 1.0;
+//        jerkVals[0] = 1.0;
+//        jerkVals[1] = 1.5;
+//        jerkVals[2] = 1.0;
+//        jerkVals[3] = 1.5;
+//        jerkVals[4] = 1.0;
+//        jerkVals[5] = 1.0;
+//        jerkVals[6] = 1.0;
+        jerkVals[0] = 2.0;
+        jerkVals[1] = 2.5;
+        jerkVals[2] = 2.0;
+        jerkVals[3] = 2.5;
+        jerkVals[4] = 2.0;
+        jerkVals[5] = 2.0;
+        jerkVals[6] = 2.0;
     }
 
     for(int i = 0; i < NUM_CTRL; i++){
@@ -203,15 +210,28 @@ taskTranslator::taskTranslator(){
         Q.diagonal()[i + DOF] = armVelCosts;
     }
 
-    Q.diagonal()[7] = cheezitXPosCost;
-    Q.diagonal()[8] = cheezitYPosCost;
+    // Set the costs for the cheezit position
+    for(int i = 0; i < 6; i++){
+        Q.diagonal()[7 + i] = cheezitPoseCosts[i];
+    }
+
     stateIndexToStateName[7] = 7;
     stateIndexToStateName[8] = 7;
-    stateIndexToFreeJntIndex[7] = 0;
-    stateIndexToFreeJntIndex[8] = 1;
+    stateIndexToStateName[9] = 7;
+    stateIndexToStateName[10] = 7;
+    stateIndexToStateName[11] = 7;
+    stateIndexToStateName[12] = 7;
+    stateIndexToFreeJntIndex[7] = X_INDEX;
+    stateIndexToFreeJntIndex[8] = Y_INDEX;
+    stateIndexToFreeJntIndex[9] = Z_INDEX;
+    stateIndexToFreeJntIndex[10] = X_INDEX;
+    stateIndexToFreeJntIndex[11] = Y_INDEX;
+    stateIndexToFreeJntIndex[12] = Z_INDEX;
 
-    Q.diagonal()[7 + DOF] = cheezitVelCosts;
-    Q.diagonal()[8 + DOF] = cheezitVelCosts;
+    for(int i = 0; i < 6; i++){
+        Q.diagonal()[7 + DOF + i] = cheezitVelCosts;
+    }
+
 #endif
 
 #ifdef REACHING_CLUTTER_TASK
@@ -278,7 +298,6 @@ taskTranslator::taskTranslator(){
     stateIndexToFreeJntIndex[16] = 1;
 
 #endif
-
 
 }
 
@@ -359,6 +378,10 @@ void taskTranslator::perturbPosition(mjData *perturbedData, mjData *origData, in
     }
     else{
         freeJoint = true;
+        // TODO - make this more generic
+        if(stateIndex >= 10){
+            quatMath = true;
+        }
     }
 
     if(!quatMath){
@@ -368,14 +391,29 @@ void taskTranslator::perturbPosition(mjData *perturbedData, mjData *origData, in
     }
     else{
 
+//        m_quat origQuat = globalMujocoController->returnBodyQuat(model, origData, bodyId);
+//        m_point origAxis = globalMujocoController->quat2Axis(origQuat);
+//
+//        m_point perturbedAxis;
+//        perturbedAxis = origAxis.replicate(1,1);
+//        perturbedAxis(1) += eps;
+//
+//        m_quat perturbedQuat = globalMujocoController->axis2Quat(perturbedAxis);
+//        globalMujocoController->setBodyQuat(model, perturbedData, bodyId, perturbedQuat);
+        //cout << "quat perturbed: " << stateIndex << "stateIndex " << freeJntIndex << endl;
+
         m_quat origQuat = globalMujocoController->returnBodyQuat(model, origData, bodyId);
-        m_point origAxis = globalMujocoController->quat2Axis(origQuat);
+        m_point origEul = globalMujocoController->quat2Axis(origQuat);
 
-        m_point perturbedAxis;
-        perturbedAxis = origAxis.replicate(1,1);
-        perturbedAxis(1) += eps;
+        //cout << "origEul: " << origEul << endl;
 
-        m_quat perturbedQuat = globalMujocoController->axis2Quat(perturbedAxis);
+        m_point pertubedEul;
+        pertubedEul = origEul.replicate(1,1);
+        pertubedEul(freeJntIndex) += eps;
+
+        //cout << "pertubedEul: " << pertubedEul << endl;
+
+        m_quat perturbedQuat = globalMujocoController->axis2Quat(pertubedEul);
         globalMujocoController->setBodyQuat(model, perturbedData, bodyId, perturbedQuat);
 
     }
