@@ -200,7 +200,7 @@ void setupMujocoWorld(double timestep, const char* fileName){
     cam.lookat[1] = -0.0179;
     cam.lookat[2] = 0.258;
 
-    model->opt.gravity[2] = 0;
+    //model->opt.gravity[2] = 0;
     //model->opt.integrator = mjINT_EULER;
 
     // create scene and context

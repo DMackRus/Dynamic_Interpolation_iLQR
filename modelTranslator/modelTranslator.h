@@ -11,8 +11,8 @@
 
 //#define DOUBLE_PENDULUM 1
 //#define REACHING 1
-//#define CYLINDER_PUSHING 1
-#define CHEEZIT_PUSHING 1
+#define CYLINDER_PUSHING 1
+//#define CHEEZIT_PUSHING 1
 //#define PUSHING_CLUTTER 1
 
 #define TORQUE_CONTROL 0

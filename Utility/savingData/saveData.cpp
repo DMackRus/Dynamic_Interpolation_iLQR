@@ -8,6 +8,15 @@ saveData::saveData(){
 
 }
 
+void saveData::saveCylinderDiffToCSV(std::vector<double> cubeDiffs, std::string fileName){
+    ofstream outputCylinderDiff;
+    outputCylinderDiff.open(fileName);
+    for(int i = 0; i < cubeDiffs.size(); i++){
+        outputCylinderDiff << cubeDiffs[i] << endl;
+    }
+    outputCylinderDiff.close();
+}
+
 void saveData::saveTrajecToCSV(iLQR* optimiser){
 
     for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){

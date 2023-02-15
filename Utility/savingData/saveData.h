@@ -53,6 +53,7 @@ public:
     void saveDataCollectionToCSV(int taskNumber);
     void saveTestingData(int numTestingData, const std::string& name);
     void saveTrajecToCSV(iLQR* optimiser);
+    void saveCylinderDiffToCSV(std::vector<double> cubeDiffs, std::string fileName);
 
 };
 
