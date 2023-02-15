@@ -94,7 +94,7 @@ public:
 
 #ifdef CHEEZIT_PUSHING_TASK
     double cheezitVelCosts = 0;
-    double cheezitPoseCosts[6] = {0.5, 0.5, 0, 1, 0, 0};
+    double cheezitPoseCosts[6] = {0, 0, 0, 3, 3, 3};
 #endif
 
     // State vector is: 7 joint angles, two cube pos (X and Y), cube rot, 7 joint velocities, two cube velocities (X and Y)

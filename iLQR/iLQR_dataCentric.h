@@ -33,8 +33,8 @@
 
 #define NUM_ALPHA                       5
 
-//#define DQACCDQ_MAX                     250
-#define DQACCDQ_MAX                     10
+#define DQACCDQ_MAX                     250
+//#define DQACCDQ_MAX                     10
 
 #define VISUALISE_ROLLOUTS              1
 

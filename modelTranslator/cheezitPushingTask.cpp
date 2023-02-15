@@ -68,7 +68,7 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
 
 //    cout << "X_diff: " << X_diff.transpose() << endl;
 //    cout << "Q_scaled: " << Q_scaled.diagonal() << endl;
-
+//
 //    VectorXd gah(1);
 //    gah = X_diff.transpose() * Q_scaled * X_diff;
 //    cout << "pos difference cost: " << gah << endl;
@@ -168,17 +168,10 @@ void taskTranslator::setState(mjData *d, m_state X){
     globalMujocoController->set_qVelVal(model, d, goalBoxId, true, Y_INDEX, X(8 + DOF));
     globalMujocoController->set_qVelVal(model, d, goalBoxId, true, Z_INDEX, X(9 + DOF));
 
-    // Get current euler angles
-    m_quat currentQuat = globalMujocoController->returnBodyQuat(model, d, goalBoxId);
-    m_point currentEuler = globalMujocoController->quat2Axis(currentQuat);
+    m_point setAxis;
+    setAxis << X(10), X(11), X(12);
 
-    m_point setEuler;
-    setEuler = currentEuler.replicate(1,1);
-    setEuler(0) = X(10);
-    setEuler(1) = X(11);
-    setEuler(2) = X(12);
-
-    m_quat desiredQuat = globalMujocoController->axis2Quat(setEuler);
+    m_quat desiredQuat = globalMujocoController->axis2Quat(setAxis);
     globalMujocoController->setBodyQuat(model, d, goalBoxId, desiredQuat);
 
     // Set the angular velocities of the box
@@ -214,12 +207,12 @@ m_state taskTranslator::returnState(mjData *d){
 
     // Get current euler angles
     m_quat currentQuat = globalMujocoController->returnBodyQuat(model, d, goalBoxId);
-    m_point currentEuler = globalMujocoController->quat2Axis(currentQuat);
+    m_point currentAxis = globalMujocoController->quat2Axis(currentQuat);
 
     // Set Euler angles of box into state vector
-    state(10) = currentEuler(0);
-    state(11) = currentEuler(1);
-    state(12) = currentEuler(2);
+    state(10) = currentAxis(0);
+    state(11) = currentAxis(1);
+    state(12) = currentAxis(2);
 
     // Get box angular velocities
     state(10 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 3);
@@ -362,14 +355,21 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
 //                0, 0, 0, 0, 0, 0, 0,
 //                0, 0, 0, 0, 0, 0;
         X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
-                0.8, 0, 0.3, 0, 0, PI/2,
+                0.8, 0, 0.3, 0, PI/2, 0,
                 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0;
 
+        // Toppled over
+//        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
+//                        0.7, 0, 0.1055, 1.21, 1.21, 1.21,
+//                        0, 0, 0, 0, 0, 0, 0,
+//                        0, 0, 0, 0, 0, 0;
+
+        // Not toppled over
         X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
-                        0.7, 0, 0.1055, 0, 0, PI/2,
-                        0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0;
+                0.7, 0, 0.1055, 0, 0, PI/2,
+                0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0;
     }
 
     setState(d, X0);
@@ -394,7 +394,7 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
 
 
     // smooth any random pertubations for starting data
-    stepModel(d, 2);
+    stepModel(d, 10);
 
     return X0;
 }

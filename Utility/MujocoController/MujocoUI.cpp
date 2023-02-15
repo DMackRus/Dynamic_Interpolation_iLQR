@@ -336,7 +336,12 @@ void render_simpleTest(){
 
             //modelTranslator->setControls(mdata, initControls[controlNum], false);
             m_state currState = modelTranslator->returnState(mdata);
-            currState(11) += 0.01;
+//            currState <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
+//                    0.7, 0, 0.1055, 1.21, 1.21, 1.21,
+//                    0, 0, 0, 0, 0, 0, 0,
+//                    0, 0, 0, 0, 0, 0;
+            //currState(11) += 0.005;
+            currState(12) += 0.005;
             modelTranslator->setState(mdata, currState);
 
             modelTranslator->stepModel(mdata, 1);

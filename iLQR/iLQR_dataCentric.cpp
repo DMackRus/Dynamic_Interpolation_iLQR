@@ -398,17 +398,13 @@ double iLQR::calcVariance(std::vector<int> data){
 
 void iLQR::getDerivativesDynamically(){
     numEvals.push_back(evaluationWaypoints.size());
-//    for(int i = 0; i < evaluationWaypoints.size(); i++){
-//        cout << evaluationWaypoints[i] << " ";
-//    }
-//    cout << endl;
 
     int save_iterations = model->opt.iterations;
     mjtNum save_tolerance = model->opt.tolerance;
     model->opt.iterations = 30;
     model->opt.tolerance = 0;
 
-    #pragma omp parallel for default(none)
+    //#pragma omp parallel for default(none)
     for(int t = 0; t < evaluationWaypoints.size(); t++){
 
         int index = evaluationWaypoints[t];

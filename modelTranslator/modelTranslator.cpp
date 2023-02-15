@@ -403,17 +403,20 @@ void taskTranslator::perturbPosition(mjData *perturbedData, mjData *origData, in
         //cout << "quat perturbed: " << stateIndex << "stateIndex " << freeJntIndex << endl;
 
         m_quat origQuat = globalMujocoController->returnBodyQuat(model, origData, bodyId);
-        m_point origEul = globalMujocoController->quat2Axis(origQuat);
+        m_point origAxis = globalMujocoController->quat2Axis(origQuat);
 
         //cout << "origEul: " << origEul << endl;
 
-        m_point pertubedEul;
-        pertubedEul = origEul.replicate(1,1);
-        pertubedEul(freeJntIndex) += eps;
+        m_point perturbedAxis;
+        perturbedAxis = origAxis.replicate(1,1);
+        perturbedAxis(freeJntIndex) += eps;
+
+        cout << "origAxis: " << origAxis << endl;
+        cout << "perturbedAxis: " << perturbedAxis <<  "\n perturbed axis: " << freeJntIndex << endl;
 
         //cout << "pertubedEul: " << pertubedEul << endl;
 
-        m_quat perturbedQuat = globalMujocoController->axis2Quat(pertubedEul);
+        m_quat perturbedQuat = globalMujocoController->axis2Quat(perturbedAxis);
         globalMujocoController->setBodyQuat(model, perturbedData, bodyId, perturbedQuat);
 
     }
