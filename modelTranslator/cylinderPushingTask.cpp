@@ -512,7 +512,7 @@ void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desi
     mainWayPoint(2) = 0.27f;
 
     mainWayPoints.push_back(mainWayPoint);
-    wayPointsTiming.push_back(1250);
+    wayPointsTiming.push_back(1750);
 
 }
 
@@ -698,20 +698,25 @@ bool taskTranslator::predictiveStateMismatch(mjData *d_predicted, mjData *d_real
     double cumError = 0.0f;
     m_state actualState = returnState(d_real);
     m_state predictedState = returnState(d_predicted);
-    double errorGains[DOF] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 1};
+    double errorGains[DOF] = {0, 0, 0, 0, 0, 0, 0, 1, 1};
     double errors[DOF];
 
 //    for(int i = 0; i < 2; i++){
 //        cumError += abs(actualState(i + NUM_CTRL) - predictedState(i + NUM_CTRL));
 //    }
+    double X_diff = actualState(7) - predictedState(7);
+    double Y_diff = actualState(8) - predictedState(8);
+    double cubeDiff = sqrt(X_diff*X_diff + Y_diff*Y_diff);
 
     for(int i = 0; i < DOF; i++){
         errors[i] = errorGains[i] * (abs(actualState(i) - predictedState(i)));
         cumError += errors[i];
     }
 
+    //cout << "cum error: " << cumError << endl;
+
     // if cumulative error is greater than some threshold
-    if(cumError > 0.3){
+    if(cubeDiff > 0.1){
         stateMismatch = true;
 
         cout << "errors: " << errors[0] << ", " << errors[1] << ", " << errors[2] << ", " << errors[3] << ", " << errors[4] << ", " << errors[5] << ", " << errors[6] << ", " << errors[7] << ", " << errors[8] << endl;
