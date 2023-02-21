@@ -180,6 +180,22 @@ m_state taskTranslator::returnState(mjData *d){
     return state;
 }
 
+m_dof taskTranslator::returnPositions(mjData *d){
+    m_dof positions;
+
+    for(int i = 0; i < NUM_CTRL; i++){
+        int bodyId = mj_name2id(model, mjOBJ_BODY, stateNames[i].c_str());
+        positions(i) = globalMujocoController->return_qPosVal(model, d, bodyId, false, 0);
+    }
+
+    int goalBoxId = mj_name2id(model, mjOBJ_BODY, stateNames[7].c_str());
+
+    positions(NUM_CTRL) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, X_INDEX);
+    positions(NUM_CTRL + 1) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, Y_INDEX);
+
+    return positions;
+}
+
 m_dof taskTranslator::returnVelocities(mjData *d){
     m_dof velocities;
 

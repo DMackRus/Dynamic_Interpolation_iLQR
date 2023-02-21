@@ -165,7 +165,7 @@ taskTranslator::taskTranslator(){
 
     armControlCosts = 0;
     double armStateCosts = 0;
-    double armVelCosts = 0.1;
+    double armVelCosts = 0.0;
     if(TORQUE_CONTROL){
         jerkVals[0] = 0.0007;
         jerkVals[1] = 0.0007;
@@ -183,13 +183,20 @@ taskTranslator::taskTranslator(){
 //        jerkVals[4] = 1.0;
 //        jerkVals[5] = 1.0;
 //        jerkVals[6] = 1.0;
-        jerkVals[0] = 2.0;
-        jerkVals[1] = 2.5;
-        jerkVals[2] = 2.0;
-        jerkVals[3] = 2.5;
-        jerkVals[4] = 2.0;
-        jerkVals[5] = 2.0;
-        jerkVals[6] = 2.0;
+//        jerkVals[0] = 2.0;
+//        jerkVals[1] = 2.5;
+//        jerkVals[2] = 2.0;
+//        jerkVals[3] = 2.5;
+//        jerkVals[4] = 2.0;
+//        jerkVals[5] = 2.0;
+//        jerkVals[6] = 2.0;
+        jerkVals[0] = 0.0;
+        jerkVals[1] = 0;
+        jerkVals[2] = 0;
+        jerkVals[3] = 0;
+        jerkVals[4] = 0;
+        jerkVals[5] = 0;
+        jerkVals[6] = 0;
     }
 
     for(int i = 0; i < NUM_CTRL; i++){
@@ -224,9 +231,9 @@ taskTranslator::taskTranslator(){
     stateIndexToFreeJntIndex[7] = X_INDEX;
     stateIndexToFreeJntIndex[8] = Y_INDEX;
     stateIndexToFreeJntIndex[9] = Z_INDEX;
-    stateIndexToFreeJntIndex[10] = X_INDEX;
-    stateIndexToFreeJntIndex[11] = Y_INDEX;
-    stateIndexToFreeJntIndex[12] = Z_INDEX;
+    stateIndexToFreeJntIndex[10] = 3;
+    stateIndexToFreeJntIndex[11] = 4;
+    stateIndexToFreeJntIndex[12] = 5;
 
     for(int i = 0; i < 6; i++){
         Q.diagonal()[7 + DOF + i] = cheezitVelCosts;
@@ -409,16 +416,15 @@ void taskTranslator::perturbPosition(mjData *perturbedData, mjData *origData, in
 
         m_point perturbedAxis;
         perturbedAxis = origAxis.replicate(1,1);
-        perturbedAxis(freeJntIndex) += eps;
+        perturbedAxis(freeJntIndex - 3) += eps;
 
-        cout << "origAxis: " << origAxis << endl;
-        cout << "perturbedAxis: " << perturbedAxis <<  "\n perturbed axis: " << freeJntIndex << endl;
+//        cout << "origAxis: " << origAxis << endl;
+//        cout << "perturbedAxis: " << perturbedAxis <<  "\n perturbed axis: " << freeJntIndex << endl;
 
         //cout << "pertubedEul: " << pertubedEul << endl;
 
         m_quat perturbedQuat = globalMujocoController->axis2Quat(perturbedAxis);
         globalMujocoController->setBodyQuat(model, perturbedData, bodyId, perturbedQuat);
-
     }
 }
 

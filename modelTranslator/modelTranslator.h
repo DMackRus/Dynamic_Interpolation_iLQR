@@ -11,8 +11,8 @@
 
 //#define DOUBLE_PENDULUM 1
 //#define REACHING 1
-#define CYLINDER_PUSHING 1
-//#define CHEEZIT_PUSHING 1
+//#define CYLINDER_PUSHING 1
+#define CHEEZIT_PUSHING 1
 //#define PUSHING_CLUTTER 1
 
 #define TORQUE_CONTROL 0
@@ -56,8 +56,8 @@
 #define GRIPPERS_OPEN   0.04
 #define GRIPPERS_CLOSED 0
 
-//#define TERMINAL_STATE_MULT     1000
-#define TERMINAL_STATE_MULT     10
+#define TERMINAL_STATE_MULT     1000
+//#define TERMINAL_STATE_MULT     10
 
 typedef Matrix<double, NUM_CTRL, 1> m_ctrl;
 typedef Matrix<double, DOF, 1> m_dof;
@@ -94,7 +94,7 @@ public:
 
 #ifdef CHEEZIT_PUSHING_TASK
     double cheezitVelCosts = 0;
-    double cheezitPoseCosts[6] = {0, 0, 0, 3, 3, 3};
+    double cheezitPoseCosts[6] = {1, 1, 0, 1, 1, 1};
 #endif
 
     // State vector is: 7 joint angles, two cube pos (X and Y), cube rot, 7 joint velocities, two cube velocities (X and Y)

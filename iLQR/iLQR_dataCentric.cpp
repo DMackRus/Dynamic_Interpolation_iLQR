@@ -99,38 +99,47 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
         // Linearise the dynamics and save cost values at each state
         // STEP 1 - Linearise dynamics and calculate cost quadratics at every time step
 
-        if(!DYNAMIC_LINEAR_DERIVS){
-            getDerivativesStatically();
-        }
-        else{
-            generateEvaluationWaypoints();
-            getDerivativesDynamically();
-            dynamicLinInterpolateDerivs();
-            evaluationWaypoints.clear();
-        }
+        generateEvaluationWaypoints();
+        getDerivatives();
+        linearInterpolateDerivs();
+
+
+//        if(!DYNAMIC_LINEAR_DERIVS){
+//            getDerivativesStatically();
+//        }
+//        else{
+//            generateEvaluationWaypoints();
+//            getDerivativesDynamically();
+//            dynamicLinInterpolateDerivs();
+//            evaluationWaypoints.clear();
+//        }
 
 //        cout << "f_x[1000]: " << endl << f_x[1000] << endl;
 //        cout << "f_u[1000]: " << endl << f_u[1000] << endl;
+//        cout << "l_u [1000]: " << endl << l_u[1000] << endl;
+//        cout << "l_uu [1000]: " << endl << l_uu[1000] << endl;
+//        cout << "l_x [1000]: " << endl << l_x[1000] << endl;
+//        cout << "l_xx [1000]: " << endl << l_xx[1000] << endl;
 
-        if(COPYING_DERIVS){
-            copyDerivatives();
-        }
-        else if(LINEAR_INTERP_DERIVS){
-            linearInterpolateDerivs();
-        }
-        else if(QUADRATIC_INTERP_DERIVS){
-            quadraticInterpolateDerivs();
-        }
-        else if(NN_INTERP_DERIVS){
-            NNInterpolateDerivs();
-        }
-        else if(DYNAMIC_LINEAR_DERIVS){
-
-        }
-        else{
-            // Error ocurred, no valid method for caluclaitng intermediate derivatives
-            std::cout << "error, no valid method for calculating intermediate derivatives" << std::endl;
-        }
+//        if(COPYING_DERIVS){
+//            copyDerivatives();
+//        }
+//        else if(LINEAR_INTERP_DERIVS){
+//            linearInterpolateDerivs();
+//        }
+//        else if(QUADRATIC_INTERP_DERIVS){
+//            quadraticInterpolateDerivs();
+//        }
+//        else if(NN_INTERP_DERIVS){
+//            NNInterpolateDerivs();
+//        }
+//        else if(DYNAMIC_LINEAR_DERIVS){
+//
+//        }
+//        else{
+//            // Error ocurred, no valid method for caluclaitng intermediate derivatives
+//            std::cout << "error, no valid method for calculating intermediate derivatives" << std::endl;
+//        }
 
         stop = high_resolution_clock::now();
         linDuration = duration_cast<microseconds>(stop - start);
@@ -169,12 +178,13 @@ std::vector<m_ctrl> iLQR::optimise(mjData *_d_init, std::vector<m_ctrl> initCont
             // STEP 3 - Forwards pass to calculate new optimal controls - with optional alpha backtracking line search
             start = high_resolution_clock::now();
             bool costReduced = false;
-            if(!DYNAMIC_LINEAR_DERIVS){
-                newCost = forwardsPassStatic(oldCost, costReduced);
-            }
-            else{
-                newCost = forwardsPassDynamic(oldCost, costReduced);
-            }
+            newCost = forwardsPassDynamic(oldCost, costReduced);
+//            if(!DYNAMIC_LINEAR_DERIVS){
+//                newCost = forwardsPassStatic(oldCost, costReduced);
+//            }
+//            else{
+//                newCost = forwardsPassDynamic(oldCost, costReduced);
+//            }
 
             stop = high_resolution_clock::now();
             auto fPDuration = duration_cast<microseconds>(stop - start);
@@ -310,45 +320,61 @@ void iLQR::generateEvaluationWaypoints(){
 
     m_dof currentVelGrads;
     m_dof lastVelGrads;
+    // clear previous evaluation waypoints
+    evaluationWaypoints.clear();
+
+    // First waypoint is always at the start of the trajectory
     evaluationWaypoints.push_back(0);
-
-    for(int i = 0; i < ilqr_horizon_length; i++){
-
-        m_state currState = X_old[i].replicate(1,1);
-        m_state lastState = X_old[i-1].replicate(1,1);
-
-        for(int j = 0; j < DOF; j++){
-            currentVelGrads(j) = currState(j + DOF) - lastState(j + DOF);
-        }
-        //cout << currentVelGrads(8) << endl;
-
-        if(counterSinceLastEval >= MIN_N){
-            if(first){
-                first = false;
-                counterSinceLastEval = 0;
+    // Evaluation waypoints are at set intervals between one another.
+    if(LINEAR_INTERP_DERIVS){
+        for(int i = 0; i < ilqr_horizon_length; i++){
+            if(counterSinceLastEval >= num_mj_steps_per_control){
                 evaluationWaypoints.push_back(i);
-
+                counterSinceLastEval = 0;
             }
-            else{
-                if(reEvaluationNeeded(currentVelGrads, lastVelGrads)){
-                    evaluationWaypoints.push_back(i);
+            counterSinceLastEval++;
+        }
+
+    }
+    // Dynamic method of generating evaluation waypoints
+    else{
+        for(int i = 0; i < ilqr_horizon_length; i++){
+
+            m_state currState = X_old[i].replicate(1,1);
+            m_state lastState = X_old[i-1].replicate(1,1);
+
+            for(int j = 0; j < DOF; j++){
+                currentVelGrads(j) = currState(j + DOF) - lastState(j + DOF);
+            }
+            //cout << currentVelGrads(8) << endl;
+
+            if(counterSinceLastEval >= MIN_N){
+                if(first){
+                    first = false;
                     counterSinceLastEval = 0;
+                    evaluationWaypoints.push_back(i);
+
                 }
+                else{
+                    if(reEvaluationNeeded(currentVelGrads, lastVelGrads)){
+                        evaluationWaypoints.push_back(i);
+                        counterSinceLastEval = 0;
+                    }
+                }
+
+                lastVelGrads = currentVelGrads.replicate(1, 1);
             }
 
-            lastVelGrads = currentVelGrads.replicate(1, 1);
-        }
+            if(counterSinceLastEval >= MAX_N){
+                evaluationWaypoints.push_back(i);
+                counterSinceLastEval = 0;
+            }
 
-        if(counterSinceLastEval >= MAX_N){
-            evaluationWaypoints.push_back(i);
-            counterSinceLastEval = 0;
+            counterSinceLastEval++;
         }
-
-        counterSinceLastEval++;
     }
 
     evaluationWaypoints.push_back(ilqr_horizon_length - 1);
-
 
     cout << "num evaluation points: " << evaluationWaypoints.size() << endl;
 
@@ -396,7 +422,7 @@ double iLQR::calcVariance(std::vector<int> data){
 
 }
 
-void iLQR::getDerivativesDynamically(){
+void iLQR::getDerivatives(){
     numEvals.push_back(evaluationWaypoints.size());
 
     int save_iterations = model->opt.iterations;
@@ -404,7 +430,7 @@ void iLQR::getDerivativesDynamically(){
     model->opt.iterations = 30;
     model->opt.tolerance = 0;
 
-    //#pragma omp parallel for default(none)
+    #pragma omp parallel for default(none)
     for(int t = 0; t < evaluationWaypoints.size(); t++){
 
         int index = evaluationWaypoints[t];
@@ -434,49 +460,87 @@ void iLQR::getDerivativesDynamically(){
 
 }
 
-void iLQR::getDerivativesStatically(){
-
-    int save_iterations = model->opt.iterations;
-    mjtNum save_tolerance = model->opt.tolerance;
-
-    model->opt.iterations = 30;
-    model->opt.tolerance = 0;
-
-    // Linearise the dynamics along the trajectory
-    #pragma omp parallel for default(none)
-    for(int t = 0; t < numCalcedDerivs; t++){
-
-        lineariseDynamics(A[t], B[t], dArray[t * num_mj_steps_per_control]);
-    }
-
-    #pragma omp parallel for default(none)
-    for(int i = 0; i < ilqr_horizon_length; i++){
-        if(i == 0){
-            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[0]);
-        }
-        else{
-            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[i - 1]);
-        }
-    }
-
-    modelTranslator->costDerivatives(dArray[ilqr_horizon_length], l_x[ilqr_horizon_length], l_xx[ilqr_horizon_length], l_u[ilqr_horizon_length - 1], l_uu[ilqr_horizon_length - 1], ilqr_horizon_length - 1, ilqr_horizon_length, dArray[ilqr_horizon_length - 1]);
-
-    model->opt.iterations = save_iterations;
-    model->opt.tolerance = save_tolerance;
-
-    // Pushing task
-    if(modelTranslator->taskNumber == 2){
-        smoothAMatrices();
-    }
-
-
-//    for(int i = 0; i < 3; i++){
-//        cout << "A " << A[i] << endl;
-//        m_state test = modelTranslator->returnState(dArray[i]);
-
+//void iLQR::getDerivativesDynamically(){
+//    numEvals.push_back(evaluationWaypoints.size());
+//
+//    int save_iterations = model->opt.iterations;
+//    mjtNum save_tolerance = model->opt.tolerance;
+//    model->opt.iterations = 30;
+//    model->opt.tolerance = 0;
+//
+//    #pragma omp parallel for default(none)
+//    for(int t = 0; t < evaluationWaypoints.size(); t++){
+//
+//        int index = evaluationWaypoints[t];
+//        lineariseDynamics(A[t], B[t], dArray[index]);
+//
 //    }
+//
+//    model->opt.iterations = save_iterations;
+//    model->opt.tolerance = save_tolerance;
+//
+//    #pragma omp parallel for default(none)
+//    for(int i = 0; i < ilqr_horizon_length; i++){
+//        m_ctrl lastControl;
+//        if(i == 0){
+////            lastControl.setZero();
+//            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[0]);
+//        }
+//        else{
+////            lastControl = modelTranslator->returnControls(dArray[i - 1]);
+//            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[i-1]);
+//        }
+//
+//    }
+//
+//    modelTranslator->costDerivatives(dArray[ilqr_horizon_length], l_x[ilqr_horizon_length], l_xx[ilqr_horizon_length], l_u[ilqr_horizon_length - 1], l_uu[ilqr_horizon_length - 1], ilqr_horizon_length - 1, ilqr_horizon_length, dArray[ilqr_horizon_length-1]);
+//
+//
+//}
 
-}
+//void iLQR::getDerivativesStatically(){
+//
+//    int save_iterations = model->opt.iterations;
+//    mjtNum save_tolerance = model->opt.tolerance;
+//
+//    model->opt.iterations = 30;
+//    model->opt.tolerance = 0;
+//
+//    // Linearise the dynamics along the trajectory
+//    #pragma omp parallel for default(none)
+//    for(int t = 0; t < numCalcedDerivs; t++){
+//
+//        lineariseDynamics(A[t], B[t], dArray[t * num_mj_steps_per_control]);
+//    }
+//
+//    #pragma omp parallel for default(none)
+//    for(int i = 0; i < ilqr_horizon_length; i++){
+//        if(i == 0){
+//            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[0]);
+//        }
+//        else{
+//            modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, ilqr_horizon_length, dArray[i - 1]);
+//        }
+//    }
+//
+//    modelTranslator->costDerivatives(dArray[ilqr_horizon_length], l_x[ilqr_horizon_length], l_xx[ilqr_horizon_length], l_u[ilqr_horizon_length - 1], l_uu[ilqr_horizon_length - 1], ilqr_horizon_length - 1, ilqr_horizon_length, dArray[ilqr_horizon_length - 1]);
+//
+//    model->opt.iterations = save_iterations;
+//    model->opt.tolerance = save_tolerance;
+//
+//    // Pushing task
+//    if(modelTranslator->taskNumber == 2){
+//        smoothAMatrices();
+//    }
+//
+//
+////    for(int i = 0; i < 3; i++){
+////        cout << "A " << A[i] << endl;
+////        m_state test = modelTranslator->returnState(dArray[i]);
+//
+////    }
+//
+//}
 
 void iLQR::smoothAMatrices(){
 
@@ -533,41 +597,41 @@ void iLQR::copyDerivatives(){
     }
 }
 
-void iLQR::linearInterpolateDerivs(){
-    for(int t = 0; t < numCalcedDerivs; t++){
-
-        m_state_state addA;
-        m_state_ctrl addB;
-
-        if(t != numCalcedDerivs - 1){
-            m_state_state startA = A[t].replicate(1, 1);
-            m_state_state endA = A[t + 1].replicate(1, 1);
-            m_state_state diffA = endA - startA;
-            addA = diffA / num_mj_steps_per_control;
-
-            m_state_ctrl startB = B[t].replicate(1, 1);
-            m_state_ctrl endB = B[t + 1].replicate(1, 1);
-            m_state_ctrl diffB = endB - startB;
-            addB = diffB / num_mj_steps_per_control;
-        }
-        else{
-            addA.setZero();
-            addB.setZero();
-        }
-
-//            cout << "start A " << endl << startA << endl;
-//            cout << "endA A " << endl << endA << endl;
-//            cout << "diff A " << endl << diff << endl;
-//            cout << "add A " << endl << add << endl;
-
-        for(int i = 0; i < num_mj_steps_per_control; i++){
-            f_x[(t * num_mj_steps_per_control) + i] = A[t].replicate(1,1) + (addA * i);
-            f_u[(t * num_mj_steps_per_control) + i] = B[t].replicate(1,1) + (addB * i);
-            //cout << "f_x " << endl << f_x[(t * num_mj_steps_per_control) + i] << endl;
-        }
-    }
-
-}
+//void iLQR::linearInterpolateDerivs(){
+//    for(int t = 0; t < numCalcedDerivs; t++){
+//
+//        m_state_state addA;
+//        m_state_ctrl addB;
+//
+//        if(t != numCalcedDerivs - 1){
+//            m_state_state startA = A[t].replicate(1, 1);
+//            m_state_state endA = A[t + 1].replicate(1, 1);
+//            m_state_state diffA = endA - startA;
+//            addA = diffA / num_mj_steps_per_control;
+//
+//            m_state_ctrl startB = B[t].replicate(1, 1);
+//            m_state_ctrl endB = B[t + 1].replicate(1, 1);
+//            m_state_ctrl diffB = endB - startB;
+//            addB = diffB / num_mj_steps_per_control;
+//        }
+//        else{
+//            addA.setZero();
+//            addB.setZero();
+//        }
+//
+////            cout << "start A " << endl << startA << endl;
+////            cout << "endA A " << endl << endA << endl;
+////            cout << "diff A " << endl << diff << endl;
+////            cout << "add A " << endl << add << endl;
+//
+//        for(int i = 0; i < num_mj_steps_per_control; i++){
+//            f_x[(t * num_mj_steps_per_control) + i] = A[t].replicate(1,1) + (addA * i);
+//            f_u[(t * num_mj_steps_per_control) + i] = B[t].replicate(1,1) + (addB * i);
+//            //cout << "f_x " << endl << f_x[(t * num_mj_steps_per_control) + i] << endl;
+//        }
+//    }
+//
+//}
 
 void iLQR::quadraticInterpolateDerivs(){
 
@@ -577,7 +641,7 @@ void iLQR::NNInterpolateDerivs(){
 
 }
 
-void iLQR::dynamicLinInterpolateDerivs() {
+void iLQR::linearInterpolateDerivs() {
 
     for(int t = 0; t < evaluationWaypoints.size()-1; t++){
 
@@ -857,7 +921,7 @@ float iLQR::forwardsPassDynamic(float oldCost, bool &costReduced){
             modelTranslator->stepModel(mdata, 1);
         }
 
-//        cout << "cost from alpha: " << alphaCount << ": " << newCost << endl;
+        //cout << "cost from alpha: " << alphaCount << ": " << newCost << endl;
 
         if(newCost < oldCost){
             costReduction = true;
@@ -1226,9 +1290,9 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
     // Initialise variables
     static int nwarmup = 3;
 
-    float epsControls = 1e-6;
-    float epsVelocities = 1e-6;
-    float epsPos = 1e-6;
+    double epsControls = 1e-5;
+    double epsVelocities = 1e-5;
+    double epsPos = 1e-5;
 
     // Initialise matrices for forwards dynamics
     m_dof_dof dqveldq;
@@ -1241,6 +1305,8 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
 
     m_dof velDec;
     m_dof velInc;
+    m_dof posInc;
+    m_dof posDec;
     m_dof acellInc, acellDec;
 
     // Create a copy of the current data that we want to differentiate around
@@ -1297,7 +1363,7 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
     }
 
 
-//    //calculate dqacc/dctrl
+    //calculate dqacc/dctrl
 //    for(int i = 0; i < NUM_CTRL; i++){
 //        saveData->ctrl[i] = linearisedData->ctrl[i] + epsControls;
 //
@@ -1372,14 +1438,12 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
 
         // copy and store +perturbation
         velInc = modelTranslator->returnVelocities(saveData);
+        posInc = modelTranslator->returnPositions(saveData);
 
         // undo perturbation
         cpMjData(model, saveData, linearisedData);
 
-        modelTranslator->perturbVelocity(saveData, linearisedData, i, epsVelocities);
-
-        // evaluate dynamics, with center warmstart
-        mju_copy(saveData->qacc_warmstart, warmstart, model->nv);
+        // perturb velocity -
         modelTranslator->perturbVelocity(saveData, linearisedData, i, -epsVelocities);
 
         // evaluate dynamics, with center warmstart
@@ -1387,11 +1451,13 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
         modelTranslator->stepModel(saveData, 1);
 
         velDec = modelTranslator->returnVelocities(saveData);
+        posDec = modelTranslator->returnPositions(saveData);
 
         // compute column i of derivative 1
         for(int j = 0; j < DOF; j++){
             double diffScaled = (velInc(j) - velDec(j));
             dqveldqvel(j, i) = diffScaled/(2*epsVelocities);
+            dqposdqvel(j, i) = (posInc(j) - posDec(j))/(2*epsVelocities);
         }
 
         // undo perturbation
@@ -1479,6 +1545,8 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
         }
     }
 
+    _A.block(0, DOF, DOF, DOF) = dqposdqvel;
+
 
     _A.block(DOF, 0, DOF, DOF) = (dqaccdq * MUJOCO_DT);
     //_A.block(DOF, 0, DOF, DOF) = dqveldq;
@@ -1486,6 +1554,10 @@ void iLQR::lineariseDynamics(Ref<MatrixXd> _A, Ref<MatrixXd> _B, mjData *lineari
     _A.block(DOF, DOF, DOF, DOF) = dqveldqvel;
     _B.block(DOF, 0, DOF, NUM_CTRL) = dqveldctrl;
     //_B.block(DOF, 0, DOF, NUM_CTRL) = (dqaccdctrl * MUJOCO_DT);
+
+//    _A.block(23, 0, 3, (2 * DOF)).setZero();
+//    _A.block(0, 23, (2 * DOF), 3).setZero();
+//    _B.block(23, 0, 3, NUM_CTRL).setZero();
 
     //cout << "A matrix is: " << _A << endl;
 //    cout << " B Mtrix is: " << _B << endl;

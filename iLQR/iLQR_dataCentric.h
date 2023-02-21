@@ -16,8 +16,8 @@
 
 // ------ These three methods of interpolation are implemented, ONLY activate 1 at a time, otherwise probably will crash ---------
 #define COPYING_DERIVS          0
-#define LINEAR_INTERP_DERIVS    0
-#define DYNAMIC_LINEAR_DERIVS   1
+#define LINEAR_INTERP_DERIVS    1
+#define DYNAMIC_LINEAR_DERIVS   0
 
 // ------- Unimplemented methods of inteprolating derivatives ------
 #define QUADRATIC_INTERP_DERIVS 0
@@ -127,8 +127,9 @@ class iLQR
 
     void generateEvaluationWaypoints();
     bool reEvaluationNeeded(m_dof currentVelGrad, m_dof lastVelGrad);
-    void getDerivativesDynamically();
-    void getDerivativesStatically();
+    void getDerivatives();
+//    void getDerivativesDynamically();
+//    void getDerivativesStatically();
     void smoothAMatrices();
     void copyDerivatives();
     void linearInterpolateDerivs();

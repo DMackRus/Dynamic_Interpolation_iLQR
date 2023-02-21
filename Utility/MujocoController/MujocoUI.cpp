@@ -340,8 +340,16 @@ void render_simpleTest(){
 //                    0.7, 0, 0.1055, 1.21, 1.21, 1.21,
 //                    0, 0, 0, 0, 0, 0, 0,
 //                    0, 0, 0, 0, 0, 0;
-            //currState(11) += 0.005;
-            currState(12) += 0.005;
+//            currState(10) += 0.005;
+//            currState(11) += 0.005;
+
+            currState(10 + DOF) = 0.5;
+
+            m_point axis;
+            axis << currState(10), currState(11), currState(12);
+            cout << "axis: " << axis.transpose() << endl;
+
+            //currState(11 + DOF) = 0.5;
             modelTranslator->setState(mdata, currState);
 
             modelTranslator->stepModel(mdata, 1);

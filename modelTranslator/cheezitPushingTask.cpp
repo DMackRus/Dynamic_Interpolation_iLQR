@@ -58,6 +58,9 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
         }
         else{
             Q_scaled.diagonal()[i] = Q.diagonal()[i];
+            if(i >= 10){
+                Q_scaled.diagonal()[i] = 0;
+            }
         }
 
         Q_scaled.diagonal()[i + DOF] = Q.diagonal()[i + DOF];
@@ -129,7 +132,12 @@ void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_st
         }
         else{
             Q_scaled.diagonal()[i] = Q.diagonal()[i];
+            if(i >= 10){
+                Q_scaled.diagonal()[i] = 0;
+            }
         }
+
+        // velocities
         Q_scaled.diagonal()[i + DOF] = Q.diagonal()[i + DOF];
     }
 
@@ -220,6 +228,30 @@ m_state taskTranslator::returnState(mjData *d){
     state(12 + DOF) = globalMujocoController->return_qVelVal(model, d, goalBoxId, true, 5);
 
     return state;
+}
+
+m_dof taskTranslator::returnPositions(mjData *d){
+    m_dof positions;
+
+    for(int i = 0; i < NUM_CTRL; i++){
+        int bodyId = mj_name2id(model, mjOBJ_BODY, stateNames[i].c_str());
+        positions(i) = globalMujocoController->return_qPosVal(model, d, bodyId, false, 0);
+    }
+
+    int goalBoxId = mj_name2id(model, mjOBJ_BODY, stateNames[7].c_str());
+
+    positions(NUM_CTRL) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, X_INDEX);
+    positions(NUM_CTRL + 1) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, Y_INDEX);
+    positions(NUM_CTRL + 2) = globalMujocoController->return_qPosVal(model, d, goalBoxId, true, Z_INDEX);
+
+    m_quat currentQuat = globalMujocoController->returnBodyQuat(model, d, goalBoxId);
+    m_point currentAxis = globalMujocoController->quat2Axis(currentQuat);
+
+    positions(NUM_CTRL + 3) = currentAxis(0);
+    positions(NUM_CTRL + 4) = currentAxis(1);
+    positions(NUM_CTRL + 5) = currentAxis(2);
+
+    return positions;
 }
 
 m_dof taskTranslator::returnVelocities(mjData *d){
@@ -350,26 +382,26 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
         // Generate start and desired state randomly
         //X0 = generateRandomStartState(d);
 
+        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
+                0.5, 0, 0.1055, 0, 0, PI/2,
+                0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0;
 //        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
-//                0.5, 0, 0.1055, 0, 0, PI/2,
+//                0.8, 0, 0.3, 0, 0, PI/4,
 //                0, 0, 0, 0, 0, 0, 0,
 //                0, 0, 0, 0, 0, 0;
-        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
-                0.8, 0, 0.3, 0, PI/2, 0,
-                0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0;
 
         // Toppled over
-//        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
-//                        0.7, 0, 0.1055, 1.21, 1.21, 1.21,
-//                        0, 0, 0, 0, 0, 0, 0,
-//                        0, 0, 0, 0, 0, 0;
+        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
+                        0.7, 0, 0.1055, 1.21, 1.21, 1.21,
+                        0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0;
 
         // Not toppled over
-        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
-                0.7, 0, 0.1055, 0, 0, PI/2,
-                0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0;
+//        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
+//                0.7, 0, 0.1055, 0, 0, 0,
+//                0, 0, 0, 0, 0, 0, 0,
+//                0, 0, 0, 0, 0, 0;
     }
 
     setState(d, X0);

@@ -8,7 +8,7 @@
 #include "mujoco.h"
 
 // Different operating modes for my code
-#define RUN_ILQR                0       // RUN_ILQR - runs a simple iLQR optimisation for given task and renders on repeat
+#define RUN_ILQR                1       // RUN_ILQR - runs a simple iLQR optimisation for given task and renders on repeat
 #define RUN_STOMP               0       // RUN_STOMP - runs a simple stomp optimiser for given task and renders on repeat
 #define MPC_TESTING             0       // MPC_TESTING - Runs an MPC controller to achieve desired task and renders controls live
 #define GENERATE_A_B            0       // GENERATE_A_B - runs initial trajectory and generates and saves A, B matrices over that trajectory for every timestep
@@ -82,7 +82,6 @@ int main() {
     // cant be done in modelTranslator constructor as model is not initialised yet
     modelTranslator->init(model);
 
-
     if(RUN_ILQR){
 
         // Initialise optimiser - creates all the data objects
@@ -153,7 +152,7 @@ int main() {
             optimiser->rollOutTrajectory();
 
             if(optimiser->trajecCollisionFree == true){
-                optimiser->getDerivativesStatically();
+                //optimiser->getDerivativesStatically();
 
                 for(int j = 0; j < MUJ_STEPS_HORIZON_LENGTH; j++){
                     dataSaver->A_matrices.push_back(m_state_state());
