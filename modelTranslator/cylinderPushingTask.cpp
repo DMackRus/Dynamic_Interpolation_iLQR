@@ -309,6 +309,8 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
 
     //    X0(5) += PI/2;
     //    X0(6) += PI/4;
+        X_desired(7) += 0.05;
+        X_desired(8) -= 0.05;
 
 
     }
@@ -528,7 +530,7 @@ void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desi
     mainWayPoint(2) = 0.27f;
 
     mainWayPoints.push_back(mainWayPoint);
-    wayPointsTiming.push_back(1750);
+    wayPointsTiming.push_back(2000);
 
 }
 

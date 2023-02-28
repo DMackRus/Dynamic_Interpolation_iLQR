@@ -58,9 +58,9 @@ double taskTranslator::costFunction(mjData *d, int controlNum, int totalControls
         }
         else{
             Q_scaled.diagonal()[i] = Q.diagonal()[i];
-            if(i >= 10){
-                Q_scaled.diagonal()[i] = 0;
-            }
+//            if(i >= 10){
+//                Q_scaled.diagonal()[i] = 0;
+//            }
         }
 
         Q_scaled.diagonal()[i + DOF] = Q.diagonal()[i + DOF];
@@ -132,9 +132,9 @@ void taskTranslator::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_st
         }
         else{
             Q_scaled.diagonal()[i] = Q.diagonal()[i];
-            if(i >= 10){
-                Q_scaled.diagonal()[i] = 0;
-            }
+//            if(i >= 10){
+//                Q_scaled.diagonal()[i] = 0;
+//            }
         }
 
         // velocities
@@ -382,8 +382,15 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
         // Generate start and desired state randomly
         //X0 = generateRandomStartState(d);
 
-        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
-                0.5, 0, 0.1055, 0, 0, PI/2,
+        // Gripper flat edge to object
+//        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
+//                0.5, 0, 0.1055, 0, 0, PI/2,
+//                0, 0, 0, 0, 0, 0, 0,
+//                0, 0, 0, 0, 0, 0;
+
+        // Gripper flat edge to floor
+        X0 <<   -0.57, 0.890, -0.318, -1.93, 0.871, -0.381, 0.137,      //-0.381, 0.137,
+                0.4, -0.1, 0.1055, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0;
 //        X0 <<   0, -0.183, 0, -3.1, 0, 1.34, 0,
@@ -392,16 +399,16 @@ m_state taskTranslator::setupTask(mjData *d, bool randomTask, int taskRow){
 //                0, 0, 0, 0, 0, 0;
 
         // Toppled over
-        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
-                        0.7, 0, 0.1055, 1.21, 1.21, 1.21,
-                        0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0;
+//        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
+//                        0.7, 0, 0.1055, 1.21, 1.21, 1.21,
+//                        0, 0, 0, 0, 0, 0, 0,
+//                        0, 0, 0, 0, 0, 0;
 
         // Not toppled over
-//        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
-//                0.7, 0, 0.1055, 0, 0, 0,
-//                0, 0, 0, 0, 0, 0, 0,
-//                0, 0, 0, 0, 0, 0;
+        X_desired <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
+                0.5, 0.2, 0.1055, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0;
     }
 
     setState(d, X0);
@@ -469,6 +476,8 @@ std::vector<m_ctrl> taskTranslator::initSetupControls(mjData *d, mjData *d_init)
     double angle_EE_push = atan2(desiredObjectEnd(1) - objectStart(1), desiredObjectEnd(0) - objectStart(0));
 
     initControls_MainWayPoints_Setup(d, model, angle_EE_push, objectStart, mainWayPoints, wayPoints_timings);
+    cout << "mainWayPoints: " << mainWayPoints[0] << endl;
+    cout << "mainWayPoints: " << mainWayPoints[1] << endl;
 
     std::vector<m_point> initPath = initControls_createAllWayPoints(mainWayPoints, wayPoints_timings);
 
@@ -484,6 +493,8 @@ void initControls_MainWayPoints_Setup(mjData *d, mjModel *model, double angle_Pu
     int EE_id = mj_name2id(model, mjOBJ_BODY, EE_name.c_str());
 
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
+
+    cout << "EE Pose start: " << startPose << endl;
 
     m_point mainWayPoint;
     mainWayPoint << startPose(0), startPose(1), startPose(2);
@@ -514,7 +525,12 @@ void initControls_MainWayPoints_Setup(mjData *d, mjModel *model, double angle_Pu
 
     mainWayPoint(0) = intermediatePoint(0);
     mainWayPoint(1) = intermediatePoint(1);
-    mainWayPoint(2) = 0.27f;
+    if(1){
+        mainWayPoint(2) = 0.08f;
+    }
+    else{
+        mainWayPoint(2) = 0.24f;
+    }
 
     mainWayPoints.push_back(mainWayPoint);
     wayPointsTiming.push_back(750);
@@ -542,6 +558,8 @@ std::vector<m_ctrl> taskTranslator::initOptimisationControls(mjData *d, mjData *
     cout << "angle_EE_push: " << angle_EE_push << endl;
 
     initControls_MainWayPoints_Optimise(d, model, desiredObjectEnd, angle_EE_push, mainWayPoints, wayPoints_timings);
+    cout << "mainWayPoints: " << mainWayPoints[0] << endl;
+    cout << "mainWayPoints: " << mainWayPoints[1] << endl;
     std::vector<m_point> initPath = initControls_createAllWayPoints(mainWayPoints, wayPoints_timings);
 
     initControls = initControls_generateAllControls(d, model, initPath, angle_EE_push);
@@ -557,7 +575,11 @@ void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desi
     int EE_id = mj_name2id(model, mjOBJ_BODY, EE_name.c_str());
     int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
 
+    cout << "EE_id: " << EE_id << endl;
+
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
+
+    cout << "EE Pose start: " << startPose << endl;
 
     m_point mainWayPoint;
     mainWayPoint << startPose(0), startPose(1), startPose(2);
@@ -605,7 +627,12 @@ void initControls_MainWayPoints_Optimise(mjData *d, mjModel *model, m_point desi
 
     mainWayPoint(0) = endPointX;
     mainWayPoint(1) = endPointY;
-    mainWayPoint(2) = 0.27f;
+    if(1){
+        mainWayPoint(2) = 0.08f;
+    }
+    else{
+        mainWayPoint(2) = 0.24f;
+    }
 
     mainWayPoints.push_back(mainWayPoint);
     wayPointsTiming.push_back(1250);
@@ -650,7 +677,16 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
     m_quat startQuat = globalMujocoController->returnBodyQuat(model, d, EE_id);
 
     m_pose startPose = globalMujocoController->returnBodyPose(model, d, EE_id);
-    globalMujocoController->quat2RotMat(startQuat);
+    MatrixXd temp = globalMujocoController->quat2RotMat(startQuat);
+
+    cout << "temp: " << temp << endl;
+
+    m_point tempPointVec;
+    tempPointVec << 0.1, 0.3, 0;
+
+    VectorXd normalised = tempPointVec.normalized();
+    cout << "normalised: " << normalised << endl;
+
 
 
 //    cout << "converted angle is: " << convertedAngle << endl;
@@ -662,9 +698,18 @@ std::vector<m_ctrl> initControls_generateAllControls(mjData *d, mjModel *model, 
     double convertedAngle = angle_EE_push - (PI/4);
 
     m_point xAxis, yAxis, zAxis;
-    xAxis << cos(convertedAngle), sin(convertedAngle), 0;
-    zAxis << 0, 0, -1;
-    yAxis = globalMujocoController->crossProduct(zAxis, xAxis);
+
+    if(1){
+        zAxis << 0, 1, 0;
+        xAxis << 0, -0.707, -0.707;
+        yAxis = globalMujocoController->crossProduct(zAxis, xAxis);
+    }
+    else{
+        xAxis << cos(convertedAngle), sin(convertedAngle), 0;
+        zAxis << 0, 0, -1;
+        yAxis = globalMujocoController->crossProduct(zAxis, xAxis);
+    }
+
 
     Eigen::Matrix3d rotMat;
     rotMat << xAxis(0), yAxis(0), zAxis(0),

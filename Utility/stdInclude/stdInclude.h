@@ -21,7 +21,7 @@ using namespace std;
 using namespace std::chrono;
 
 #define PI 3.141519265
-#define MUJ_STEPS_HORIZON_LENGTH 2000
+#define MUJ_STEPS_HORIZON_LENGTH 2500
 #define MUJOCO_DT 0.004
 
 #define X_INDEX 0

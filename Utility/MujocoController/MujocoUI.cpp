@@ -193,12 +193,12 @@ void setupMujocoWorld(double timestep, const char* fileName){
     mjv_defaultOption(&opt);
     mjr_defaultContext(&con);
 
-    cam.distance = 1.485;
-    cam.azimuth = 178.7;
-    cam.elevation = -31.3;
-    cam.lookat[0] = 0.325;
-    cam.lookat[1] = -0.0179;
-    cam.lookat[2] = 0.258;
+    cam.distance = 0.891;
+    cam.azimuth = 110.9;
+    cam.elevation = -19.9;
+    cam.lookat[0] = 0.396;
+    cam.lookat[1] = -0.0629;
+    cam.lookat[2] = 0.1622;
 
     //model->opt.gravity[2] = 0;
     //model->opt.integrator = mjINT_EULER;
@@ -226,16 +226,16 @@ void render(){
     m_ctrl nextControl;
     cpMjData(model, mdata, d_init_master);
 
-    if(modelTranslator->taskNumber == 2){
-        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
-
-        m_pose interPose;
-        interPose.setZero();
-        interPose(0) = intermediatePoint(0);
-        interPose(1) = intermediatePoint(1);
-
-        globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
-    }
+//    if(modelTranslator->taskNumber == 2){
+//        int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
+//
+//        m_pose interPose;
+//        interPose.setZero();
+//        interPose(0) = intermediatePoint(0);
+//        interPose(1) = intermediatePoint(1);
+//
+//        globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+//    }
 
     while (!glfwWindowShouldClose(window))
     {
@@ -265,12 +265,12 @@ void render(){
                 if(modelTranslator->taskNumber == 2) {
                     int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 
-                    m_pose interPose;
-                    interPose.setZero();
-                    interPose(0) = intermediatePoint(0);
-                    interPose(1) = intermediatePoint(1);
+//                    m_pose interPose;
+//                    interPose.setZero();
+//                    interPose(0) = intermediatePoint(0);
+//                    interPose(1) = intermediatePoint(1);
 
-                    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
+//                    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
                 }
             }
         }
@@ -298,6 +298,9 @@ void render(){
 
         // process pending GUI events, call GLFW callbacks
         glfwPollEvents();
+        if(controlNum == 760 or controlNum == 1500 or controlNum == 2750){
+            cout << "controlNum: " << controlNum << endl;
+        }
     }
 
 }
@@ -334,23 +337,31 @@ void render_simpleTest(){
 //            m_quat newQuat = globalMujocoController->eul2Quat(currEuler);
 //            globalMujocoController->setBodyQuat(model, mdata, bodyId, newQuat);
 
-            //modelTranslator->setControls(mdata, initControls[controlNum], false);
+            m_ctrl null;
             m_state currState = modelTranslator->returnState(mdata);
-//            currState <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
-//                    0.7, 0, 0.1055, 1.21, 1.21, 1.21,
-//                    0, 0, 0, 0, 0, 0, 0,
-//                    0, 0, 0, 0, 0, 0;
-//            currState(10) += 0.005;
-//            currState(11) += 0.005;
+            for (int i = 0; i < NUM_CTRL; i++) {
+                null[i] = currState(i);
+            }
 
-            currState(10 + DOF) = 0.5;
+            //cout << "null: " << null.transpose() << endl;
 
-            m_point axis;
-            axis << currState(10), currState(11), currState(12);
-            cout << "axis: " << axis.transpose() << endl;
-
-            //currState(11 + DOF) = 0.5;
-            modelTranslator->setState(mdata, currState);
+            modelTranslator->setControls(mdata, initControls[controlNum], false);
+//            m_state currState = modelTranslator->returnState(mdata);
+////            currState <<    0, -0.183, 0, -3.1, 0, 1.34, 0,
+////                    0.7, 0, 0.1055, 1.21, 1.21, 1.21,
+////                    0, 0, 0, 0, 0, 0, 0,
+////                    0, 0, 0, 0, 0, 0;
+////            currState(10) += 0.005;
+////            currState(11) += 0.005;
+//
+//            currState(10 + DOF) = 0.5;
+//
+//            m_point axis;
+//            axis << currState(10), currState(11), currState(12);
+//            cout << "axis: " << axis.transpose() << endl;
+//
+//            //currState(11 + DOF) = 0.5;
+//            modelTranslator->setState(mdata, currState);
 
             modelTranslator->stepModel(mdata, 1);
 

@@ -183,20 +183,20 @@ taskTranslator::taskTranslator(){
 //        jerkVals[4] = 1.0;
 //        jerkVals[5] = 1.0;
 //        jerkVals[6] = 1.0;
-//        jerkVals[0] = 2.0;
-//        jerkVals[1] = 2.5;
-//        jerkVals[2] = 2.0;
-//        jerkVals[3] = 2.5;
-//        jerkVals[4] = 2.0;
-//        jerkVals[5] = 2.0;
-//        jerkVals[6] = 2.0;
-        jerkVals[0] = 0.0;
-        jerkVals[1] = 0;
-        jerkVals[2] = 0;
-        jerkVals[3] = 0;
-        jerkVals[4] = 0;
-        jerkVals[5] = 0;
-        jerkVals[6] = 0;
+        jerkVals[0] = 2.0;
+        jerkVals[1] = 2.5;
+        jerkVals[2] = 2.0;
+        jerkVals[3] = 2.5;
+        jerkVals[4] = 2.0;
+        jerkVals[5] = 2.0;
+        jerkVals[6] = 2.0;
+//        jerkVals[0] = 0.0;
+//        jerkVals[1] = 0;
+//        jerkVals[2] = 0;
+//        jerkVals[3] = 0;
+//        jerkVals[4] = 0;
+//        jerkVals[5] = 0;
+//        jerkVals[6] = 0;
     }
 
     for(int i = 0; i < NUM_CTRL; i++){

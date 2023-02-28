@@ -47,7 +47,7 @@ int main() {
     modelTranslator = new taskTranslator();
     dataSaver = new saveData();
     const char *fileName;
-    int taskRow = 5;        // done testing with taskRow = 3
+    int taskRow = 12;        // done testing with taskRow = 3
 
     // All these model paths are set up to a cloned folder not present in this repo,
     // clone https://github.com/DMackRus/Franka-emika-panda-arm into the root of this project
@@ -314,7 +314,7 @@ int main() {
 void MPCControl(int taskRow){
     // Initialise optimiser - creates all the data objects
     optimiser = new iLQR(model, mdata, modelTranslator);
-    X0 = modelTranslator->setupTask(d_init_master, false, taskRow);
+    X0 = modelTranslator->setupTask(d_init_master, true, taskRow);
     cout << "X desired: " << modelTranslator->X_desired << endl;
     optimiser->updateNumStepsPerDeriv(5);
     initControls = modelTranslator->initSetupControls(mdata, d_init);

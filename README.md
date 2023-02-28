@@ -1,6 +1,9 @@
 # Dynamic_Interpolation_iLQR
 This work is to appear in the proceedings of ICRA 2023.
 
+## Video
+- TODO link to video
+
 ## Installation Requirements
 - MuJoCo V2.10(Included in this repository)
 - Eigen V3.40
