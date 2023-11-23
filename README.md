@@ -1,5 +1,5 @@
 # Dynamic_Interpolation_iLQR
-This work is to appear in the proceedings of ICRA 2023.
+This work appeared in the proceedings of ICRA 2023. This repository is out of date now, the new repository with additional functionality, documentation and usability is located [here](https://github.com/DMackRus/TrajOptKP).
 
 ## Video
 - TODO link to video
