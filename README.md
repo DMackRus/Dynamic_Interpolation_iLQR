@@ -2,7 +2,7 @@
 This work appeared in the proceedings of ICRA 2023. This repository is out of date now, the new repository with additional functionality, documentation and usability is located [here](https://github.com/DMackRus/TrajOptKP).
 
 ## Video
-- TODO link to video
+[![Watch the video](https://img.youtube.com/vi/yK43qbHiZck/maxresdefault.jpg)](https://youtu.be/yK43qbHiZck?si=OGV9pYAPVSsmmX1O)
 
 ## Installation Requirements
 - MuJoCo V2.10(Included in this repository)
